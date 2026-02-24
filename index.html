@@ -1,0 +1,1329 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ascend | Travel ROI Calculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
+<style>
+:root {
+  --bg: #ffffff; --text: #1a1a1a; --text-muted: #666; --text-secondary: #444;
+  --text-detail: #333; --metric-bg: #F1EEFF; --metric-border: #E8E8E8;
+  --hero-bg: #D9FDD2; --hero-border: #6F57FF; --footer-bg: #161616;
+  --footer-text: #999; --footer-link: #B4A7FF;
+  --accent: #6F57FF; --accent-hover: #5A44E0; --accent-light: #F1EEFF;
+  --success: #D9FDD2; --success-text: #1a5c1a;
+  --input-bg: #fff; --input-border: #E8E8E8; --input-focus: #6F57FF;
+  --table-stripe: #F9F8FF; --chart-text: #1a1a1a;
+  --card-dark: #161616; --card-dark-text: #fff; --card-dark-muted: #aaa;
+  --amber-bg: #FEF3C7; --amber-border: #D97706; --amber-text: #92400E;
+  --bonus-bg: #F1EEFF; --bonus-border: #6F57FF;
+  --mono: 'DM Mono', monospace;
+}
+[data-theme="dark"] {
+  --bg: #0e0e12; --text: #e8e8e8; --text-muted: #888; --text-secondary: #bbb;
+  --text-detail: #ccc; --metric-bg: #1c1a28; --metric-border: #2d2b3a;
+  --hero-bg: #1a2e1f; --hero-border: #6F57FF; --footer-bg: #0a0a0e;
+  --footer-text: #666; --footer-link: #B4A7FF;
+  --accent: #8B7AFF; --accent-hover: #A090FF; --accent-light: #1c1a28;
+  --success: #1a2e1f; --success-text: #a3d98f;
+  --input-bg: #1c1a28; --input-border: #2d2b3a; --input-focus: #8B7AFF;
+  --table-stripe: #1c1a28; --chart-text: #e8e8e8;
+  --card-dark: #1c1a28; --card-dark-text: #e8e8e8; --card-dark-muted: #888;
+  --amber-bg: #2a2015; --amber-border: #b45309; --amber-text: #fbbf24;
+  --bonus-bg: #1c1a28; --bonus-border: #6F57FF;
+}
+*, *::before, *::after { box-sizing: border-box; }
+html, body {
+  margin: 0; padding: 0; font-family: 'Inter', -apple-system, sans-serif;
+  background: var(--bg); color: var(--text); line-height: 1.5;
+}
+.container { max-width: 960px; margin: 0 auto; padding: 0 16px 40px; }
+
+/* HEADER */
+.asc-header {
+  background: #161616; padding: 20px 28px 16px; display: flex;
+  justify-content: space-between; align-items: center; margin-bottom: 1.5rem;
+}
+.asc-header h1 { color: #fff; font-size: 26px; font-weight: 700; margin: 0 0 2px; letter-spacing: -0.5px; }
+.asc-header .accent-dot { color: var(--accent); }
+.asc-header p { color: #999; font-size: 14px; margin: 0; }
+.asc-toggle {
+  color: #999; border: 1px solid #444; padding: 5px 14px;
+  border-radius: 32px; font-size: 12px; cursor: pointer;
+  background: transparent; white-space: nowrap; font-family: 'Inter', sans-serif;
+  transition: all 0.2s;
+}
+.asc-toggle:hover { background: rgba(255,255,255,0.1); color: #fff; border-color: #666; }
+
+/* TYPOGRAPHY */
+h2 { font-size: 20px; font-weight: 700; margin: 1.8rem 0 0.75rem; letter-spacing: -0.3px; }
+h3 { font-size: 17px; font-weight: 700; margin: 1rem 0 0.5rem; }
+.divider { border: none; border-top: 1px solid var(--metric-border); margin: 1.8rem 0; }
+.caption { color: var(--text-muted); font-size: 13px; margin: 4px 0 8px; }
+
+/* GRID */
+.row { display: grid; gap: 12px; margin-bottom: 12px; }
+.row-4 { grid-template-columns: repeat(4, 1fr); }
+.row-3 { grid-template-columns: repeat(3, 1fr); }
+.row-2 { grid-template-columns: repeat(2, 1fr); }
+@media (max-width: 700px) {
+  .row-4, .row-3 { grid-template-columns: repeat(2, 1fr); }
+  .row-2 { grid-template-columns: 1fr; }
+  .asc-header { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .case-studies { grid-template-columns: 1fr !important; }
+  .savings-hero .amount { font-size: 36px !important; }
+}
+@media (max-width: 400px) {
+  .row-4, .row-3, .row-2 { grid-template-columns: 1fr; }
+}
+
+/* FORMS */
+label { display: block; font-size: 13px; font-weight: 500; color: var(--text-secondary); margin-bottom: 4px; }
+input, select {
+  width: 100%; padding: 8px 10px; font-size: 14px; font-family: 'Inter', sans-serif;
+  background: var(--input-bg); color: var(--text); border: 1px solid var(--input-border);
+  border-radius: 6px; transition: border-color 0.2s;
+}
+input:focus, select:focus { outline: none; border-color: var(--input-focus); box-shadow: 0 0 0 3px rgba(111,87,255,0.1); }
+input[type="range"] { padding: 0; border: none; background: transparent; box-shadow: none; accent-color: var(--accent); }
+.radio-group { display: flex; gap: 16px; flex-wrap: wrap; margin: 4px 0; }
+.radio-group label { display: flex; align-items: center; gap: 6px; cursor: pointer; font-weight: 400; }
+.radio-group input[type="radio"] { width: auto; accent-color: var(--accent); }
+.checkbox-row { display: flex; align-items: center; gap: 8px; margin: 8px 0; }
+.checkbox-row input[type="checkbox"] { width: auto; accent-color: var(--accent); }
+
+/* SLIDER VALUE */
+.slider-val { font-family: var(--mono); font-weight: 500; color: var(--accent); }
+
+/* METRIC CARDS */
+.metric-card {
+  background: var(--metric-bg); border: 1px solid var(--metric-border);
+  border-left: 3px solid var(--accent); border-radius: 6px; padding: 12px 16px;
+}
+.metric-card .metric-label { color: var(--text-secondary); font-weight: 500; font-size: 13px; }
+.metric-card .metric-value { color: var(--accent); font-weight: 700; font-size: 24px; font-family: var(--mono); }
+
+/* SAVINGS HERO */
+.savings-hero {
+  background: var(--hero-bg); border: 2px solid var(--hero-border);
+  border-radius: 12px; padding: 32px; text-align: center; margin: 0.5rem 0 1rem;
+}
+.savings-hero .amount { color: var(--accent); font-size: 52px; font-weight: 700; line-height: 1.1; margin: 6px 0; font-family: var(--mono); }
+.savings-hero .label { color: var(--text-muted); font-size: 14px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
+.savings-hero .detail { color: var(--text-detail); font-size: 14px; margin-top: 12px; }
+.savings-hero .payback { color: var(--accent); font-size: 18px; font-weight: 600; margin-top: 8px; }
+
+/* INFO BOXES */
+.info-box {
+  background: var(--accent-light); border: 1px solid var(--accent);
+  border-radius: 8px; padding: 14px 18px; font-size: 14px; margin: 8px 0;
+}
+.success-box { background: var(--success); border: 1px solid #34a853; border-radius: 8px; padding: 14px 18px; font-size: 14px; margin: 8px 0; color: var(--success-text); }
+.warning-box { background: var(--amber-bg); border: 1px solid var(--amber-border); border-radius: 8px; padding: 14px 18px; font-size: 14px; margin: 8px 0; color: var(--amber-text); }
+.bonus-box {
+  background: var(--bonus-bg); border: 1px solid var(--bonus-border);
+  border-radius: 8px; padding: 18px 22px; margin: 12px 0;
+}
+.bonus-box h3 { margin: 0 0 10px; color: var(--accent); }
+.bonus-box .bonus-item { display: flex; justify-content: space-between; padding: 4px 0; font-size: 14px; }
+.bonus-box .bonus-total { border-top: 1px solid var(--metric-border); padding-top: 8px; margin-top: 8px; font-weight: 700; }
+
+/* DETAILS / COLLAPSIBLE */
+details { background: var(--metric-bg); border: 1px solid var(--metric-border); border-radius: 8px; margin: 8px 0; }
+summary { padding: 12px 16px; cursor: pointer; font-weight: 500; font-size: 14px; user-select: none; }
+details > div, details > .detail-content { padding: 0 16px 16px; }
+
+/* TABLES */
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { background: var(--metric-bg); border: 1px solid var(--metric-border); padding: 8px 10px; text-align: left; font-weight: 600; }
+td { border: 1px solid var(--metric-border); padding: 6px 10px; }
+tr:nth-child(even) { background: var(--table-stripe); }
+
+/* CHARTS */
+.chart-container { position: relative; margin: 12px 0; }
+
+/* BUTTONS */
+.btn-primary {
+  background: var(--accent); color: #fff; border: none; padding: 12px 28px;
+  border-radius: 32px; font-size: 15px; font-weight: 600; cursor: pointer;
+  font-family: 'Inter', sans-serif; transition: background 0.2s;
+}
+.btn-primary:hover { background: var(--accent-hover); }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-outline {
+  background: transparent; color: var(--accent); border: 1px solid var(--accent);
+  padding: 10px 20px; border-radius: 32px; font-size: 14px; cursor: pointer;
+  font-family: 'Inter', sans-serif; transition: all 0.2s;
+}
+.btn-outline:hover { background: var(--accent-light); }
+
+/* CASE STUDY CARDS */
+.case-studies { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 12px 0; }
+.case-card {
+  background: var(--card-dark); border-radius: 10px; padding: 20px;
+  color: var(--card-dark-text);
+}
+.case-card .case-title { font-weight: 700; font-size: 15px; margin-bottom: 10px; }
+.case-card .case-stat { font-family: var(--mono); font-size: 22px; font-weight: 700; color: var(--accent); margin: 4px 0; }
+.case-card .case-detail { font-size: 13px; color: var(--card-dark-muted); line-height: 1.5; }
+
+/* CTA */
+.cta-section { background: var(--accent); text-align: center; padding: 24px; border-radius: 10px; margin: 1.5rem 0; }
+.cta-section a { color: #fff; font-size: 17px; font-weight: 700; text-decoration: none; }
+.cta-section p { color: rgba(255,255,255,0.8); font-size: 13px; margin: 4px 0 0; }
+
+/* LEAD CAPTURE INLINE FORM */
+.lead-form { display: none; margin-top: 12px; padding: 16px; background: var(--metric-bg); border: 1px solid var(--metric-border); border-radius: 8px; }
+.lead-form.visible { display: block; }
+
+/* FOOTER */
+.asc-footer {
+  background: var(--footer-bg); padding: 18px 24px; border-radius: 8px;
+  margin-top: 0.5rem;
+}
+.asc-footer p { color: var(--footer-text); font-size: 11px; margin: 0 0 4px; line-height: 1.5; }
+.asc-footer a { color: var(--footer-link); font-weight: 600; text-decoration: none; }
+
+/* MEMBERSHIP RADIO CARDS */
+.tier-group { display: flex; gap: 12px; flex-wrap: wrap; margin: 8px 0; }
+.tier-option {
+  flex: 1; min-width: 180px; padding: 14px 16px; border: 2px solid var(--metric-border);
+  border-radius: 8px; cursor: pointer; transition: all 0.2s; position: relative;
+  background: var(--input-bg);
+}
+.tier-option:hover { border-color: var(--accent); }
+.tier-option.selected { border-color: var(--accent); background: var(--accent-light); }
+.tier-option input[type="radio"] { position: absolute; opacity: 0; }
+.tier-option .tier-name { font-weight: 700; font-size: 14px; }
+.tier-option .tier-price { font-family: var(--mono); font-size: 16px; color: var(--accent); font-weight: 500; }
+.tier-option .tier-note { font-size: 12px; color: var(--text-muted); }
+
+/* CONTEXTUAL MATCH */
+.context-match {
+  background: var(--accent-light); border: 1px solid var(--accent);
+  border-radius: 8px; padding: 14px 18px; font-size: 14px; margin: 12px 0;
+}
+
+/* ENTERPRISE FIELDS */
+.enterprise-fields { display: none; margin-top: 8px; }
+.enterprise-fields.visible { display: block; }
+
+/* PRIVATE AVIATION FIELDS */
+.private-fields { display: none; margin-top: 8px; }
+.private-fields.visible { display: block; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="asc-header">
+  <div>
+    <h1>Ascend<span class="accent-dot">.</span></h1>
+    <p>Travel ROI Calculator &mdash; See Your Savings</p>
+  </div>
+  <button class="asc-toggle" onclick="toggleTheme()" id="theme-toggle">Dark mode</button>
+</div>
+
+<div class="container">
+
+<!-- SECTION A: TRAVEL PROFILE -->
+<h2>Tell us about your travel</h2>
+<div class="row row-3">
+  <div>
+    <label for="trips">Trips per year</label>
+    <input type="number" id="trips" value="8" min="1" max="100" step="1">
+  </div>
+  <div>
+    <label for="nights">Avg trip duration (nights)</label>
+    <input type="number" id="nights" value="3" min="1" max="30" step="1">
+  </div>
+  <div>
+    <label for="travel-mix">Travel mix</label>
+    <select id="travel-mix">
+      <option value="domestic">Mostly domestic (80/20)</option>
+      <option value="mixed" selected>Mixed (50/50 domestic &amp; international)</option>
+      <option value="international">Mostly international (20/80)</option>
+    </select>
+  </div>
+</div>
+
+<!-- SECTION B: HOW YOU TRAVEL -->
+<h2>How do you travel?</h2>
+<div class="row row-3">
+  <div>
+    <label for="cabin">Cabin class</label>
+    <select id="cabin">
+      <option value="premiumEconomy" selected>Premium Economy</option>
+      <option value="business">Business</option>
+      <option value="first">First</option>
+    </select>
+  </div>
+  <div>
+    <label for="hotel">Hotel preference</label>
+    <select id="hotel">
+      <option value="3star">3-star</option>
+      <option value="4star" selected>4-star</option>
+      <option value="5star">5-star</option>
+    </select>
+  </div>
+  <div>
+    <label>Do you often book last-minute?</label>
+    <div class="radio-group">
+      <label><input type="radio" name="last-minute" value="no" checked> No</label>
+      <label><input type="radio" name="last-minute" value="yes"> Yes</label>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION C: BOOKING METHOD -->
+<h2>How do you book travel today?</h2>
+<div class="row row-2">
+  <div>
+    <label for="booking">Booking method</label>
+    <select id="booking">
+      <option value="self" selected>Self-book online</option>
+      <option value="ea">Executive assistant</option>
+      <option value="corp">Corporate platform (Concur, etc.)</option>
+      <option value="agent">Travel agent</option>
+    </select>
+  </div>
+  <div>
+    <label for="hourly">Your time value: <span class="slider-val" id="hourly-val">$150</span>/hr</label>
+    <input type="range" id="hourly" min="50" max="1000" step="25" value="150">
+  </div>
+</div>
+
+<!-- SECTION D: EXTRAS -->
+<h2>Your travel extras</h2>
+<div class="row row-3">
+  <div>
+    <label for="car-rentals">Car rentals per year</label>
+    <input type="number" id="car-rentals" value="4" min="0" max="50" step="1">
+  </div>
+  <div>
+    <label for="car-days">Avg car rental days</label>
+    <input type="number" id="car-days" value="3" min="1" max="30" step="1">
+  </div>
+  <div>
+    <label>Need private aviation?</label>
+    <div class="radio-group">
+      <label><input type="radio" name="private" value="no" checked> No</label>
+      <label><input type="radio" name="private" value="yes"> Yes</label>
+    </div>
+  </div>
+</div>
+<div class="private-fields" id="private-fields">
+  <div class="row row-2">
+    <div>
+      <label for="private-flights">Private flights per year</label>
+      <input type="number" id="private-flights" value="2" min="1" max="50" step="1">
+    </div>
+    <div>
+      <label for="private-hours">Avg flight hours</label>
+      <input type="number" id="private-hours" value="3" min="1" max="20" step="0.5">
+    </div>
+  </div>
+</div>
+
+<!-- SECTION E: FINE-TUNE -->
+<details id="fine-tune">
+  <summary>Fine-tune your numbers</summary>
+  <div class="detail-content">
+    <div class="checkbox-row">
+      <input type="checkbox" id="know-spend">
+      <label for="know-spend" style="margin:0">I know my annual travel spend</label>
+    </div>
+    <div id="spend-override" style="display:none;" class="row row-2">
+      <div>
+        <label for="annual-spend">Annual travel budget ($)</label>
+        <input type="number" id="annual-spend" value="50000" min="5000" max="1000000" step="1000">
+      </div>
+      <div></div>
+    </div>
+    <p class="caption">Optional per-trip cost overrides:</p>
+    <div class="row row-3">
+      <div>
+        <label for="override-flight">Avg flight cost (roundtrip $)</label>
+        <input type="number" id="override-flight" placeholder="Auto-calculated" min="0" step="100">
+      </div>
+      <div>
+        <label for="override-hotel">Avg hotel/night ($)</label>
+        <input type="number" id="override-hotel" placeholder="Auto-calculated" min="0" step="25">
+      </div>
+      <div>
+        <label for="override-car">Avg car rental/day ($)</label>
+        <input type="number" id="override-car" placeholder="Auto-calculated" min="0" step="5">
+      </div>
+    </div>
+  </div>
+</details>
+
+<!-- SECTION F: MEMBERSHIP TIER -->
+<h2>Choose your membership</h2>
+<div class="tier-group" id="tier-group">
+  <label class="tier-option" id="tier-monthly">
+    <input type="radio" name="tier" value="monthly">
+    <div class="tier-name">Individual Monthly</div>
+    <div class="tier-price">$300/mo</div>
+    <div class="tier-note">$3,600/yr &middot; Cancel anytime</div>
+  </label>
+  <label class="tier-option selected" id="tier-annual">
+    <input type="radio" name="tier" value="annual" checked>
+    <div class="tier-name">Individual Annual</div>
+    <div class="tier-price">$2,500/yr</div>
+    <div class="tier-note">Save $1,100 vs monthly</div>
+  </label>
+  <label class="tier-option" id="tier-enterprise">
+    <input type="radio" name="tier" value="enterprise">
+    <div class="tier-name">Enterprise</div>
+    <div class="tier-price">Custom</div>
+    <div class="tier-note">Multi-seat team plans</div>
+  </label>
+</div>
+<div class="enterprise-fields" id="enterprise-fields">
+  <div class="row row-2">
+    <div>
+      <label for="ent-seats">Number of seats</label>
+      <input type="number" id="ent-seats" value="5" min="2" max="500" step="1">
+    </div>
+    <div>
+      <label for="ent-cost">Cost per seat ($/yr)</label>
+      <input type="number" id="ent-cost" value="2000" min="500" max="10000" step="100">
+    </div>
+  </div>
+</div>
+
+<!-- ============================================ -->
+<!-- RESULTS START HERE -->
+<!-- ============================================ -->
+
+<hr class="divider">
+
+<!-- GUARDRAIL NUDGE -->
+<div id="guardrail-nudge" style="display:none;"></div>
+
+<!-- SAVINGS HERO -->
+<div id="savings-hero"></div>
+
+<!-- QUICK STATS -->
+<div class="row row-4" id="quick-stats">
+  <div class="metric-card"><div class="metric-label">Annual Travel Savings</div><div class="metric-value" id="stat-savings">$0</div></div>
+  <div class="metric-card"><div class="metric-label">Hours Reclaimed</div><div class="metric-value" id="stat-hours">0 hrs</div></div>
+  <div class="metric-card"><div class="metric-label">Trips to Payback</div><div class="metric-value" id="stat-payback">0</div></div>
+  <div class="metric-card"><div class="metric-label">ROI Multiple</div><div class="metric-value" id="stat-roi">0x</div></div>
+</div>
+
+<!-- COST COMPARISON CHART -->
+<hr class="divider">
+<h2>Cost Comparison</h2>
+<div class="chart-container"><canvas id="cost-chart" height="180"></canvas></div>
+
+<!-- SAVINGS BREAKDOWN TABLE -->
+<details>
+  <summary>Savings breakdown by category</summary>
+  <div class="detail-content">
+    <table id="breakdown-table">
+      <thead><tr><th>Category</th><th>Current</th><th>With Ascend</th><th>You Save</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</details>
+
+<!-- CUMULATIVE SAVINGS CHART -->
+<hr class="divider">
+<h2>12-Month Savings Projection</h2>
+<div class="chart-container"><canvas id="cumulative-chart" height="280"></canvas></div>
+
+<!-- BONUS VALUE -->
+<div id="bonus-section"></div>
+
+<!-- CASE STUDIES -->
+<hr class="divider">
+<h2>Real Member Results</h2>
+<div class="case-studies">
+  <div class="case-card">
+    <div class="case-title">Bitkraft Ventures</div>
+    <div class="case-stat">$127K saved</div>
+    <div class="case-detail">47 bookings &middot; 32% avg savings<br>Over 6 months</div>
+  </div>
+  <div class="case-card">
+    <div class="case-title">Global Beauty Brand</div>
+    <div class="case-stat">$57K saved</div>
+    <div class="case-detail">18 bookings<br>Over 6 months</div>
+  </div>
+  <div class="case-card">
+    <div class="case-title">Individual Traveler</div>
+    <div class="case-stat">$18.5K saved</div>
+    <div class="case-detail">14 trips &middot; 38% avg savings<br>Over 12 months</div>
+  </div>
+</div>
+
+<!-- CONTEXTUAL COMPARISON -->
+<div id="context-match"></div>
+
+<!-- PDF DOWNLOAD + LEAD CAPTURE -->
+<hr class="divider">
+<button class="btn-primary" id="download-btn" onclick="showLeadForm()">Download Your Personalized Report</button>
+
+<div class="lead-form" id="lead-form">
+  <div class="row row-3">
+    <div>
+      <label for="lead-name">Name *</label>
+      <input type="text" id="lead-name" placeholder="Your name" required>
+    </div>
+    <div>
+      <label for="lead-email">Email *</label>
+      <input type="email" id="lead-email" placeholder="you@company.com" required>
+    </div>
+    <div>
+      <label for="lead-company">Company (optional)</label>
+      <input type="text" id="lead-company" placeholder="Company name">
+    </div>
+  </div>
+  <button class="btn-primary" onclick="submitLeadAndDownload()" style="margin-top:8px;">Send My Report</button>
+  <div id="lead-result" style="margin-top:8px;"></div>
+</div>
+
+<!-- CTA -->
+<div class="cta-section">
+  <a href="https://joinascend.com/join-ascend">Start Saving with Ascend Today</a>
+  <p>Join hundreds of executives saving 35%+ on premium travel</p>
+</div>
+
+<!-- METHODOLOGY -->
+<details>
+  <summary>How we calculate this</summary>
+  <div class="detail-content">
+    <p><strong>Flight savings</strong> use Ascend's published average discount rates by cabin class: Premium Economy (20%), Business (35%), and First (40%). Base fares are industry averages for domestic, short-haul international, and long-haul international routes.</p>
+    <p><strong>Hotel savings</strong> are based on Ascend's preferred property network: 3-star (10%), 4-star (20%), 5-star (25%).</p>
+    <p><strong>Time savings</strong> calculate the hours you currently spend booking travel (researching, comparing, booking, managing changes) and value that time at your stated hourly rate. Ascend's concierge handles all of this for you.</p>
+    <p><strong>Car rental &amp; private aviation</strong> savings reflect Ascend's negotiated fleet rates and charter partnerships.</p>
+    <p><strong>Bonus values</strong> (disruption handling, preference memory, hotel amenities) are shown separately and not included in the headline ROI to keep the core number defensible.</p>
+    <p>Case studies are from real Ascend members with permission. Individual results vary based on travel patterns and booking lead times.</p>
+  </div>
+</details>
+
+<!-- FOOTER -->
+<div class="asc-footer">
+  <p>Built for <a href="https://joinascend.com">Ascend</a> &mdash; Premium travel concierge for executives and teams.</p>
+  <p>Calculator estimates based on industry averages and published Ascend savings rates. Individual results may vary.</p>
+</div>
+
+</div><!-- /container -->
+
+<script>
+// =============================================================================
+// DATA CONSTANTS
+// =============================================================================
+
+var FLIGHT_COSTS = {
+  premiumEconomy: { domestic: 500, intlShort: 900, intlLong: 1600 },
+  business:       { domestic: 1200, intlShort: 2500, intlLong: 5500 },
+  first:          { domestic: 2500, intlShort: 5000, intlLong: 12000 }
+};
+
+var SAVINGS_RATES = {
+  premiumEconomy: 0.20,
+  business: 0.35,
+  first: 0.40
+};
+
+var HOTEL_COSTS = {
+  '3star': { domestic: 150, international: 180 },
+  '4star': { domestic: 275, international: 350 },
+  '5star': { domestic: 550, international: 750 }
+};
+
+var HOTEL_SAVINGS = { '3star': 0.10, '4star': 0.20, '5star': 0.25 };
+
+var CAR_COSTS = { domestic: 65, international: 85 };
+var CAR_SAVINGS = 0.15;
+
+var PRIVATE_COST_PER_HR = 5000;
+var PRIVATE_SAVINGS = 0.20;
+
+var TIME_PER_TRIP = { self: 5.0, ea: 2.5, corp: 3.0, agent: 1.6 };
+var LAST_MINUTE_MULT = { yes: 1.5, no: 1.0 };
+
+var TRAVEL_MIX = {
+  domestic:      { domestic: 0.80, intlShort: 0.08, intlLong: 0.12 },
+  mixed:         { domestic: 0.50, intlShort: 0.20, intlLong: 0.30 },
+  international: { domestic: 0.20, intlShort: 0.32, intlLong: 0.48 }
+};
+
+var MEMBERSHIP_COST = {
+  monthly: 3600,
+  annual: 2500,
+  enterprise: function() {
+    return (parseInt($('ent-seats').value) || 5) * (parseInt($('ent-cost').value) || 2000);
+  }
+};
+
+var BONUS_VALUES = {
+  disruptionHandling: 500,
+  preferenceMemory: 200,
+  hotelAmenitiesPerTrip: 50
+};
+
+var CASE_STUDIES = [
+  { name: 'Bitkraft Ventures', saved: 127000, bookings: 47, avgPct: 32, months: 6, annualSpend: 254000, tripsPerYear: 94 },
+  { name: 'Global Beauty Brand', saved: 57000, bookings: 18, months: 6, annualSpend: 114000, tripsPerYear: 36 },
+  { name: 'Individual Traveler', saved: 18500, trips: 14, avgPct: 38, months: 12, annualSpend: 48684, tripsPerYear: 14 }
+];
+
+// =============================================================================
+// STATE
+// =============================================================================
+
+var costChart = null;
+var cumulativeChart = null;
+var calc = {};
+
+// =============================================================================
+// HELPERS
+// =============================================================================
+
+var $ = function(id) { return document.getElementById(id); };
+var fmt = function(n) { return Math.round(n).toLocaleString('en-US'); };
+var fmtD = function(n, d) { return n.toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d }); };
+
+function setText(el, text) {
+  if (typeof el === 'string') el = $(el);
+  if (el) el.textContent = text;
+}
+
+function buildTableRows(tbody, rows) {
+  tbody.textContent = '';
+  rows.forEach(function(cells) {
+    var tr = document.createElement('tr');
+    cells.forEach(function(cell) {
+      var td = document.createElement('td');
+      if (cell.bold) { var b = document.createElement('strong'); b.textContent = cell.text; td.appendChild(b); }
+      else { td.textContent = cell.text; }
+      if (cell.style) td.setAttribute('style', cell.style);
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  });
+}
+
+// =============================================================================
+// THEME
+// =============================================================================
+
+function toggleTheme() {
+  var html = document.documentElement;
+  var isDark = html.getAttribute('data-theme') === 'dark';
+  html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  $('theme-toggle').textContent = isDark ? 'Dark mode' : 'Light mode';
+  var url = new URL(window.location);
+  if (isDark) { url.searchParams.delete('theme'); } else { url.searchParams.set('theme', 'dark'); }
+  history.replaceState(null, '', url);
+  recalculate();
+}
+
+// =============================================================================
+// CALCULATION ENGINE
+// =============================================================================
+
+function recalculate() {
+  var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  var chartTextColor = isDark ? '#e8e8e8' : '#1a1a1a';
+
+  // Read inputs
+  var trips = parseInt($('trips').value) || 8;
+  var nights = parseInt($('nights').value) || 3;
+  var mixKey = $('travel-mix').value;
+  var cabin = $('cabin').value;
+  var hotel = $('hotel').value;
+  var lastMinute = document.querySelector('input[name="last-minute"]:checked').value;
+  var booking = $('booking').value;
+  var hourly = parseInt($('hourly').value) || 150;
+  var carRentals = parseInt($('car-rentals').value) || 0;
+  var carDays = parseInt($('car-days').value) || 3;
+  var isPrivate = document.querySelector('input[name="private"]:checked').value === 'yes';
+  var privateFlights = isPrivate ? (parseInt($('private-flights').value) || 2) : 0;
+  var privateHours = isPrivate ? (parseFloat($('private-hours').value) || 3) : 0;
+  var knowSpend = $('know-spend').checked;
+  var overrideFlight = parseFloat($('override-flight').value) || 0;
+  var overrideHotel = parseFloat($('override-hotel').value) || 0;
+  var overrideCar = parseFloat($('override-car').value) || 0;
+
+  // Membership cost
+  var tierVal = document.querySelector('input[name="tier"]:checked').value;
+  var membershipCost;
+  if (tierVal === 'enterprise') {
+    membershipCost = MEMBERSHIP_COST.enterprise();
+  } else {
+    membershipCost = MEMBERSHIP_COST[tierVal];
+  }
+
+  // Travel mix
+  var mix = TRAVEL_MIX[mixKey];
+  var lmMult = LAST_MINUTE_MULT[lastMinute];
+
+  // --- FLIGHT COSTS ---
+  var flightCostData = FLIGHT_COSTS[cabin];
+  var weightedFlightCost;
+  if (overrideFlight > 0) {
+    weightedFlightCost = overrideFlight;
+  } else {
+    weightedFlightCost = (
+      mix.domestic * flightCostData.domestic +
+      mix.intlShort * flightCostData.intlShort +
+      mix.intlLong * flightCostData.intlLong
+    ) * 2 * lmMult; // x2 for roundtrip
+  }
+  var annualFlightCost = weightedFlightCost * trips;
+  var flightSavingsRate = SAVINGS_RATES[cabin];
+  var flightSavings = annualFlightCost * flightSavingsRate;
+
+  // --- HOTEL COSTS ---
+  var hotelData = HOTEL_COSTS[hotel];
+  var pctIntl = 1 - mix.domestic;
+  var weightedHotelNight;
+  if (overrideHotel > 0) {
+    weightedHotelNight = overrideHotel;
+  } else {
+    weightedHotelNight = mix.domestic * hotelData.domestic + pctIntl * hotelData.international;
+  }
+  var annualHotelCost = weightedHotelNight * nights * trips;
+  var hotelSavingsRate = HOTEL_SAVINGS[hotel];
+  var hotelSavings = annualHotelCost * hotelSavingsRate;
+
+  // --- CAR RENTAL COSTS ---
+  var weightedCarDay;
+  if (overrideCar > 0) {
+    weightedCarDay = overrideCar;
+  } else {
+    weightedCarDay = mix.domestic * CAR_COSTS.domestic + pctIntl * CAR_COSTS.international;
+  }
+  var annualCarCost = weightedCarDay * carDays * carRentals;
+  var carSavings = annualCarCost * CAR_SAVINGS;
+
+  // --- PRIVATE AVIATION ---
+  var annualPrivateCost = privateFlights * privateHours * PRIVATE_COST_PER_HR;
+  var privateSavings = annualPrivateCost * PRIVATE_SAVINGS;
+
+  // --- MANUAL SPEND OVERRIDE ---
+  if (knowSpend) {
+    var manualSpend = parseInt($('annual-spend').value) || 50000;
+    var calcSpend = annualFlightCost + annualHotelCost + annualCarCost + annualPrivateCost;
+    if (calcSpend > 0) {
+      var ratio = manualSpend / calcSpend;
+      annualFlightCost *= ratio;
+      annualHotelCost *= ratio;
+      annualCarCost *= ratio;
+      annualPrivateCost *= ratio;
+      flightSavings *= ratio;
+      hotelSavings *= ratio;
+      carSavings *= ratio;
+      privateSavings *= ratio;
+    }
+  }
+
+  // --- TIME SAVINGS ---
+  var hoursPerTrip = TIME_PER_TRIP[booking];
+  var totalHours = hoursPerTrip * trips;
+  var timeValue = totalHours * hourly;
+
+  // --- TOTALS ---
+  var totalTravelSavings = flightSavings + hotelSavings + carSavings + privateSavings;
+  var hardROI = totalTravelSavings + timeValue - membershipCost;
+  var roiMultiple = membershipCost > 0 ? (totalTravelSavings + timeValue) / membershipCost : 0;
+
+  // Per-trip benefit for payback
+  var perTripBenefit = trips > 0 ? (totalTravelSavings + timeValue) / trips : 0;
+  var tripsToPayback = perTripBenefit > 0 ? Math.ceil(membershipCost / perTripBenefit) : 99;
+
+  // --- BONUS VALUES ---
+  var bonusDisruption = BONUS_VALUES.disruptionHandling;
+  var bonusPreference = BONUS_VALUES.preferenceMemory;
+  var bonusAmenities = BONUS_VALUES.hotelAmenitiesPerTrip * trips;
+  var totalBonus = bonusDisruption + bonusPreference + bonusAmenities;
+
+  // Store for PDF
+  calc = {
+    trips: trips, nights: nights, cabin: cabin, hotel: hotel, booking: booking,
+    hourly: hourly, tierVal: tierVal,
+    annualFlightCost: annualFlightCost, flightSavings: flightSavings, flightSavingsRate: flightSavingsRate,
+    annualHotelCost: annualHotelCost, hotelSavings: hotelSavings, hotelSavingsRate: hotelSavingsRate,
+    annualCarCost: annualCarCost, carSavings: carSavings,
+    annualPrivateCost: annualPrivateCost, privateSavings: privateSavings,
+    totalHours: totalHours, timeValue: timeValue, hoursPerTrip: hoursPerTrip,
+    totalTravelSavings: totalTravelSavings, hardROI: hardROI, roiMultiple: roiMultiple,
+    tripsToPayback: tripsToPayback, membershipCost: membershipCost,
+    totalBonus: totalBonus, bonusDisruption: bonusDisruption,
+    bonusPreference: bonusPreference, bonusAmenities: bonusAmenities,
+    isPrivate: isPrivate
+  };
+
+  // =========================
+  // RENDER OUTPUTS
+  // =========================
+
+  // --- GUARDRAILS ---
+  var nudge = $('guardrail-nudge');
+  nudge.textContent = '';
+  nudge.style.display = 'none';
+
+  if (hardROI < 0) {
+    nudge.style.display = '';
+    var box = document.createElement('div');
+    box.className = 'warning-box';
+    var strong = document.createElement('strong');
+    strong.textContent = 'Based on your profile, Ascend works best for travelers with 6+ trips per year in premium cabins. ';
+    box.appendChild(strong);
+    box.appendChild(document.createTextNode('Adjust your trip count or cabin class, or '));
+    var link = document.createElement('a');
+    link.href = 'https://joinascend.com/join-ascend';
+    link.style.cssText = 'color:inherit;font-weight:700;';
+    link.textContent = 'book a call';
+    box.appendChild(link);
+    box.appendChild(document.createTextNode(' to discuss your needs.'));
+    nudge.appendChild(box);
+  } else if (trips < 4 && cabin === 'premiumEconomy') {
+    nudge.style.display = '';
+    var tip = document.createElement('div');
+    tip.className = 'info-box';
+    tip.textContent = 'Ascend members average 8+ trips per year. Increasing your trip count shows the full value of membership.';
+    nudge.appendChild(tip);
+  }
+
+  // --- SAVINGS HERO ---
+  var heroEl = $('savings-hero');
+  heroEl.textContent = '';
+  var hero = document.createElement('div');
+  hero.className = 'savings-hero';
+
+  var displayROI = hardROI;
+  if (displayROI < -9999) displayROI = -9999;
+
+  var lbl = document.createElement('div'); lbl.className = 'label';
+  lbl.textContent = 'Estimated Net Annual Benefit';
+  var amt = document.createElement('div'); amt.className = 'amount';
+  amt.textContent = (displayROI >= 0 ? '$' : '-$') + fmt(Math.abs(displayROI)) + '/yr';
+  var det = document.createElement('div'); det.className = 'detail';
+  det.textContent = 'Flight savings: $' + fmt(flightSavings) +
+    ' + Hotel: $' + fmt(hotelSavings) +
+    ' + Time: $' + fmt(timeValue) +
+    (carSavings > 0 ? ' + Car: $' + fmt(carSavings) : '') +
+    (privateSavings > 0 ? ' + Aviation: $' + fmt(privateSavings) : '') +
+    ' minus $' + fmt(membershipCost) + ' membership';
+  var pb = document.createElement('div'); pb.className = 'payback';
+  pb.textContent = tripsToPayback <= trips
+    ? 'Recoup your membership in ' + tripsToPayback + ' trip' + (tripsToPayback !== 1 ? 's' : '')
+    : 'Payback: ' + tripsToPayback + ' trips';
+
+  hero.appendChild(lbl); hero.appendChild(amt); hero.appendChild(det); hero.appendChild(pb);
+  heroEl.appendChild(hero);
+
+  // --- QUICK STATS ---
+  setText('stat-savings', '$' + fmt(totalTravelSavings));
+  setText('stat-hours', Math.round(totalHours) + ' hrs/yr');
+  setText('stat-payback', tripsToPayback + ' trip' + (tripsToPayback !== 1 ? 's' : ''));
+  setText('stat-roi', fmtD(roiMultiple, 1) + 'x');
+
+  // --- COST COMPARISON BAR CHART ---
+  var totalRetail = annualFlightCost + annualHotelCost + annualCarCost + annualPrivateCost;
+  var totalAscend = totalRetail - totalTravelSavings + membershipCost;
+
+  if (costChart) {
+    costChart.data.datasets[0].data = [totalAscend, totalRetail];
+    costChart.options.scales.x.ticks.color = chartTextColor;
+    costChart.options.scales.y.ticks.color = chartTextColor;
+    costChart.options.plugins.legend.labels.color = chartTextColor;
+    costChart.update();
+  } else {
+    costChart = new Chart($('cost-chart'), {
+      type: 'bar',
+      data: {
+        labels: ['With Ascend', 'Current Spend'],
+        datasets: [{
+          label: 'Annual Cost',
+          data: [totalAscend, totalRetail],
+          backgroundColor: ['#6F57FF', '#999'],
+          borderRadius: 4
+        }]
+      },
+      options: {
+        indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+        plugins: {
+          legend: { display: true, labels: { color: chartTextColor } },
+          tooltip: { callbacks: { label: function(ctx) { return '$' + fmt(ctx.raw); } } }
+        },
+        scales: {
+          x: {
+            title: { display: true, text: 'Annual Cost ($)', color: chartTextColor },
+            ticks: { color: chartTextColor, callback: function(v) { return '$' + fmt(v); } },
+            grid: { color: 'rgba(128,128,128,0.15)' }
+          },
+          y: { ticks: { color: chartTextColor, font: { weight: 'bold' } }, grid: { display: false } }
+        }
+      }
+    });
+  }
+
+  // --- BREAKDOWN TABLE ---
+  var bRows = [];
+  bRows.push([
+    { text: 'Flights' },
+    { text: '$' + fmt(annualFlightCost) },
+    { text: '$' + fmt(annualFlightCost - flightSavings) },
+    { text: '$' + fmt(flightSavings) + ' (' + Math.round(flightSavingsRate * 100) + '%)' }
+  ]);
+  bRows.push([
+    { text: 'Hotels' },
+    { text: '$' + fmt(annualHotelCost) },
+    { text: '$' + fmt(annualHotelCost - hotelSavings) },
+    { text: '$' + fmt(hotelSavings) + ' (' + Math.round(hotelSavingsRate * 100) + '%)' }
+  ]);
+  if (annualCarCost > 0) {
+    bRows.push([
+      { text: 'Car Rentals' },
+      { text: '$' + fmt(annualCarCost) },
+      { text: '$' + fmt(annualCarCost - carSavings) },
+      { text: '$' + fmt(carSavings) + ' (15%)' }
+    ]);
+  }
+  if (annualPrivateCost > 0) {
+    bRows.push([
+      { text: 'Private Aviation' },
+      { text: '$' + fmt(annualPrivateCost) },
+      { text: '$' + fmt(annualPrivateCost - privateSavings) },
+      { text: '$' + fmt(privateSavings) + ' (20%)' }
+    ]);
+  }
+  bRows.push([
+    { text: 'Time (' + Math.round(totalHours) + ' hrs x $' + fmt(hourly) + '/hr)' },
+    { text: '$' + fmt(timeValue) },
+    { text: '$0' },
+    { text: '$' + fmt(timeValue) }
+  ]);
+  bRows.push([
+    { text: 'Membership' },
+    { text: '\u2014' },
+    { text: '-$' + fmt(membershipCost) },
+    { text: '-$' + fmt(membershipCost) }
+  ]);
+  bRows.push([
+    { text: 'Net Annual Benefit', bold: true },
+    { text: '' },
+    { text: '' },
+    { text: (hardROI >= 0 ? '$' : '-$') + fmt(Math.abs(hardROI)), bold: true }
+  ]);
+  buildTableRows($('breakdown-table').querySelector('tbody'), bRows);
+
+  // --- CUMULATIVE SAVINGS LINE CHART ---
+  var monthLabels = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var monthlyMemberCost = tierVal === 'monthly' ? 300 : 0;
+  var annualUpfront = tierVal === 'monthly' ? 0 : membershipCost;
+  var monthlySavings = (totalTravelSavings + timeValue) / 12;
+  var cumData = [];
+  var runningTotal = -annualUpfront;
+  for (var m = 0; m < 12; m++) {
+    runningTotal += monthlySavings - monthlyMemberCost;
+    cumData.push(Math.round(runningTotal));
+  }
+
+  if (cumulativeChart) {
+    cumulativeChart.data.datasets[0].data = cumData;
+    cumulativeChart.options.scales.x.ticks.color = chartTextColor;
+    cumulativeChart.options.scales.y.ticks.color = chartTextColor;
+    cumulativeChart.options.plugins.legend.labels.color = chartTextColor;
+    cumulativeChart.update();
+  } else {
+    cumulativeChart = new Chart($('cumulative-chart'), {
+      type: 'line',
+      data: {
+        labels: monthLabels,
+        datasets: [{
+          label: 'Cumulative Net Savings',
+          data: cumData,
+          borderColor: '#6F57FF',
+          backgroundColor: 'rgba(111,87,255,0.08)',
+          fill: true,
+          tension: 0.3,
+          pointRadius: 4,
+          pointBackgroundColor: '#6F57FF',
+          borderWidth: 2.5
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+          legend: { labels: { color: chartTextColor } },
+          tooltip: { callbacks: { label: function(ctx) { return '$' + fmt(ctx.raw); } } }
+        },
+        scales: {
+          x: { ticks: { color: chartTextColor }, grid: { color: 'rgba(128,128,128,0.1)' } },
+          y: {
+            title: { display: true, text: 'Cumulative Savings ($)', color: chartTextColor },
+            ticks: { color: chartTextColor, callback: function(v) { return '$' + fmt(v); } },
+            grid: { color: 'rgba(128,128,128,0.15)' }
+          }
+        }
+      }
+    });
+  }
+
+  // --- BONUS VALUE SECTION ---
+  var bonusEl = $('bonus-section');
+  bonusEl.textContent = '';
+  var bonusBox = document.createElement('div');
+  bonusBox.className = 'bonus-box';
+  var bh = document.createElement('h3');
+  bh.textContent = 'Bonus: Concierge Value';
+  bonusBox.appendChild(bh);
+  var bIntro = document.createElement('p');
+  bIntro.style.cssText = 'font-size:14px;margin:0 0 10px;color:var(--text-secondary);';
+  bIntro.textContent = 'In addition to your $' + fmt(totalTravelSavings + timeValue) + ' in hard savings, Ascend members also receive:';
+  bonusBox.appendChild(bIntro);
+
+  var bonusItems = [
+    ['24/7 disruption handling (98% resolution rate)', '$' + fmt(bonusDisruption) + '/yr'],
+    ['Saved travel preferences (no re-explaining)', '$' + fmt(bonusPreference) + '/yr'],
+    ['Hotel upgrades & amenities at preferred properties', '$' + fmt(bonusAmenities) + '/yr']
+  ];
+  bonusItems.forEach(function(item) {
+    var row = document.createElement('div');
+    row.className = 'bonus-item';
+    var left = document.createElement('span'); left.textContent = item[0];
+    var right = document.createElement('span'); right.style.fontFamily = 'var(--mono)'; right.textContent = item[1];
+    row.appendChild(left); row.appendChild(right);
+    bonusBox.appendChild(row);
+  });
+
+  var totalRow = document.createElement('div');
+  totalRow.className = 'bonus-item bonus-total';
+  var tl = document.createElement('span'); tl.textContent = 'Total estimated bonus value';
+  var tr2 = document.createElement('span'); tr2.style.cssText = 'font-family:var(--mono);color:var(--accent);';
+  tr2.textContent = '$' + fmt(totalBonus) + '/yr';
+  totalRow.appendChild(tl); totalRow.appendChild(tr2);
+  bonusBox.appendChild(totalRow);
+  bonusEl.appendChild(bonusBox);
+
+  // --- CONTEXTUAL CASE STUDY MATCH ---
+  var matchEl = $('context-match');
+  matchEl.textContent = '';
+  var annualSpend = annualFlightCost + annualHotelCost + annualCarCost + annualPrivateCost;
+  var bestMatch = null;
+  var bestDist = Infinity;
+  CASE_STUDIES.forEach(function(cs) {
+    var spendDist = Math.abs(annualSpend - cs.annualSpend);
+    var tripDist = Math.abs(trips - cs.tripsPerYear) * 5000;
+    var dist = spendDist + tripDist;
+    if (dist < bestDist) { bestDist = dist; bestMatch = cs; }
+  });
+  if (bestMatch) {
+    var cm = document.createElement('div');
+    cm.className = 'context-match';
+    cm.textContent = 'Your profile is most similar to ' + bestMatch.name + '. They saved $' + fmt(bestMatch.saved) + ' over ' + bestMatch.months + ' months.';
+    matchEl.appendChild(cm);
+  }
+}
+
+// =============================================================================
+// PDF GENERATION
+// =============================================================================
+
+function downloadPDF() {
+  var jsPDF = window.jspdf.jsPDF;
+  var pdf = new jsPDF();
+
+  // --- PAGE 1 ---
+  // Header bar
+  pdf.setFillColor(22, 22, 22);
+  pdf.rect(0, 0, 210, 35, 'F');
+  pdf.setTextColor(255, 255, 255);
+  pdf.setFontSize(24); pdf.setFont('helvetica', 'bold');
+  pdf.text('Ascend', 14, 18);
+  pdf.setFontSize(12); pdf.setFont('helvetica', 'normal');
+  pdf.setTextColor(180, 167, 255);
+  pdf.text('Your Personalized Travel ROI Report', 14, 28);
+
+  pdf.setTextColor(34, 34, 34);
+  var y = 44;
+
+  // Travel profile
+  pdf.setFontSize(14); pdf.setFont('helvetica', 'bold');
+  pdf.text('Your Travel Profile', 14, y); y += 8;
+  pdf.setFontSize(10); pdf.setFont('helvetica', 'normal');
+
+  var cabinLabel = { premiumEconomy: 'Premium Economy', business: 'Business', first: 'First' }[calc.cabin];
+  var hotelLabel = { '3star': '3-star', '4star': '4-star', '5star': '5-star' }[calc.hotel];
+  var bookingLabel = { self: 'Self-book online', ea: 'Executive assistant', corp: 'Corporate platform', agent: 'Travel agent' }[calc.booking];
+  var tierLabel = { monthly: 'Individual Monthly ($300/mo)', annual: 'Individual Annual ($2,500/yr)', enterprise: 'Enterprise' }[calc.tierVal];
+
+  var profileLines = [
+    'Trips per year: ' + calc.trips + ' | Avg duration: ' + calc.nights + ' nights',
+    'Cabin class: ' + cabinLabel + ' | Hotels: ' + hotelLabel,
+    'Booking method: ' + bookingLabel + ' | Time value: $' + fmt(calc.hourly) + '/hr',
+    'Membership: ' + tierLabel
+  ];
+  profileLines.forEach(function(l) { pdf.text(l, 14, y); y += 6; });
+  y += 4;
+
+  // Savings hero
+  pdf.setFontSize(16); pdf.setFont('helvetica', 'bold');
+  pdf.setTextColor(111, 87, 255);
+  var heroText = calc.hardROI >= 0
+    ? 'Net Annual Benefit: $' + fmt(calc.hardROI)
+    : 'Net Annual Benefit: -$' + fmt(Math.abs(calc.hardROI));
+  pdf.text(heroText, 14, y); y += 8;
+  pdf.setTextColor(34, 34, 34);
+  pdf.setFontSize(10); pdf.setFont('helvetica', 'normal');
+  pdf.text('ROI Multiple: ' + fmtD(calc.roiMultiple, 1) + 'x | Payback: ' + calc.tripsToPayback + ' trips | Hours reclaimed: ' + Math.round(calc.totalHours) + '/yr', 14, y);
+  y += 10;
+
+  // Cost breakdown table
+  pdf.setFontSize(14); pdf.setFont('helvetica', 'bold');
+  pdf.text('Savings Breakdown', 14, y); y += 8;
+  pdf.setFontSize(9); pdf.setFont('helvetica', 'bold');
+  pdf.setFillColor(241, 238, 255);
+  var headers = ['Category', 'Current', 'With Ascend', 'You Save'];
+  var xpos = [14, 74, 109, 149];
+  var widths = [60, 35, 40, 42];
+  headers.forEach(function(h, i) {
+    pdf.rect(xpos[i], y - 4, widths[i], 6, 'F');
+    pdf.text(h, xpos[i] + 2, y);
+  });
+  y += 6;
+  pdf.setFont('helvetica', 'normal');
+
+  var tableRows = [
+    ['Flights', '$' + fmt(calc.annualFlightCost), '$' + fmt(calc.annualFlightCost - calc.flightSavings), '$' + fmt(calc.flightSavings)],
+    ['Hotels', '$' + fmt(calc.annualHotelCost), '$' + fmt(calc.annualHotelCost - calc.hotelSavings), '$' + fmt(calc.hotelSavings)]
+  ];
+  if (calc.annualCarCost > 0) {
+    tableRows.push(['Car Rentals', '$' + fmt(calc.annualCarCost), '$' + fmt(calc.annualCarCost - calc.carSavings), '$' + fmt(calc.carSavings)]);
+  }
+  if (calc.annualPrivateCost > 0) {
+    tableRows.push(['Private Aviation', '$' + fmt(calc.annualPrivateCost), '$' + fmt(calc.annualPrivateCost - calc.privateSavings), '$' + fmt(calc.privateSavings)]);
+  }
+  tableRows.push(['Time (' + Math.round(calc.totalHours) + ' hrs)', '$' + fmt(calc.timeValue), '$0', '$' + fmt(calc.timeValue)]);
+  tableRows.push(['Membership', '\u2014', '-$' + fmt(calc.membershipCost), '-$' + fmt(calc.membershipCost)]);
+
+  tableRows.forEach(function(row) {
+    row.forEach(function(cell, i) {
+      pdf.text(cell, xpos[i] + 2, y);
+    });
+    y += 5.5;
+  });
+
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('Net Benefit', xpos[0] + 2, y);
+  pdf.text((calc.hardROI >= 0 ? '$' : '-$') + fmt(Math.abs(calc.hardROI)), xpos[3] + 2, y);
+  y += 10;
+
+  // --- PAGE 2 ---
+  pdf.addPage();
+
+  // Header stripe
+  pdf.setFillColor(22, 22, 22);
+  pdf.rect(0, 0, 210, 12, 'F');
+  pdf.setTextColor(255, 255, 255);
+  pdf.setFontSize(10);
+  pdf.text('Ascend Travel ROI Report - Continued', 14, 8);
+
+  pdf.setTextColor(34, 34, 34);
+  y = 22;
+  pdf.setFontSize(14); pdf.setFont('helvetica', 'bold');
+  pdf.text('12-Month Savings Projection', 14, y); y += 8;
+
+  var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var pdfMonthlyMemberCost = calc.tierVal === 'monthly' ? 300 : 0;
+  var pdfAnnualUpfront = calc.tierVal === 'monthly' ? 0 : calc.membershipCost;
+  var pdfMonthlySavings = (calc.totalTravelSavings + calc.timeValue) / 12;
+
+  pdf.setFontSize(9); pdf.setFont('helvetica', 'bold');
+  pdf.setFillColor(241, 238, 255);
+  pdf.rect(14, y - 4, 25, 6, 'F');
+  pdf.rect(39, y - 4, 35, 6, 'F');
+  pdf.rect(74, y - 4, 35, 6, 'F');
+  pdf.rect(109, y - 4, 35, 6, 'F');
+  pdf.text('Month', 16, y);
+  pdf.text('Savings', 41, y);
+  pdf.text('Cost', 76, y);
+  pdf.text('Cumulative', 111, y);
+  y += 6;
+  pdf.setFont('helvetica', 'normal');
+
+  var cumTotal = -pdfAnnualUpfront;
+  months.forEach(function(month) {
+    cumTotal += pdfMonthlySavings - pdfMonthlyMemberCost;
+    pdf.text(month, 16, y);
+    pdf.text('$' + fmt(pdfMonthlySavings), 41, y);
+    pdf.text('$' + fmt(pdfMonthlyMemberCost), 76, y);
+    if (cumTotal >= 0) { pdf.setTextColor(30, 120, 30); }
+    else { pdf.setTextColor(180, 40, 40); }
+    pdf.text((cumTotal >= 0 ? '$' : '-$') + fmt(Math.abs(cumTotal)), 111, y);
+    pdf.setTextColor(34, 34, 34);
+    y += 5.5;
+  });
+  y += 6;
+
+  // Case study comparison
+  pdf.setFontSize(14); pdf.setFont('helvetica', 'bold');
+  pdf.text('How You Compare to Ascend Members', 14, y); y += 8;
+  pdf.setFontSize(10); pdf.setFont('helvetica', 'normal');
+
+  var pdfAnnualSpend = calc.annualFlightCost + calc.annualHotelCost + calc.annualCarCost + calc.annualPrivateCost;
+  var pdfBestMatch = null;
+  var pdfBestDist = Infinity;
+  CASE_STUDIES.forEach(function(cs) {
+    var dist = Math.abs(pdfAnnualSpend - cs.annualSpend) + Math.abs(calc.trips - cs.tripsPerYear) * 5000;
+    if (dist < pdfBestDist) { pdfBestDist = dist; pdfBestMatch = cs; }
+  });
+  if (pdfBestMatch) {
+    pdf.text('Your profile is most similar to ' + pdfBestMatch.name + '.', 14, y); y += 5.5;
+    pdf.text('They saved $' + fmt(pdfBestMatch.saved) + ' over ' + pdfBestMatch.months + ' months.', 14, y); y += 10;
+  }
+
+  // CTA
+  pdf.setFillColor(111, 87, 255);
+  pdf.roundedRect(14, y, 182, 20, 4, 4, 'F');
+  pdf.setTextColor(255, 255, 255);
+  pdf.setFontSize(14); pdf.setFont('helvetica', 'bold');
+  pdf.text('Ready to start saving? joinascend.com/join-ascend', 105, y + 12, { align: 'center' });
+
+  // Footer
+  pdf.setFontSize(8); pdf.setTextColor(119, 119, 119);
+  pdf.text('Generated by Ascend Travel ROI Calculator | joinascend.com', 105, 280, { align: 'center' });
+  pdf.text('Savings estimates based on industry averages and published Ascend rates. Individual results may vary.', 105, 284, { align: 'center' });
+
+  pdf.save('ascend-roi-report.pdf');
+}
+
+// =============================================================================
+// LEAD CAPTURE
+// =============================================================================
+
+function showLeadForm() {
+  var form = $('lead-form');
+  form.classList.toggle('visible');
+  if (form.classList.contains('visible')) {
+    $('lead-name').focus();
+  }
+}
+
+function submitLeadAndDownload() {
+  var name = $('lead-name').value.trim();
+  var email = $('lead-email').value.trim();
+  var company = $('lead-company').value.trim();
+  var resultEl = $('lead-result');
+
+  if (!name) {
+    resultEl.textContent = '';
+    var err = document.createElement('div'); err.className = 'warning-box';
+    err.textContent = 'Please enter your name.'; resultEl.appendChild(err); return;
+  }
+  if (!email || !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email)) {
+    resultEl.textContent = '';
+    var err2 = document.createElement('div'); err2.className = 'warning-box';
+    err2.textContent = 'Please enter a valid email address.'; resultEl.appendChild(err2); return;
+  }
+
+  var payload = {
+    name: name, email: email, company: company,
+    tripsPerYear: calc.trips, cabinClass: calc.cabin,
+    annualSavings: Math.round(calc.hardROI),
+    roiMultiple: parseFloat(fmtD(calc.roiMultiple, 1)),
+    membershipTier: calc.tierVal,
+    timestamp: new Date().toISOString()
+  };
+
+  fetch('https://waltersignal-ai.pages.dev/api/ascend-roi-lead', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  })
+  .then(function(r) {
+    if (r.ok) {
+      resultEl.textContent = '';
+      var sb = document.createElement('div'); sb.className = 'success-box';
+      sb.textContent = 'Thanks, ' + name + '! Your report is downloading.'; resultEl.appendChild(sb);
+    } else { throw new Error('API error'); }
+  })
+  .catch(function() {
+    resultEl.textContent = '';
+    var ib = document.createElement('div'); ib.className = 'info-box';
+    ib.textContent = 'Your report is downloading. We will follow up shortly!'; resultEl.appendChild(ib);
+  });
+
+  // Always trigger PDF
+  downloadPDF();
+}
+
+// =============================================================================
+// EVENT WIRING
+// =============================================================================
+
+function wireEvents() {
+  var inputs = document.querySelectorAll('input, select');
+  inputs.forEach(function(el) {
+    el.addEventListener('input', recalculate);
+    el.addEventListener('change', recalculate);
+  });
+
+  $('hourly').addEventListener('input', function() {
+    setText('hourly-val', '$' + fmt(parseInt(this.value)));
+  });
+
+  document.querySelectorAll('input[name="private"]').forEach(function(radio) {
+    radio.addEventListener('change', function() {
+      $('private-fields').classList.toggle('visible', this.value === 'yes');
+      recalculate();
+    });
+  });
+
+  $('know-spend').addEventListener('change', function() {
+    $('spend-override').style.display = this.checked ? '' : 'none';
+    recalculate();
+  });
+
+  document.querySelectorAll('input[name="tier"]').forEach(function(radio) {
+    radio.addEventListener('change', function() {
+      document.querySelectorAll('.tier-option').forEach(function(opt) { opt.classList.remove('selected'); });
+      this.closest('.tier-option').classList.add('selected');
+      $('enterprise-fields').classList.toggle('visible', this.value === 'enterprise');
+      recalculate();
+    });
+  });
+}
+
+// =============================================================================
+// INIT
+// =============================================================================
+
+function init() {
+  var params = new URLSearchParams(window.location.search);
+  if (params.get('theme') === 'dark') {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    $('theme-toggle').textContent = 'Light mode';
+  }
+  if (params.get('trips')) $('trips').value = params.get('trips');
+  if (params.get('cabin')) $('cabin').value = params.get('cabin');
+  if (params.get('hotel')) $('hotel').value = params.get('hotel');
+  if (params.get('tier')) {
+    var tierRadio = document.querySelector('input[name="tier"][value="' + params.get('tier') + '"]');
+    if (tierRadio) {
+      tierRadio.checked = true;
+      document.querySelectorAll('.tier-option').forEach(function(opt) { opt.classList.remove('selected'); });
+      tierRadio.closest('.tier-option').classList.add('selected');
+      if (params.get('tier') === 'enterprise') $('enterprise-fields').classList.add('visible');
+    }
+  }
+
+  wireEvents();
+  recalculate();
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>

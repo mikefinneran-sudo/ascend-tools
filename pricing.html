@@ -127,6 +127,28 @@ tr:nth-child(even) td { background: var(--table-stripe); }
   color: var(--card-dark-text); border: none; padding: 6px 14px;
   border-radius: 20px; font-size: 12px; cursor: pointer; z-index: 100;
 }
+/* UNIFIED NAV BAR */
+.asc-nav {
+  background: #111118; padding: 0 28px; height: 56px;
+  display: flex; justify-content: space-between; align-items: center;
+  position: sticky; top: 0; z-index: 200;
+}
+.asc-nav-left { display: flex; align-items: center; gap: 8px; text-decoration: none; }
+.asc-nav-left span { font-size: 1.15rem; font-weight: 700; color: #fff; letter-spacing: -0.02em; }
+.asc-nav-links { display: flex; align-items: center; gap: 6px; }
+.asc-nav-links a {
+  color: #888; font-size: 13px; font-weight: 500; text-decoration: none;
+  padding: 6px 14px; border-radius: 100px; transition: all 0.2s;
+  border: 1px solid transparent;
+}
+.asc-nav-links a:hover { color: #fff; background: rgba(255,255,255,0.06); }
+.asc-nav-links a.active { color: #fff; background: rgba(111,87,255,0.15); border-color: rgba(111,87,255,0.3); }
+.asc-nav-toggle {
+  color: #888; border: 1px solid #333; padding: 5px 14px; border-radius: 32px;
+  font-size: 12px; cursor: pointer; background: transparent; font-family: 'Inter', sans-serif;
+  transition: all 0.2s; margin-left: 12px;
+}
+.asc-nav-toggle:hover { color: #fff; border-color: #666; background: rgba(255,255,255,0.06); }
 /* Preset chips */
 .preset-bar { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 20px; }
 .preset-chip {
@@ -181,7 +203,14 @@ input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 18p
 </head>
 <body>
 
-<button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()">Dark mode</button>
+<nav class="asc-nav">
+  <a href="index.html" class="asc-nav-left"><span>ascend</span></a>
+  <div class="asc-nav-links">
+    <a href="index.html">ROI Calculator</a>
+    <a href="pricing.html" class="active">Pricing</a>
+    <button class="asc-nav-toggle" id="theme-toggle" onclick="toggleTheme()">Dark mode</button>
+  </div>
+</nav>
 
 <div class="container">
 
@@ -200,19 +229,36 @@ input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 18p
     <input type="text" id="contact-name" placeholder="John Smith">
   </div>
 </div>
+<div class="row row-2">
+  <div>
+    <label for="client-website">Client Website</label>
+    <input type="text" id="client-website" placeholder="www.acmecorp.com">
+  </div>
+  <div>
+    <label for="implementation-fee">Implementation Fee ($)</label>
+    <input type="number" id="implementation-fee" value="2000" min="0" step="500">
+  </div>
+</div>
 <div class="row row-3">
   <div>
-    <label for="segment">Segment</label>
-    <select id="segment">
-      <option value="individual">Individual Executive</option>
-      <option value="smb" selected>SMB (2-10)</option>
-      <option value="midmarket">Mid-Market (11-50)</option>
-      <option value="enterprise">Enterprise (50+)</option>
-      <option value="pefund">PE Fund / Family Office</option>
-      <option value="charity">Charity / Nonprofit</option>
-      <option value="custom">Custom (manual floor/ceiling)</option>
+    <label for="num-users">Number of Users</label>
+    <input type="number" id="num-users" value="1" min="1" max="500" step="1">
+  </div>
+  <div>
+    <label for="billing-cycle">Billing</label>
+    <select id="billing-cycle">
+      <option value="annual" selected>Annual ($2,500/user/yr)</option>
+      <option value="monthly">Monthly ($300/user/mo)</option>
     </select>
   </div>
+  <div>
+    <label>Base Price</label>
+    <input type="text" id="base-price-display" readonly style="background:var(--table-stripe);font-weight:700;">
+  </div>
+</div>
+<input type="hidden" id="base-price" value="2500">
+<input type="hidden" id="segment" value="smb">
+<div class="row row-3">
   <div>
     <label for="prepared-by">Prepared By</label>
     <input type="text" id="prepared-by" value="Mike Finneran">
@@ -223,68 +269,28 @@ input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 18p
       <option value="">— New Proposal —</option>
     </select>
   </div>
+  <div></div>
 </div>
+<div id="custom-segment-fields" style="display:none;"></div>
 
-<!-- Custom floor/ceiling (only visible for custom segment) -->
-<div class="row row-2" id="custom-segment-fields" style="display:none;">
-  <div>
-    <label for="custom-floor">Custom Price Floor ($)</label>
-    <input type="number" id="custom-floor" value="1000" min="0" step="500">
-  </div>
-  <div>
-    <label for="custom-ceiling">Custom Price Ceiling ($)</label>
-    <input type="number" id="custom-ceiling" value="25000" min="0" step="500">
-  </div>
-</div>
-
-<!-- ==================== SECTION 2: QUICK PRESETS ==================== -->
-<h2>Quick Presets</h2>
-<div class="preset-bar">
-  <button class="preset-chip" onclick="applyPreset('enterprise_full')">Enterprise Full Price</button>
-  <button class="preset-chip" onclick="applyPreset('charity_logo')">Charity / Logo Play</button>
-  <button class="preset-chip" onclick="applyPreset('referral_partner')">High-Network Referral</button>
-  <button class="preset-chip" onclick="applyPreset('smb_standard')">SMB Standard</button>
-  <button class="preset-chip" onclick="applyPreset('custom')">Custom</button>
-</div>
-
-<!-- ==================== SECTION 3: FACTOR 1 — WTP ==================== -->
-<h2>Factor 1: Willingness to Pay <span class="internal-badge">Highest Priority</span></h2>
-<div id="wtp-flag"></div>
-<div class="row row-3">
-  <div>
-    <label>Segment Floor</label>
-    <input type="text" id="seg-floor" readonly style="background:var(--table-stripe);">
-  </div>
-  <div>
-    <label for="base-price">Base Price ($)</label>
-    <input type="number" id="base-price" value="5000" min="0" step="250">
-  </div>
-  <div>
-    <label>Segment Ceiling</label>
-    <input type="text" id="seg-ceiling" readonly style="background:var(--table-stripe);">
-  </div>
-</div>
-
-<!-- ==================== SECTION 4: FACTOR 2 — LOGO VALUE ==================== -->
-<h2>Factor 2: Logo Value</h2>
+<!-- ==================== SECTION 4: LOGO VALUE ==================== -->
+<h2>Logo Value</h2>
 <div class="row row-2">
+  <div>
+    <label for="brand-tier">Brand Tier</label>
+    <select id="brand-tier">
+      <option value="none" selected>None (0%)</option>
+      <option value="good">Good — recognizable name (5%)</option>
+      <option value="better">Better — strong brand, case study worthy (10%)</option>
+      <option value="best">Best — marquee logo, opens doors (15%)</option>
+    </select>
+  </div>
   <div>
     <label>Logo usage rights granted?</label>
     <div class="radio-group">
       <label><input type="radio" name="logo-rights" value="no" checked> No</label>
       <label><input type="radio" name="logo-rights" value="yes"> Yes</label>
     </div>
-  </div>
-  <div>
-    <label for="brand-tier">Brand Tier</label>
-    <select id="brand-tier">
-      <option value="unknown">Unknown (0%)</option>
-      <option value="local">Local / Niche (3%)</option>
-      <option value="regional">Regional (5%)</option>
-      <option value="national">National (8%)</option>
-      <option value="fortune500">Fortune 500 (12%)</option>
-      <option value="iconic">Iconic (15%)</option>
-    </select>
   </div>
 </div>
 
@@ -354,7 +360,7 @@ input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 18p
 <div class="row row-2">
   <div>
     <label for="avg-route-value">Avg Route Value ($)</label>
-    <input type="number" id="avg-route-value" value="3500" min="0" step="250">
+    <input type="number" id="avg-route-value" value="2250" min="0" step="250">
   </div>
   <div>
     <label for="margin-rate">Estimated Margin Rate</label>
@@ -458,7 +464,7 @@ input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 18p
 <!-- ==================== FOOTER ==================== -->
 <div class="asc-footer">
   <p>Built for <a href="https://joinascend.com">Ascend</a> — Internal pricing tool</p>
-  <p><a href="index.html" id="roi-crosslink">Open ROI Calculator</a></p>
+  <p><a href="index.html" id="roi-crosslink">ROI Calculator</a> &middot; <a href="pricing.html">Pricing Proposal</a></p>
 </div>
 
 </div><!-- /container -->
@@ -468,25 +474,14 @@ input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 18p
 // DATA CONSTANTS
 // =============================================================================
 
-var SEGMENTS = {
-  individual:  { label: 'Individual Executive', floor: 2000,  ceiling: 5000,   highWTP: false },
-  smb:         { label: 'SMB (2-10)',           floor: 3000,  ceiling: 10000,  highWTP: false },
-  midmarket:   { label: 'Mid-Market (11-50)',   floor: 8000,  ceiling: 25000,  highWTP: false },
-  enterprise:  { label: 'Enterprise (50+)',     floor: 15000, ceiling: 75000,  highWTP: true  },
-  pefund:      { label: 'PE Fund / Family Office', floor: 10000, ceiling: 50000, highWTP: true },
-  charity:     { label: 'Charity / Nonprofit',  floor: 1000,  ceiling: 5000,   highWTP: false },
-  custom:      { label: 'Custom',               floor: 1000,  ceiling: 25000,  highWTP: false }
-};
-
-var HIGH_WTP_CAP = 0.05; // 5% max discount for high-WTP segments
+var RATE_ANNUAL = 2500;  // per user per year
+var RATE_MONTHLY = 300;  // per user per month
 
 var LOGO_DISCOUNTS = {
-  unknown:    0,
-  local:      0.03,
-  regional:   0.05,
-  national:   0.08,
-  fortune500: 0.12,
-  iconic:     0.15
+  none:   0,
+  good:   0.05,
+  better: 0.10,
+  best:   0.15
 };
 
 var NETWORK_TIERS = {
@@ -515,37 +510,7 @@ var DISCOUNT_REASONS = [
   { label: 'Other (requires approval, capped at 3%)', maxPct: 3 }
 ];
 
-var PRESETS = {
-  enterprise_full: {
-    segment: 'enterprise', basePrice: 50000,
-    logoRights: 'no', brandTier: 'unknown',
-    networkTier: 'low', referralCommit: 'no',
-    tripsYear: 20, travelers: 3, travelMix: 'all_premium',
-    avgRouteValue: 8000, marginRate: 20
-  },
-  charity_logo: {
-    segment: 'charity', basePrice: 2500,
-    logoRights: 'yes', brandTier: 'iconic',
-    networkTier: 'medium', referralCommit: 'no',
-    tripsYear: 4, travelers: 1, travelMix: 'balanced',
-    avgRouteValue: 2500, marginRate: 12
-  },
-  referral_partner: {
-    segment: 'midmarket', basePrice: 15000,
-    logoRights: 'yes', brandTier: 'national',
-    networkTier: 'high', referralCommit: 'yes',
-    tripsYear: 12, travelers: 2, travelMix: 'heavy_premium',
-    avgRouteValue: 5000, marginRate: 17
-  },
-  smb_standard: {
-    segment: 'smb', basePrice: 5000,
-    logoRights: 'no', brandTier: 'unknown',
-    networkTier: 'low', referralCommit: 'no',
-    tripsYear: 8, travelers: 1, travelMix: 'balanced',
-    avgRouteValue: 3500, marginRate: 15
-  },
-  custom: null
-};
+// No presets — pricing is simply users × rate
 
 // =============================================================================
 // STATE
@@ -584,80 +549,26 @@ function toggleTheme() {
 // PRESETS
 // =============================================================================
 
-function applyPreset(key) {
-  // Highlight active chip
-  document.querySelectorAll('.preset-chip').forEach(function(c) { c.classList.remove('active'); });
-  event.target.classList.add('active');
-
-  if (key === 'custom' || !PRESETS[key]) {
-    // Clear to defaults
-    $('segment').value = 'smb';
-    $('base-price').value = 5000;
-    document.querySelector('input[name="logo-rights"][value="no"]').checked = true;
-    $('brand-tier').value = 'unknown';
-    $('network-tier').value = 'low';
-    document.querySelector('input[name="referral-commit"][value="no"]').checked = true;
-    $('trips-year').value = 8;
-    $('travelers').value = 1;
-    $('travel-mix').value = 'balanced';
-    $('avg-route-value').value = 3500;
-    $('margin-rate').value = 15;
-    updateSegmentDisplay();
-    updateMixDisplay();
-    recalculate();
-    return;
-  }
-
-  var p = PRESETS[key];
-  $('segment').value = p.segment;
-  updateSegmentDisplay();
-  $('base-price').value = p.basePrice;
-  document.querySelector('input[name="logo-rights"][value="' + p.logoRights + '"]').checked = true;
-  $('brand-tier').value = p.brandTier;
-  $('network-tier').value = p.networkTier;
-  document.querySelector('input[name="referral-commit"][value="' + p.referralCommit + '"]').checked = true;
-  $('trips-year').value = p.tripsYear;
-  $('travelers').value = p.travelers;
-  $('travel-mix').value = p.travelMix;
-  $('avg-route-value').value = p.avgRouteValue;
-  $('margin-rate').value = p.marginRate;
-  setText('margin-rate-val', p.marginRate + '%');
-  updateMixDisplay();
-  recalculate();
-}
-
-// =============================================================================
-// SEGMENT DISPLAY
-// =============================================================================
-
-function updateSegmentDisplay() {
-  var segKey = $('segment').value;
-  var seg = SEGMENTS[segKey];
-
-  if (segKey === 'custom') {
-    $('custom-segment-fields').style.display = '';
-    var f = parseInt($('custom-floor').value) || 1000;
-    var c = parseInt($('custom-ceiling').value) || 25000;
-    setText('seg-floor', '$' + fmt(f));
-    setText('seg-ceiling', '$' + fmt(c));
+function updateBasePrice() {
+  var users = parseInt($('num-users').value) || 1;
+  var billing = $('billing-cycle').value;
+  var annualPrice;
+  if (billing === 'monthly') {
+    annualPrice = users * RATE_MONTHLY * 12;
+    $('base-price-display').value = '$' + fmt(annualPrice) + '/yr ($' + fmt(users * RATE_MONTHLY) + '/mo)';
   } else {
-    $('custom-segment-fields').style.display = 'none';
-    setText('seg-floor', '$' + fmt(seg.floor));
-    setText('seg-ceiling', '$' + fmt(seg.ceiling));
-    // Set base price to segment midpoint
-    var mid = Math.round((seg.floor + seg.ceiling) / 2 / 250) * 250;
-    $('base-price').value = mid;
+    annualPrice = users * RATE_ANNUAL;
+    $('base-price-display').value = '$' + fmt(annualPrice) + '/yr';
   }
+  $('base-price').value = annualPrice;
 
-  // WTP flag
-  var flagEl = $('wtp-flag');
-  flagEl.textContent = '';
-  if (seg.highWTP) {
-    var div = document.createElement('div');
-    div.className = 'highwtp-flag';
-    div.textContent = 'High-WTP segment detected — all discounts capped at ' + (HIGH_WTP_CAP * 100) + '% max';
-    flagEl.appendChild(div);
-  }
+  // Set segment hint for Gamma export
+  if (users === 1) $('segment').value = 'individual';
+  else if (users <= 10) $('segment').value = 'smb';
+  else if (users <= 50) $('segment').value = 'midmarket';
+  else $('segment').value = 'enterprise';
+
+  recalculate();
 }
 
 // =============================================================================
@@ -677,22 +588,8 @@ function recalculate() {
   var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
   var chartTextColor = isDark ? '#e8e8e8' : '#1a1a1a';
 
-  // --- Read segment ---
-  var segKey = $('segment').value;
-  var seg = SEGMENTS[segKey];
-  var floor, ceiling, highWTP;
-
-  if (segKey === 'custom') {
-    floor = parseInt($('custom-floor').value) || 1000;
-    ceiling = parseInt($('custom-ceiling').value) || 25000;
-    highWTP = false;
-  } else {
-    floor = seg.floor;
-    ceiling = seg.ceiling;
-    highWTP = seg.highWTP;
-  }
-
-  var basePrice = parseInt($('base-price').value) || Math.round((floor + ceiling) / 2);
+  // --- Read base price (users × rate) ---
+  var basePrice = parseInt($('base-price').value) || 2500;
 
   // --- Calculate discounts ---
   var logoRights = document.querySelector('input[name="logo-rights"]:checked').value === 'yes';
@@ -706,23 +603,9 @@ function recalculate() {
 
   var totalDiscount = logoDiscount + networkDiscount;
 
-  // Apply high-WTP cap
-  if (highWTP && totalDiscount > HIGH_WTP_CAP) {
-    totalDiscount = HIGH_WTP_CAP;
-    // Proportionally reduce individual discounts
-    var originalTotal = logoDiscount + networkDiscount;
-    if (originalTotal > 0) {
-      logoDiscount = logoDiscount * (HIGH_WTP_CAP / originalTotal);
-      networkDiscount = networkDiscount * (HIGH_WTP_CAP / originalTotal);
-    }
-  }
-
   // Apply discounts
   var discountAmount = basePrice * totalDiscount;
   var recommendedPrice = Math.round(basePrice - discountAmount);
-
-  // Enforce floor
-  if (recommendedPrice < floor) recommendedPrice = floor;
 
   // --- Travel mix + margin projection ---
   var tripsYear = parseInt($('trips-year').value) || 0;
@@ -793,10 +676,8 @@ function recalculate() {
   var netMargin = recommendedPrice + projectedTransMargin - totalCostToServe;
 
   // Price range (sensitivity: ±1 tier on key inputs)
-  var priceLow = Math.round(basePrice * (1 - Math.min(totalDiscount + 0.05, highWTP ? HIGH_WTP_CAP : 0.30)));
-  if (priceLow < floor) priceLow = floor;
+  var priceLow = Math.round(basePrice * (1 - Math.min(totalDiscount + 0.05, 0.30)));
   var priceHigh = Math.round(basePrice * (1 - Math.max(totalDiscount - 0.03, 0)));
-  if (priceHigh > ceiling) priceHigh = ceiling;
   if (priceLow > priceHigh) { var tmp = priceLow; priceLow = priceHigh; priceHigh = tmp; }
 
   // Deal health
@@ -813,9 +694,10 @@ function recalculate() {
   calcResult = {
     prospectName: $('prospect-name').value,
     contactName: $('contact-name').value,
-    segment: segKey, segmentLabel: seg.label,
+    segment: $('segment').value,
+    numUsers: parseInt($('num-users').value) || 1,
+    billingCycle: $('billing-cycle').value,
     preparedBy: $('prepared-by').value,
-    floor: floor, ceiling: ceiling, highWTP: highWTP,
     basePrice: basePrice, recommendedPrice: recommendedPrice,
     logoDiscount: logoDiscount, networkDiscount: networkDiscount,
     totalDiscount: totalDiscount, discountAmount: discountAmount,
@@ -860,9 +742,9 @@ function recalculate() {
   setText('stat-margin', (netMargin >= 0 ? '$' : '-$') + fmt(Math.abs(netMargin)));
 
   // --- Price Waterfall Chart ---
-  var wfLabels = ['Ceiling', 'Base Price'];
-  var wfData = [ceiling, basePrice];
-  var wfColors = ['#999', '#6F57FF'];
+  var wfLabels = ['Base Price'];
+  var wfData = [basePrice];
+  var wfColors = ['#6F57FF'];
   if (logoDiscount > 0) {
     wfLabels.push('After Logo (-' + fmtD(logoDiscount * 100, 1) + '%)');
     wfData.push(Math.round(basePrice * (1 - logoDiscount)));
@@ -1022,14 +904,6 @@ function recalculate() {
       tbody.appendChild(tr);
     });
   }
-  if (highWTP && (logoDiscount > 0 || networkDiscount > 0)) {
-    var capRow = document.createElement('tr');
-    var capTd = document.createElement('td');
-    capTd.colSpan = 3;
-    capTd.style.cssText = 'font-size:12px;color:var(--amber-text);background:var(--amber-bg);';
-    capTd.textContent = 'High-WTP cap applied: discounts limited to ' + fmtD(HIGH_WTP_CAP * 100, 0) + '% max';
-    capRow.appendChild(capTd); tbody.appendChild(capRow);
-  }
 
   // --- ROI cross-link with params ---
   var roiParams = new URLSearchParams();
@@ -1094,114 +968,115 @@ function setGammaStatus(state, text, linkData) {
 
 function buildProposalCards() {
   var r = calcResult;
-  var today = new Date();
-  var dateStr = today.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-  var validDate = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000);
-  var validStr = validDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-  var segLabel = SEGMENTS[r.segment] ? SEGMENTS[r.segment].label : r.segment;
+  var prospectName = $('prospect-name').value.trim() || 'Your Company';
+  var clientWebsite = $('client-website').value.trim() || '';
+  var implFee = parseInt($('implementation-fee').value) || 2000;
+  var monthlyFee = Math.round(r.recommendedPrice / 12);
+  var seatCount = parseInt($('num-users').value) || 1;
+  var segLabel = r.numUsers === 1 ? 'Individual' : r.numUsers + '-User Team';
+
+  // Booking fee only for certain segments
+  var hasBookingFee = (r.segment === 'pefund' || r.segment === 'enterprise');
+  var bookingFeeNote = hasBookingFee ? ' Booking on behalf of your clients will incur a $50 booking fee per ticket.' : '';
 
   var cards = [];
 
   // Card 1: Title / Cover
   cards.push(
-    '# Ascend — Pricing Proposal\n\n' +
-    '**Prepared for ' + (r.prospectName || 'Prospect') + '**\n\n' +
-    (r.contactName ? 'Attn: ' + r.contactName + '\n\n' : '') +
-    dateStr + '\n\n' +
-    'Prepared by ' + (r.preparedBy || 'Ascend Team')
+    '# Ascend\n\n' +
+    '## Enterprise Partnership Proposal\n\n' +
+    '**' + prospectName + '**\n\n' +
+    (clientWebsite ? clientWebsite : '')
   );
 
-  // Card 2: Proposed Fee (hero card)
+  // Card 2: The Executive Travel Problem (dark bg)
   cards.push(
-    '# Proposed Annual Fee\n\n' +
-    '## $' + fmt(r.recommendedPrice) + ' / year\n\n' +
-    'Segment: ' + segLabel + '\n\n' +
-    'Valid through ' + validStr
+    '# The Executive Travel Problem\n\n' +
+    'Your leadership team deserves better than reactive travel logistics and wasted hours navigating complex booking platforms.\n\n' +
+    '**Time Drain** — Executives spend countless hours comparing flights, hotels, and ground transportation across multiple platforms instead of focusing on business priorities.\n\n' +
+    '**Reactive Disruptions** — Flight delays and cancellations handled only after problems arise, leading to missed meetings and frustrated travelers.\n\n' +
+    '**Fragmented Support** — No unified point of contact for complex itineraries spanning multiple cities, airlines, and accommodation providers.\n\n' +
+    '**Admin Overload** — Executive assistants drowning in booking requests, coordination emails, and endless follow-up tasks that pull them away from strategic work.'
   );
 
-  // Card 3: Deal Terms
-  var terms = [
-    'Annual membership with full concierge travel service',
-    'Travel booking and management for ' + r.travelers + ' traveler' + (r.travelers !== 1 ? 's' : ''),
-    r.tripsYear > 0 ? 'Estimated ' + r.tripsYear + ' trips per year' : 'Trip volume to be confirmed'
-  ];
-  if (r.logoRights) terms.push('Logo usage rights included — brand tier: ' + r.brandTier);
-  if (r.referralCommit) terms.push('Formal referral commitment in place');
-  if (r.totalDiscount > 0) terms.push('Applied discount: ' + fmtD(r.totalDiscount * 100, 1) + '%');
-
+  // Card 3: Meet Ascend
   cards.push(
-    '# Deal Terms\n\n' +
-    terms.map(function(t) { return '- ' + t; }).join('\n')
+    '# Meet Ascend\n' +
+    '## Your 24/7 Travel Concierge on WhatsApp\n\n' +
+    'Ascend is a revolutionary WhatsApp-based travel concierge membership that puts human expertise at your fingertips. No apps, no portals — just effortless travel booking through simple messages.\n\n' +
+    '- **Under 60-Second Response Times** — Real humans, available instantly, 24/7/365\n' +
+    '- **35% Average Savings** — On business and first-class travel bookings\n' +
+    '- **Proactive Disruption Management** — Problems solved before you even notice them\n' +
+    '- **Unlimited Bookings** — Zero per-trip fees, complete freedom to travel'
   );
 
-  // Card 4: What's Included
+  // Card 4: How It Works (light bg, 3 steps)
+  cards.push(
+    '# How It Works\n\n' +
+    'Three simple steps to effortless enterprise travel management\n\n' +
+    '**1. Text** — Message your travel needs, preferences, and constraints directly via WhatsApp. No forms, no portals — just natural conversation with your dedicated concierge team.\n\n' +
+    '**2. Approve** — Review personalized options for flights, hotels, and ground transportation curated specifically for your requirements. Multiple choices presented with transparent pricing and tradeoffs.\n\n' +
+    '**3. Relax** — We handle all booking confirmations, seat assignments, and loyalty program credits. Continuous monitoring ensures proactive rebooking if disruptions arise — before you\'re affected.'
+  );
+
+  // Card 5: Proven Results (stats)
+  cards.push(
+    '# Proven Results\n' +
+    '**Real data from enterprise clients and individual members**\n\n' +
+    '**$127K** — Saved by Bitkraft Ventures. 32% average savings across 47 bookings in first 6 months.\n\n' +
+    '**82%** — ROI Within 2 Trips. Of members recoup their entire membership cost after just two bookings.\n\n' +
+    '**98%** — Proactive Resolution Rate. Of disruptions handled before customers even become aware of the issue.\n\n' +
+    '**26** — Hours Reclaimed Monthly. Average time saved per executive assistant, redirected to strategic initiatives.'
+  );
+
+  // Card 6: Enterprise Benefits (dynamic client name)
+  cards.push(
+    '# Enterprise Benefits\n' +
+    '**Designed specifically for ' + prospectName + '**\n\n' +
+    '**Dedicated Account Manager** — Single point of contact who learns your company\'s travel preferences, policy requirements, and VIP traveler needs.\n\n' +
+    '**Travel Policy Management** — Consultation support is included to help create your internal policies to keep your team on budget.\n\n' +
+    '**Business + Personal Travel** — Both corporate trips and personal vacations covered under the same membership — a valuable executive benefit.\n\n' +
+    '**Custom Billing and Report Options** — We have various options to meet your needs. Monthly activity reporting, business review and settlement via Crypto are all possible.'
+  );
+
+  // Card 7: Your Investment (DYNAMIC pricing from calculator)
+  cards.push(
+    '# Your Investment\n' +
+    '**' + prospectName + ' Enterprise Package**\n\n' +
+    '**Implementation Fee: $' + fmt(implFee) + '** — One-time investment covering onboarding, training and travel policy creations.\n\n' +
+    '**Monthly Fee: $' + fmt(monthlyFee) + '** — ' + seatCount + ' travelers/seats per month. Includes unlimited bookings, 24/7 concierge access, proactive monitoring, and zero per-trip fees.' + bookingFeeNote + '\n\n' +
+    '*No hidden costs. Transparent, predictable pricing that scales with your team.*'
+  );
+
+  // Card 8: What's Included (services grid)
   cards.push(
     '# What\'s Included\n\n' +
-    '- **24/7 concierge access** — dedicated travel team, always available\n' +
-    '- **Flight & hotel booking** — premium cabins, preferred properties, negotiated rates\n' +
-    '- **Disruption handling** — rebooking, cancellations, schedule changes managed for you\n' +
-    '- **Preference memory** — your travel style remembered across every trip\n' +
-    '- **Reporting & visibility** — travel spend tracking and optimization insights'
+    'Comprehensive travel support covering every aspect of your journey\n\n' +
+    '**Flight Booking & Management** — Business and first-class flights across all major airlines with real-time monitoring and automatic rebooking during disruptions.\n\n' +
+    '**Accommodations** — Hotels, boutique properties, villas, and extended-stay options matched to your preferences and loyalty programs.\n\n' +
+    '**Ground Transportation** — Car rentals, private drivers, and premium car services coordinated seamlessly with your flight arrivals.\n\n' +
+    '**Private Aviation** — Access to private jet charter options when commercial flights don\'t meet timing or routing requirements.\n\n' +
+    '**Proactive Monitoring** — Real-time disruption alerts with automatic rebooking initiated before you\'re impacted by delays or cancellations.\n\n' +
+    '**Special Event Access** — Coordination for high-demand events including Super Bowl, Masters, Wimbledon, and exclusive corporate entertainment opportunities.\n\n' +
+    '**Emergency Support** — Last-minute travel arrangements for urgent business needs, family emergencies, or unexpected opportunities — anytime, anywhere.'
   );
 
-  // Card 5: Next Steps
+  // Card 9: Getting Started (onboarding steps)
   cards.push(
-    '# Next Steps\n\n' +
-    '1. Review this proposal and reach out with any questions\n' +
-    '2. Schedule an onboarding call to get started\n' +
-    '3. This proposal is valid for 30 days\n\n' +
-    '**Contact:** joinascend.com | hello@joinascend.com'
+    '# Getting Started\n' +
+    '**From signed agreement to first booking in 48 hours**\n\n' +
+    '**Sign Enterprise Agreement** — Review and execute the service agreement with transparent terms, SLAs, and data security provisions that meet your procurement standards.\n\n' +
+    '**30-Minute Onboarding Call** — Your dedicated account manager conducts a comprehensive session to understand travel preferences, policy requirements, VIP traveler profiles, and preferred suppliers.\n\n' +
+    '**Add Your Team** — Invite employees to your dedicated enterprise WhatsApp group with role-based permissions and custom approval workflows as needed.\n\n' +
+    '**Start Booking Immediately** — Begin making travel requests instantly with 24/7 access to your concierge team — no learning curve, no complicated software to master.'
   );
 
-  // Card 6: Price Waterfall (analytical backup — internal)
-  var wfLines = [
-    '| Step | Amount | Change |',
-    '|------|--------|--------|',
-    '| Segment Ceiling | $' + fmt(r.ceiling) + ' | — |',
-    '| Base Price | $' + fmt(r.basePrice) + ' | -$' + fmt(r.ceiling - r.basePrice) + ' |'
-  ];
-  if (r.logoDiscount > 0) {
-    var afterLogo = Math.round(r.basePrice * (1 - r.logoDiscount));
-    wfLines.push('| After Logo Discount | $' + fmt(afterLogo) + ' | -' + fmtD(r.logoDiscount * 100, 1) + '% |');
-  }
-  if (r.networkDiscount > 0) {
-    var afterNet = Math.round(r.basePrice * (1 - r.logoDiscount - r.networkDiscount));
-    wfLines.push('| After Network Discount | $' + fmt(afterNet) + ' | -' + fmtD(r.networkDiscount * 100, 1) + '% |');
-  }
-  wfLines.push('| **Final Price** | **$' + fmt(r.recommendedPrice) + '** | -$' + fmt(r.basePrice - r.recommendedPrice) + ' total |');
-  wfLines.push('| Break-Even | $' + fmt(r.breakEvenFee) + ' | — |');
-
-  if (r.highWTP) {
-    wfLines.push('\n*High-WTP cap applied: discounts limited to ' + fmtD(HIGH_WTP_CAP * 100, 0) + '% max*');
-  }
-
+  // Card 10: Thank You (closing)
   cards.push(
-    '# Price Waterfall\n\n' +
-    wfLines.join('\n')
-  );
-
-  // Card 7: Margin Projection (internal)
-  cards.push(
-    '# Margin Projection\n\n' +
-    '| Metric | Value |\n' +
-    '|--------|-------|\n' +
-    '| Recommended Price | $' + fmt(r.recommendedPrice) + ' |\n' +
-    '| Projected Transactional Margin | $' + fmt(r.projectedTransMargin) + ' |\n' +
-    '| Total Cost to Serve | $' + fmt(r.totalCostToServe) + ' |\n' +
-    '| Break-Even Fee | $' + fmt(r.breakEvenFee) + ' |\n' +
-    '| **Net Margin** | **' + (r.netMargin >= 0 ? '$' : '-$') + fmt(Math.abs(r.netMargin)) + '** |'
-  );
-
-  // Card 8: Travel Mix (internal)
-  cards.push(
-    '# Travel Mix & Revenue\n\n' +
-    '**Mix:** Economy ' + Math.round(r.mix.economy * 100) + '% · Business ' + Math.round(r.mix.business * 100) + '% · First ' + Math.round(r.mix.first * 100) + '%\n\n' +
-    '- Avg Route Value: $' + fmt(r.avgRouteValue) + '\n' +
-    '- Margin Rate: ' + fmtD(r.marginRate, 1) + '%\n' +
-    '- Weighted Multiplier: ' + fmtD(r.weightedMarginMult, 2) + 'x\n' +
-    '- Total Booking Value: $' + fmt(r.totalBookingValue) + '\n' +
-    '- Effective Margin: ' + fmtD(r.effectiveMarginRate * 100, 1) + '%\n\n' +
-    '*Internal Use Only — Not for external distribution*'
+    '# Thank You\n\n' +
+    '**We look forward to making your travel effortless.**\n\n' +
+    'Questions? mike@joinascend.com\n\n' +
+    '*Ascend — Make booking travel effortless.*'
   );
 
   return cards.join('\n---\n');
@@ -1230,7 +1105,7 @@ async function generateGammaProposal() {
     themeId: 'consultant',
     cardSplit: 'inputTextBreaks',
     exportAs: 'pdf',
-    additionalInstructions: 'This is a pricing proposal for a premium travel concierge service. Keep the design clean and professional. Cards 1-5 are client-facing. Cards 6-8 are internal analytical backup — mark them clearly as internal.',
+    additionalInstructions: 'This is an enterprise partnership proposal for Ascend, a premium WhatsApp-based travel concierge. Design style: Card 1 is a clean title card with large logo text. Card 2 uses a dark background with 4 feature boxes in a 2x2 grid. Card 3 is light with bullet points and a small label badge. Card 4 uses a light blue background with numbered steps (1, 2, 3). Card 5 shows big statistics numbers prominently in purple/violet. Card 6 uses a dark background with icon cards in a grid. Card 7 shows pricing in two side-by-side cards (one purple, one dark). Card 8 uses a light blue background with an icon grid of services. Card 9 is a split layout with a timeline of onboarding steps. Card 10 is a bold purple closing slide. Overall: professional, corporate, clean. Primary accent color: #6F57FF (purple/violet). Use dark sections (#1e293b) for contrast alternating with light blue (#EFF6FF) sections.',
     imageOptions: { source: 'webFreeToUseCommercially' },
     cardOptions: {
       dimensions: '16x9',
@@ -1320,6 +1195,8 @@ function saveProposal() {
     preparedBy: $('prepared-by').value,
     inputs: {
       basePrice: $('base-price').value,
+      clientWebsite: $('client-website').value,
+      implementationFee: $('implementation-fee').value,
       logoRights: document.querySelector('input[name="logo-rights"]:checked').value,
       brandTier: $('brand-tier').value,
       networkTier: $('network-tier').value,
@@ -1335,8 +1212,8 @@ function saveProposal() {
       paymentPct: $('payment-pct').value,
       cac: $('cac').value,
       overhead: $('overhead').value,
-      customFloor: $('custom-floor').value,
-      customCeiling: $('custom-ceiling').value,
+      numUsers: $('num-users').value,
+      billingCycle: $('billing-cycle').value,
       mixEconomy: $('mix-economy').value,
       mixBusiness: $('mix-business').value,
       mixFirst: $('mix-first').value
@@ -1385,6 +1262,8 @@ function loadProposal(name) {
   var inp = entry.inputs;
   if (inp) {
     $('base-price').value = inp.basePrice || 5000;
+    $('client-website').value = inp.clientWebsite || '';
+    $('implementation-fee').value = inp.implementationFee || 2000;
     var lr = document.querySelector('input[name="logo-rights"][value="' + (inp.logoRights || 'no') + '"]');
     if (lr) lr.checked = true;
     $('brand-tier').value = inp.brandTier || 'unknown';
@@ -1402,16 +1281,15 @@ function loadProposal(name) {
     $('payment-pct').value = inp.paymentPct || 2.9;
     $('cac').value = inp.cac || 500;
     $('overhead').value = inp.overhead || 300;
-    $('custom-floor').value = inp.customFloor || 1000;
-    $('custom-ceiling').value = inp.customCeiling || 25000;
+    $('num-users').value = inp.numUsers || 1;
+    $('billing-cycle').value = inp.billingCycle || 'annual';
     $('mix-economy').value = inp.mixEconomy || 40;
     $('mix-business').value = inp.mixBusiness || 40;
     $('mix-first').value = inp.mixFirst || 20;
   }
 
-  updateSegmentDisplay();
+  updateBasePrice();
   updateMixDisplay();
-  recalculate();
 }
 
 function populateLoadRecent() {
@@ -1446,15 +1324,9 @@ function wireEvents() {
     el.addEventListener('input', recalculate);
   });
 
-  // Segment change updates display
-  $('segment').addEventListener('change', function() {
-    updateSegmentDisplay();
-    recalculate();
-  });
-
-  // Custom segment fields
-  $('custom-floor').addEventListener('input', function() { updateSegmentDisplay(); recalculate(); });
-  $('custom-ceiling').addEventListener('input', function() { updateSegmentDisplay(); recalculate(); });
+  // Users / billing change
+  $('num-users').addEventListener('input', updateBasePrice);
+  $('billing-cycle').addEventListener('change', updateBasePrice);
 
   // Travel mix toggle
   $('travel-mix').addEventListener('change', function() {
@@ -1479,6 +1351,12 @@ function init() {
     $('theme-toggle').textContent = 'Light mode';
   }
 
+  // Pre-fill from ROI calculator handoff
+  if (params.get('trips')) $('trips-year').value = params.get('trips');
+  if (params.get('travelers')) $('num-users').value = params.get('travelers');
+  if (params.get('mix')) $('travel-mix').value = params.get('mix');
+  if (params.get('routeValue')) $('avg-route-value').value = params.get('routeValue');
+
   // Pre-fill Gamma key from localStorage
   var savedKey = localStorage.getItem('ascend-gamma-key');
   if (savedKey) {
@@ -1486,7 +1364,7 @@ function init() {
   }
 
   populateLoadRecent();
-  updateSegmentDisplay();
+  updateBasePrice();
   updateMixDisplay();
   wireEvents();
   recalculate();

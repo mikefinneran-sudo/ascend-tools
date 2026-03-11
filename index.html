@@ -58,6 +58,28 @@ html, body {
   transition: all 0.2s;
 }
 .asc-toggle:hover { background: rgba(255,255,255,0.1); color: #fff; border-color: #666; }
+/* UNIFIED NAV BAR */
+.asc-nav {
+  background: #111118; padding: 0 28px; height: 56px;
+  display: flex; justify-content: space-between; align-items: center;
+  position: sticky; top: 0; z-index: 200;
+}
+.asc-nav-left { display: flex; align-items: center; gap: 8px; text-decoration: none; }
+.asc-nav-left span { font-size: 1.15rem; font-weight: 700; color: #fff; letter-spacing: -0.02em; }
+.asc-nav-links { display: flex; align-items: center; gap: 6px; }
+.asc-nav-links a {
+  color: #888; font-size: 13px; font-weight: 500; text-decoration: none;
+  padding: 6px 14px; border-radius: 100px; transition: all 0.2s;
+  border: 1px solid transparent;
+}
+.asc-nav-links a:hover { color: #fff; background: rgba(255,255,255,0.06); }
+.asc-nav-links a.active { color: #fff; background: rgba(111,87,255,0.15); border-color: rgba(111,87,255,0.3); }
+.asc-nav-toggle {
+  color: #888; border: 1px solid #333; padding: 5px 14px; border-radius: 32px;
+  font-size: 12px; cursor: pointer; background: transparent; font-family: 'Inter', sans-serif;
+  transition: all 0.2s; margin-left: 12px;
+}
+.asc-nav-toggle:hover { color: #fff; border-color: #666; background: rgba(255,255,255,0.06); }
 
 /* TYPOGRAPHY */
 h2 { font-size: 20px; font-weight: 700; margin: 1.8rem 0 0.75rem; letter-spacing: -0.3px; }
@@ -220,13 +242,14 @@ tr:nth-child(even) { background: var(--table-stripe); }
 <body>
 
 <!-- HEADER -->
-<div class="asc-header">
-  <div>
-    <h1>Ascend<span class="accent-dot">.</span></h1>
-    <p>Travel ROI Calculator &mdash; See Your Savings</p>
+<nav class="asc-nav">
+  <a href="index.html" class="asc-nav-left"><span>ascend</span></a>
+  <div class="asc-nav-links">
+    <a href="index.html" class="active">ROI Calculator</a>
+    <a href="pricing.html">Pricing</a>
+    <button class="asc-nav-toggle" onclick="toggleTheme()" id="theme-toggle">Dark mode</button>
   </div>
-  <button class="asc-toggle" onclick="toggleTheme()" id="theme-toggle">Dark mode</button>
-</div>
+</nav>
 
 <div class="container">
 
@@ -266,8 +289,8 @@ tr:nth-child(even) { background: var(--table-stripe); }
     <label for="hotel">Hotel preference</label>
     <select id="hotel">
       <option value="3star">3-star</option>
-      <option value="4star" selected>4-star</option>
-      <option value="5star">5-star</option>
+      <option value="4star">4-star</option>
+      <option value="5star" selected>5-star</option>
     </select>
   </div>
   <div>
@@ -392,7 +415,7 @@ tr:nth-child(even) { background: var(--table-stripe); }
     </div>
     <div>
       <label for="ent-cost">Cost per seat ($/yr)</label>
-      <input type="number" id="ent-cost" value="2000" min="500" max="10000" step="100">
+      <input type="number" id="ent-cost" value="2500" min="500" max="10000" step="100">
     </div>
   </div>
 </div>
@@ -494,6 +517,10 @@ tr:nth-child(even) { background: var(--table-stripe); }
   <p>Join hundreds of executives saving 35%+ on premium travel</p>
 </div>
 
+<div style="text-align:center;margin:1rem 0;">
+  <a href="#" id="pricingLink" onclick="goToPricing()" style="color:var(--accent);font-size:14px;font-weight:600;text-decoration:none;">Build a pricing proposal with these numbers &rarr;</a>
+</div>
+
 <!-- METHODOLOGY -->
 <details>
   <summary>How we calculate this</summary>
@@ -510,7 +537,7 @@ tr:nth-child(even) { background: var(--table-stripe); }
 <!-- FOOTER -->
 <div class="asc-footer">
   <p>Built for <a href="https://joinascend.com">Ascend</a> &mdash; Premium travel concierge for executives and teams.</p>
-  <p><a href="pricing.html">Open Pricing Proposal Tool</a></p>
+  <p><a href="index.html">ROI Calculator</a> &middot; <a href="pricing.html">Pricing Proposal</a></p>
   <p>Calculator estimates based on industry averages and published Ascend savings rates. Individual results may vary.</p>
 </div>
 
@@ -536,7 +563,7 @@ var SAVINGS_RATES = {
 var HOTEL_COSTS = {
   '3star': { domestic: 150, international: 180 },
   '4star': { domestic: 275, international: 350 },
-  '5star': { domestic: 550, international: 750 }
+  '5star': { domestic: 500, international: 500 }
 };
 
 var HOTEL_SAVINGS = { '3star': 0.10, '4star': 0.20, '5star': 0.25 };
@@ -560,7 +587,7 @@ var MEMBERSHIP_COST = {
   monthly: 3600,
   annual: 2500,
   enterprise: function() {
-    return (parseInt($('ent-seats').value) || 5) * (parseInt($('ent-cost').value) || 2000);
+    return (parseInt($('ent-seats').value) || 5) * (parseInt($('ent-cost').value) || 2500);
   }
 };
 
@@ -1310,6 +1337,7 @@ function init() {
   if (params.get('trips')) $('trips').value = params.get('trips');
   if (params.get('cabin')) $('cabin').value = params.get('cabin');
   if (params.get('hotel')) $('hotel').value = params.get('hotel');
+  if (params.get('mix')) $('travel-mix').value = params.get('mix');
   if (params.get('tier')) {
     var tierRadio = document.querySelector('input[name="tier"][value="' + params.get('tier') + '"]');
     if (tierRadio) {
@@ -1322,6 +1350,45 @@ function init() {
 
   wireEvents();
   recalculate();
+}
+
+// =============================================================================
+// ROI → PRICING HANDOFF
+// =============================================================================
+
+function goToPricing() {
+  var params = new URLSearchParams();
+
+  // Trips and travelers
+  var trips = parseInt($('trips').value) || 8;
+  params.set('trips', trips);
+
+  // Cabin → travel mix mapping
+  var cabin = $('cabin').value;
+  if (cabin === 'first') params.set('mix', 'all_premium');
+  else if (cabin === 'business') params.set('mix', 'heavy_premium');
+  else params.set('mix', 'balanced');
+
+  // Route value: weighted avg of domestic ($500) and international ($4K)
+  var travelMix = $('travel-mix').value;
+  var pctIntl = travelMix === 'international' ? 0.8 : travelMix === 'mixed' ? 0.5 : 0.2;
+  var routeVal = Math.round(500 * (1 - pctIntl) + 4000 * pctIntl);
+  params.set('routeValue', routeVal);
+
+  // Segment and travelers from tier selection
+  var tier = document.querySelector('input[name="tier"]:checked');
+  if (tier && tier.value === 'enterprise') {
+    params.set('segment', 'enterprise');
+    params.set('travelers', parseInt($('ent-seats').value) || 5);
+  } else {
+    params.set('segment', 'smb');
+    params.set('travelers', 1);
+  }
+
+  // Theme passthrough
+  if (document.documentElement.getAttribute('data-theme') === 'dark') params.set('theme', 'dark');
+
+  window.location.href = 'pricing.html?' + params.toString();
 }
 
 document.addEventListener('DOMContentLoaded', init);

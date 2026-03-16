@@ -208,6 +208,7 @@ input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 18p
   <div class="asc-nav-links">
     <a href="index.html">ROI Calculator</a>
     <a href="pricing.html" class="active">Pricing</a>
+    <a href="trip-planner.html">Trip Planner</a>
     <button class="asc-nav-toggle" id="theme-toggle" onclick="toggleTheme()">Dark mode</button>
   </div>
 </nav>
@@ -249,11 +250,22 @@ input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 18p
     <select id="billing-cycle">
       <option value="annual" selected>Annual ($2,500/user/yr)</option>
       <option value="monthly">Monthly ($300/user/mo)</option>
+      <option value="custom">Custom</option>
     </select>
   </div>
   <div>
     <label>Base Price</label>
     <input type="text" id="base-price-display" readonly style="background:var(--table-stripe);font-weight:700;">
+  </div>
+</div>
+<div class="row row-2" id="custom-pricing-fields" style="display:none;">
+  <div>
+    <label for="custom-monthly-fee">Custom Monthly Fee ($)</label>
+    <input type="number" id="custom-monthly-fee" value="500" min="0" step="50" placeholder="e.g. 500">
+  </div>
+  <div>
+    <label for="custom-annual-price">— or Annual Price ($)</label>
+    <input type="number" id="custom-annual-price" value="6000" min="0" step="500" placeholder="e.g. 6000">
   </div>
 </div>
 <input type="hidden" id="base-price" value="2500">
@@ -359,17 +371,56 @@ input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 18p
 
 <div class="row row-2">
   <div>
-    <label for="avg-route-value">Avg Route Value ($)</label>
+    <label for="avg-route-value">Avg Flight Value ($)</label>
     <input type="number" id="avg-route-value" value="2250" min="0" step="250">
   </div>
   <div>
-    <label for="margin-rate">Estimated Margin Rate</label>
+    <label for="margin-rate">Flight Margin Rate</label>
     <div class="slider-row" style="margin-top:4px;">
       <input type="range" id="margin-rate" min="5" max="30" value="15" step="0.5">
       <span class="slider-val" id="margin-rate-val">15%</span>
     </div>
   </div>
 </div>
+
+<h2 style="margin-top:16px;">Hotel Bookings</h2>
+<div class="row row-3">
+  <div>
+    <label for="hotel-nights-year">Hotel Nights / Year</label>
+    <input type="number" id="hotel-nights-year" value="0" min="0" max="500" step="1">
+  </div>
+  <div>
+    <label for="avg-nightly-rate">Avg Nightly Rate ($)</label>
+    <input type="number" id="avg-nightly-rate" value="350" min="0" step="25">
+  </div>
+  <div>
+    <label for="hotel-commission">Hotel Commission</label>
+    <div class="slider-row" style="margin-top:4px;">
+      <input type="range" id="hotel-commission" min="0" max="20" value="10" step="0.5">
+      <span class="slider-val" id="hotel-commission-val">10%</span>
+    </div>
+  </div>
+</div>
+
+<h2 style="margin-top:16px;">Car Rental Bookings</h2>
+<div class="row row-3">
+  <div>
+    <label for="car-rentals-year">Rental Days / Year</label>
+    <input type="number" id="car-rentals-year" value="0" min="0" max="500" step="1">
+  </div>
+  <div>
+    <label for="avg-daily-rental">Avg Daily Rate ($)</label>
+    <input type="number" id="avg-daily-rental" value="95" min="0" step="5">
+  </div>
+  <div>
+    <label for="car-commission">Car Commission</label>
+    <div class="slider-row" style="margin-top:4px;">
+      <input type="range" id="car-commission" min="0" max="20" value="8" step="0.5">
+      <span class="slider-val" id="car-commission-val">8%</span>
+    </div>
+  </div>
+</div>
+
 <div id="zero-trip-guard"></div>
 
 <!-- ==================== SECTION 7: BREAK-EVEN COSTS ==================== -->
@@ -428,6 +479,12 @@ input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 18p
   <div class="metric-card"><div class="metric-label">Recommended Price</div><div class="metric-value" id="stat-price">$0</div></div>
   <div class="metric-card"><div class="metric-label">Break-Even Fee</div><div class="metric-value" id="stat-breakeven">$0</div></div>
   <div class="metric-card"><div class="metric-label">Projected Annual Margin</div><div class="metric-value" id="stat-margin">$0</div></div>
+</div>
+<div class="row row-4" style="margin-top:8px;">
+  <div class="metric-card"><div class="metric-label">Flight Revenue</div><div class="metric-value" id="stat-flight-rev" style="font-size:16px;">$0</div></div>
+  <div class="metric-card"><div class="metric-label">Hotel Revenue</div><div class="metric-value" id="stat-hotel-rev" style="font-size:16px;">$0</div></div>
+  <div class="metric-card"><div class="metric-label">Car Revenue</div><div class="metric-value" id="stat-car-rev" style="font-size:16px;">$0</div></div>
+  <div class="metric-card"><div class="metric-label">Total Trans. Revenue</div><div class="metric-value" id="stat-total-trans" style="font-size:16px;">$0</div></div>
 </div>
 
 <!-- Price Waterfall Chart -->
@@ -553,7 +610,19 @@ function updateBasePrice() {
   var users = parseInt($('num-users').value) || 1;
   var billing = $('billing-cycle').value;
   var annualPrice;
-  if (billing === 'monthly') {
+
+  // Show/hide custom pricing fields
+  $('custom-pricing-fields').style.display = billing === 'custom' ? '' : 'none';
+
+  if (billing === 'custom') {
+    // Custom: user sets monthly or annual directly
+    var customMonthly = parseFloat($('custom-monthly-fee').value) || 0;
+    var customAnnual = parseFloat($('custom-annual-price').value) || 0;
+    // Monthly field takes priority if both are filled; sync the other
+    annualPrice = customMonthly > 0 ? customMonthly * 12 * users : customAnnual * users;
+    var monthlyDisplay = annualPrice / 12;
+    $('base-price-display').value = '$' + fmt(annualPrice) + '/yr ($' + fmt(monthlyDisplay) + '/mo)';
+  } else if (billing === 'monthly') {
     annualPrice = users * RATE_MONTHLY * 12;
     $('base-price-display').value = '$' + fmt(annualPrice) + '/yr ($' + fmt(users * RATE_MONTHLY) + '/mo)';
   } else {
@@ -644,16 +713,36 @@ function recalculate() {
                            mix.first * CABIN_MARGIN_MULT.first;
 
   var effectiveMarginRate = (marginRate / 100) * weightedMarginMult;
-  var totalBookingValue = avgRouteValue * tripsYear * travelers;
-  var projectedTransMargin = totalBookingValue * effectiveMarginRate;
+  var totalFlightValue = avgRouteValue * tripsYear * travelers;
+  var flightMargin = totalFlightValue * effectiveMarginRate;
+
+  // --- Hotel revenue ---
+  var hotelNights = parseInt($('hotel-nights-year').value) || 0;
+  var avgNightlyRate = parseFloat($('avg-nightly-rate').value) || 0;
+  var hotelCommission = parseFloat($('hotel-commission').value) || 10;
+  setText('hotel-commission-val', fmtD(hotelCommission, 1) + '%');
+  var totalHotelValue = hotelNights * avgNightlyRate;
+  var hotelMargin = totalHotelValue * (hotelCommission / 100);
+
+  // --- Car rental revenue ---
+  var carDays = parseInt($('car-rentals-year').value) || 0;
+  var avgDailyRental = parseFloat($('avg-daily-rental').value) || 0;
+  var carCommission = parseFloat($('car-commission').value) || 8;
+  setText('car-commission-val', fmtD(carCommission, 1) + '%');
+  var totalCarValue = carDays * avgDailyRental;
+  var carMargin = totalCarValue * (carCommission / 100);
+
+  // --- Combined transactional margin ---
+  var totalBookingValue = totalFlightValue + totalHotelValue + totalCarValue;
+  var projectedTransMargin = flightMargin + hotelMargin + carMargin;
 
   // Zero-trip guard
   var guardEl = $('zero-trip-guard');
   guardEl.textContent = '';
-  if (tripsYear === 0) {
+  if (tripsYear === 0 && hotelNights === 0 && carDays === 0) {
     var w = document.createElement('div');
     w.className = 'warning-box';
-    w.textContent = 'Insufficient travel data — transactional margin projection unavailable. Price based on subscription value only.';
+    w.textContent = 'No travel data entered — transactional margin projection unavailable. Price based on subscription value only.';
     guardEl.appendChild(w);
   }
 
@@ -707,6 +796,9 @@ function recalculate() {
     avgRouteValue: avgRouteValue, marginRate: marginRate,
     weightedMarginMult: weightedMarginMult, effectiveMarginRate: effectiveMarginRate,
     totalBookingValue: totalBookingValue, projectedTransMargin: projectedTransMargin,
+    flightMargin: flightMargin, hotelMargin: hotelMargin, carMargin: carMargin,
+    hotelNights: hotelNights, avgNightlyRate: avgNightlyRate, hotelCommission: hotelCommission,
+    carDays: carDays, avgDailyRental: avgDailyRental, carCommission: carCommission,
     totalCostToServe: totalCostToServe, breakEvenFee: breakEvenFee,
     netMargin: netMargin, priceLow: priceLow, priceHigh: priceHigh,
     healthStatus: healthStatus
@@ -740,6 +832,10 @@ function recalculate() {
   setText('stat-price', '$' + fmt(recommendedPrice));
   setText('stat-breakeven', '$' + fmt(breakEvenFee));
   setText('stat-margin', (netMargin >= 0 ? '$' : '-$') + fmt(Math.abs(netMargin)));
+  setText('stat-flight-rev', '$' + fmt(flightMargin));
+  setText('stat-hotel-rev', '$' + fmt(hotelMargin));
+  setText('stat-car-rev', '$' + fmt(carMargin));
+  setText('stat-total-trans', '$' + fmt(projectedTransMargin));
 
   // --- Price Waterfall Chart ---
   var wfLabels = ['Base Price'];
@@ -1044,7 +1140,7 @@ function buildProposalCards() {
     '# Your Investment\n' +
     '**' + prospectName + ' Enterprise Package**\n\n' +
     '**Implementation Fee: $' + fmt(implFee) + '** — One-time investment covering onboarding, training and travel policy creations.\n\n' +
-    '**Monthly Fee: $' + fmt(monthlyFee) + '** — ' + seatCount + ' travelers/seats per month. Includes unlimited bookings, 24/7 concierge access, proactive monitoring, and zero per-trip fees.' + bookingFeeNote + '\n\n' +
+    '**Monthly Fee: $' + fmt(monthlyFee) + '** — ' + seatCount + ' travelers/seats per month. Includes unlimited flight, hotel, and car rental bookings, 24/7 concierge access, proactive monitoring, and zero per-trip fees.' + bookingFeeNote + '\n\n' +
     '*No hidden costs. Transparent, predictable pricing that scales with your team.*'
   );
 
@@ -1214,9 +1310,17 @@ function saveProposal() {
       overhead: $('overhead').value,
       numUsers: $('num-users').value,
       billingCycle: $('billing-cycle').value,
+      customMonthlyFee: $('custom-monthly-fee').value,
+      customAnnualPrice: $('custom-annual-price').value,
       mixEconomy: $('mix-economy').value,
       mixBusiness: $('mix-business').value,
-      mixFirst: $('mix-first').value
+      mixFirst: $('mix-first').value,
+      hotelNightsYear: $('hotel-nights-year').value,
+      avgNightlyRate: $('avg-nightly-rate').value,
+      hotelCommission: $('hotel-commission').value,
+      carRentalsYear: $('car-rentals-year').value,
+      avgDailyRental: $('avg-daily-rental').value,
+      carCommission: $('car-commission').value
     },
     outputs: {
       recommendedPrice: calcResult.recommendedPrice,
@@ -1286,6 +1390,14 @@ function loadProposal(name) {
     $('mix-economy').value = inp.mixEconomy || 40;
     $('mix-business').value = inp.mixBusiness || 40;
     $('mix-first').value = inp.mixFirst || 20;
+    $('custom-monthly-fee').value = inp.customMonthlyFee || 500;
+    $('custom-annual-price').value = inp.customAnnualPrice || 6000;
+    $('hotel-nights-year').value = inp.hotelNightsYear || 0;
+    $('avg-nightly-rate').value = inp.avgNightlyRate || 350;
+    $('hotel-commission').value = inp.hotelCommission || 10;
+    $('car-rentals-year').value = inp.carRentalsYear || 0;
+    $('avg-daily-rental').value = inp.avgDailyRental || 95;
+    $('car-commission').value = inp.carCommission || 8;
   }
 
   updateBasePrice();
@@ -1327,6 +1439,14 @@ function wireEvents() {
   // Users / billing change
   $('num-users').addEventListener('input', updateBasePrice);
   $('billing-cycle').addEventListener('change', updateBasePrice);
+  $('custom-monthly-fee').addEventListener('input', function() {
+    $('custom-annual-price').value = Math.round((parseFloat(this.value) || 0) * 12);
+    updateBasePrice();
+  });
+  $('custom-annual-price').addEventListener('input', function() {
+    $('custom-monthly-fee').value = Math.round((parseFloat(this.value) || 0) / 12);
+    updateBasePrice();
+  });
 
   // Travel mix toggle
   $('travel-mix').addEventListener('change', function() {

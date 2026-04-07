@@ -1426,15 +1426,11 @@ function navigateToTab(tab, params, replace) {
     var url = new URL(window.location.href);
     url.hash = nextHash;
     history.replaceState(null, '', url);
-    activateTabFromLocation();
-    return;
+  } else {
+    window.location.hash = nextHash;
   }
-
-  if (window.location.hash === nextHash) {
-    activateTabFromLocation();
-    return;
-  }
-  window.location.hash = nextHash;
+  // Always activate immediately — don't rely on hashchange event timing
+  activateTab(tab, params instanceof URLSearchParams ? params : new URLSearchParams(params || {}));
 }
 
 function scrollTabIntoView() {

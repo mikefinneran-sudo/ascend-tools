@@ -309,21 +309,10 @@ input:focus, select:focus {
 .registration-card h3 { margin: 0 0 4px; font-size: 16px; }
 .registration-card p { margin: 0; }
 .disclaimer { margin-top: 16px; font-size: 13px; color: var(--text-secondary); }
-.glossary {
-  margin-top: 16px; padding: 14px 16px; border-radius: 10px;
-  background: var(--metric-bg); border: 1px solid var(--metric-border);
+.rule-definition {
+  margin: 6px 0 0; font-size: 13px; color: var(--text-secondary); line-height: 1.4;
+  font-style: italic;
 }
-.glossary-toggle {
-  display: flex; align-items: center; justify-content: space-between; cursor: pointer;
-  font-size: 13px; font-weight: 600; color: var(--text-secondary); user-select: none;
-  background: none; border: none; width: 100%; padding: 0; font-family: var(--sans);
-}
-.glossary-toggle:hover { color: var(--text); }
-.glossary-body { display: none; margin-top: 10px; }
-.glossary.open .glossary-body { display: block; }
-.glossary-body dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; font-size: 13px; }
-.glossary-body dt { font-weight: 600; color: var(--text); white-space: nowrap; }
-.glossary-body dd { margin: 0; color: var(--text-secondary); line-height: 1.4; }
 .copy-btn {
   display: inline-flex; align-items: center; gap: 4px; padding: 6px 14px;
   font-size: 13px; font-weight: 500; font-family: var(--sans);
@@ -950,17 +939,27 @@ function renderCopyButton(copyId) {
   return '<button type="button" class="copy-btn" data-copy-id="' + copyId + '">Copy</button>';
 }
 
-function renderGlossary() {
-  return '<div class="glossary" onclick="this.classList.toggle(\'open\')">' +
-    '<button type="button" class="glossary-toggle" aria-expanded="false">What do these terms mean? <span>&#9662;</span></button>' +
-    '<div class="glossary-body"><dl>' +
-      '<dt>Visa not required</dt><dd>No visa needed. Present your passport at the border and enter. Easiest entry type.</dd>' +
-      '<dt>eTA</dt><dd>Electronic Travel Authorization. A lightweight online approval (usually under $20, approved in minutes). Required before boarding your flight. Not a visa.</dd>' +
-      '<dt>eVisa</dt><dd>Electronic Visa. Applied for online before travel. Typically takes 1-5 business days to process. More involved than an eTA but no embassy visit needed.</dd>' +
-      '<dt>Visa on arrival</dt><dd>Visa issued at the airport or border crossing when you land. May require cash payment, passport photos, or proof of onward travel. No pre-approval needed.</dd>' +
-      '<dt>Free visa on arrival</dt><dd>Same as visa on arrival but with no fee. Stamp or sticker issued at the border at no cost.</dd>' +
-      '<dt>Visa required</dt><dd>Must apply at an embassy or consulate before travel. Longest lead time — plan weeks or months ahead. May require interview, invitation letter, or proof of funds.</dd>' +
-    '</dl></div></div>';
+var RULE_DEFINITIONS = {
+  'visa not required': 'No visa needed. Present your passport at the border and enter.',
+  'eta': 'Electronic Travel Authorization. Quick online approval (usually under $20, approved in minutes). Required before boarding.',
+  'evisa': 'Electronic Visa. Applied for online before travel. Typically 1-5 business days to process. No embassy visit needed.',
+  'visa on arrival': 'Visa issued at the airport/border when you land. May require cash payment, passport photos, or proof of onward travel.',
+  'free visa on arrival': 'Visa issued at the border at no cost. No pre-approval needed.',
+  'visa required': 'Must apply at an embassy or consulate before travel. Plan weeks or months ahead. May require interview or supporting documents.',
+  'tourist card': 'A travel document purchased on arrival or in advance. Simpler than a visa but still required for entry.',
+  'freedom of movement': 'Unrestricted entry — no visa, no eTA, no formalities beyond ID.'
+};
+
+function getRuleDefinition(ruleName) {
+  if (!ruleName) return '';
+  var key = ruleName.toLowerCase().trim();
+  return RULE_DEFINITIONS[key] || '';
+}
+
+function renderDefinition(ruleName) {
+  var def = getRuleDefinition(ruleName);
+  if (!def) return '';
+  return '<p class="rule-definition">' + escapeHtml(def) + '</p>';
 }
 
 function safeHref(url) {
@@ -1736,6 +1735,7 @@ const Tabs = {
       return '<article class="rule-card ' + toneClass(rule.color) + '">' +
         '<p class="rule-label">' + escapeHtml(title) + '</p>' +
         '<h3>' + escapeHtml(rule.name) + '</h3>' +
+        renderDefinition(rule.name) +
         (rule.duration ? '<p class="rule-meta">Duration: <strong>' + escapeHtml(rule.duration) + '</strong></p>' : '') +
       '</article>';
     },
@@ -1811,13 +1811,14 @@ const Tabs = {
         Tabs.check.renderRegistration(data.mandatory_registration) +
         '<div class="result-actions">' + renderCopyButton('check-copy') + '</div>' +
         '<p class="disclaimer">Verify requirements with the official embassy before advising clients.</p>' +
-        renderGlossary() +
       '</div>');
 
       // Store text for copy
       var lines = [];
       lines.push('VISA REQUIREMENTS: ' + (passport.name || passport.code) + ' → ' + (destination.name || destination.code));
       lines.push('Status: ' + primaryRule.name + (primaryRule.duration ? ' (' + primaryRule.duration + ')' : ''));
+      var checkDef = getRuleDefinition(primaryRule.name);
+      if (checkDef) { lines.push('  → ' + checkDef); }
       if (visaRules.secondary_rule && visaRules.secondary_rule.name) {
         lines.push('Secondary: ' + visaRules.secondary_rule.name + (visaRules.secondary_rule.duration ? ' (' + visaRules.secondary_rule.duration + ')' : ''));
       }
@@ -2008,6 +2009,7 @@ const Tabs = {
           '</div>' +
           '<div class="status-pill ' + toneClass(primaryRule.color) + '">' + escapeHtml(primaryRule.name || 'Status unavailable') + '</div>' +
         '</div>' +
+        renderDefinition(primaryRule.name) +
         '<div class="leg-meta">' +
           (primaryRule.duration ? '<span class="meta-chip">Duration: <strong>' + escapeHtml(primaryRule.duration) + '</strong></span>' : '') +
           Tabs.trip.renderRegistration(data.mandatory_registration) +
@@ -2150,8 +2152,7 @@ const Tabs = {
 
         $('trip-summary-card').innerHTML = Tabs.trip.buildSummaryMarkup(results);
         $('trip-results-list').innerHTML = results.map(Tabs.trip.buildLegMarkup).join('') +
-          '<div class="result-actions">' + renderCopyButton('trip-copy') + '</div>' +
-          renderGlossary();
+          '<div class="result-actions">' + renderCopyButton('trip-copy') + '</div>';
         $('trip-results-shell').hidden = false;
         Tabs.trip.setNotice('Itinerary check complete. Review red and yellow legs before clearing travel.', false);
 
@@ -2161,7 +2162,9 @@ const Tabs = {
         results.forEach(function(r, i) {
           if (r.kind === 'ok') {
             var pr = r.payload.data.visa_rules.primary_rule;
+            var legDef = getRuleDefinition(pr.name);
             tripLines.push((i + 1) + '. ' + r.destination.name + ': ' + pr.name + (pr.duration ? ' (' + pr.duration + ')' : ''));
+            if (legDef) { tripLines.push('   → ' + legDef); }
           } else {
             tripLines.push((i + 1) + '. ' + r.destination.name + ': ERROR - ' + r.message);
           }
@@ -2275,6 +2278,7 @@ const Tabs = {
           '</div>' +
           '<div class="pill ' + toneClass(result.color) + '">' + escapeHtml(result.ruleName) + '</div>' +
         '</div>' +
+        renderDefinition(result.ruleName) +
         '<div class="passport-meta">' +
           (result.duration ? '<span class="meta-chip">Duration: <strong>' + escapeHtml(result.duration) + '</strong></span>' : '') +
           (result.registration ? '<span class="meta-chip">Registration: <strong>' + escapeHtml(result.registration) + '</strong></span>' : '') +
@@ -2312,8 +2316,7 @@ const Tabs = {
       '</div>';
 
       $('compare-grid').innerHTML = Tabs.compare.renderPassportCard(resultA, winner === 'a') + Tabs.compare.renderPassportCard(resultB, winner === 'b') +
-        '<div class="result-actions">' + renderCopyButton('compare-copy') + '</div>' +
-        renderGlossary();
+        '<div class="result-actions">' + renderCopyButton('compare-copy') + '</div>';
       $('compare-single-results').hidden = false;
       $('compare-all-results').hidden = true;
 
@@ -2321,7 +2324,11 @@ const Tabs = {
       var destName = getCountry($('compare-destination-country').dataset.selectedCode);
       var cmpLines = ['PASSPORT COMPARISON: ' + (destName ? destName.name : '')];
       cmpLines.push(resultA.label + ': ' + resultA.ruleName + (resultA.duration ? ' (' + resultA.duration + ')' : ''));
+      var defA = getRuleDefinition(resultA.ruleName);
+      if (defA) { cmpLines.push('  → ' + defA); }
       cmpLines.push(resultB.label + ': ' + resultB.ruleName + (resultB.duration ? ' (' + resultB.duration + ')' : ''));
+      var defB = getRuleDefinition(resultB.ruleName);
+      if (defB) { cmpLines.push('  → ' + defB); }
       cmpLines.push('Recommendation: ' + recommendationText);
       cmpLines.push('');
       cmpLines.push('Source: Travel Buddy API via Ascend Tools');

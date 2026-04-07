@@ -309,6 +309,15 @@ input:focus, select:focus {
 .registration-card h3 { margin: 0 0 4px; font-size: 16px; }
 .registration-card p { margin: 0; }
 .disclaimer { margin-top: 16px; font-size: 13px; color: var(--text-secondary); }
+.copy-btn {
+  display: inline-flex; align-items: center; gap: 4px; padding: 6px 14px;
+  font-size: 13px; font-weight: 500; font-family: var(--sans);
+  background: var(--accent); color: #fff; border: none; border-radius: 6px;
+  cursor: pointer; transition: background 0.2s;
+}
+.copy-btn:hover { background: var(--accent-hover); }
+.copy-btn.copied { background: #16a34a; }
+.result-actions { display: flex; gap: 8px; margin-top: 12px; }
 
 .trip-field-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
 .itinerary-shell { margin-top: 24px; }
@@ -856,13 +865,16 @@ const AppState = {
   selectedProfileName: '',
   initialLoad: true,
   datalistReady: false,
+  check: { copyText: '' },
   trip: {
     rowCounter: 2,
+    copyText: '',
     itineraryItems: [
       { id: 'trip-destination-1', code: '' },
       { id: 'trip-destination-2', code: '' }
     ]
   },
+  compare: { copyText: '' },
   map: {
     librariesPromise: null,
     geoFeaturesPromise: null,
@@ -894,6 +906,33 @@ function escapeHtml(value) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
+}
+
+function copyToClipboard(text, buttonEl) {
+  navigator.clipboard.writeText(text).then(function() {
+    var original = buttonEl.textContent;
+    buttonEl.textContent = 'Copied!';
+    buttonEl.classList.add('copied');
+    setTimeout(function() { buttonEl.textContent = original; buttonEl.classList.remove('copied'); }, 2000);
+  }).catch(function() {
+    // Fallback for older browsers
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    var original = buttonEl.textContent;
+    buttonEl.textContent = 'Copied!';
+    buttonEl.classList.add('copied');
+    setTimeout(function() { buttonEl.textContent = original; buttonEl.classList.remove('copied'); }, 2000);
+  });
+}
+
+function renderCopyButton(copyId) {
+  return '<button type="button" class="copy-btn" data-copy-id="' + copyId + '">Copy</button>';
 }
 
 function safeHref(url) {
@@ -1742,8 +1781,28 @@ const Tabs = {
           Tabs.check.renderDetailCardHtml('Embassy info', embassyHref ? '<a href="' + escapeHtml(embassyHref) + '" target="_blank" rel="noreferrer">Open embassy link</a>' : escapeHtml('Not provided')) +
         '</div>' +
         Tabs.check.renderRegistration(data.mandatory_registration) +
+        '<div class="result-actions">' + renderCopyButton('check-copy') + '</div>' +
         '<p class="disclaimer">Verify requirements with the official embassy before advising clients.</p>' +
       '</div>');
+
+      // Store text for copy
+      var lines = [];
+      lines.push('VISA REQUIREMENTS: ' + (passport.name || passport.code) + ' → ' + (destination.name || destination.code));
+      lines.push('Status: ' + primaryRule.name + (primaryRule.duration ? ' (' + primaryRule.duration + ')' : ''));
+      if (visaRules.secondary_rule && visaRules.secondary_rule.name) {
+        lines.push('Secondary: ' + visaRules.secondary_rule.name + (visaRules.secondary_rule.duration ? ' (' + visaRules.secondary_rule.duration + ')' : ''));
+      }
+      if (data.mandatory_registration && data.mandatory_registration.name) {
+        lines.push('Registration: ' + data.mandatory_registration.name);
+      }
+      lines.push('Passport validity: ' + (destination.passport_validity || 'Not provided'));
+      if (destination.embassy_url) { lines.push('Embassy: ' + destination.embassy_url); }
+      lines.push('');
+      lines.push('Source: Travel Buddy API via Ascend Tools');
+      AppState.check.copyText = lines.join('\n');
+
+      var copyBtn = document.querySelector('[data-copy-id="check-copy"]');
+      if (copyBtn) { copyBtn.addEventListener('click', function() { copyToClipboard(AppState.check.copyText, this); }); }
     },
 
     checkRequirements: async function() {
@@ -2061,9 +2120,27 @@ const Tabs = {
         });
 
         $('trip-summary-card').innerHTML = Tabs.trip.buildSummaryMarkup(results);
-        $('trip-results-list').innerHTML = results.map(Tabs.trip.buildLegMarkup).join('');
+        $('trip-results-list').innerHTML = results.map(Tabs.trip.buildLegMarkup).join('') +
+          '<div class="result-actions">' + renderCopyButton('trip-copy') + '</div>';
         $('trip-results-shell').hidden = false;
         Tabs.trip.setNotice('Itinerary check complete. Review red and yellow legs before clearing travel.', false);
+
+        // Build copy text for clipboard
+        var passportName = getCountry($('trip-passport-country').dataset.selectedCode);
+        var tripLines = ['ITINERARY CHECK: ' + (passportName ? passportName.name : '') + ' passport'];
+        results.forEach(function(r, i) {
+          if (r.kind === 'ok') {
+            var pr = r.payload.data.visa_rules.primary_rule;
+            tripLines.push((i + 1) + '. ' + r.destination.name + ': ' + pr.name + (pr.duration ? ' (' + pr.duration + ')' : ''));
+          } else {
+            tripLines.push((i + 1) + '. ' + r.destination.name + ': ERROR - ' + r.message);
+          }
+        });
+        tripLines.push('');
+        tripLines.push('Source: Travel Buddy API via Ascend Tools');
+        AppState.trip.copyText = tripLines.join('\n');
+        var tripCopyBtn = document.querySelector('[data-copy-id="trip-copy"]');
+        if (tripCopyBtn) { tripCopyBtn.addEventListener('click', function() { copyToClipboard(AppState.trip.copyText, this); }); }
       } catch (error) {
         Tabs.trip.setNotice('Unable to complete the itinerary check right now.', true);
         $('trip-results-shell').hidden = true;
@@ -2204,9 +2281,22 @@ const Tabs = {
         '<div class="pill ' + recommendationTone + '">' + escapeHtml(winner === 'tie' ? 'Tie' : 'Best option') + '</div>' +
       '</div>';
 
-      $('compare-grid').innerHTML = Tabs.compare.renderPassportCard(resultA, winner === 'a') + Tabs.compare.renderPassportCard(resultB, winner === 'b');
+      $('compare-grid').innerHTML = Tabs.compare.renderPassportCard(resultA, winner === 'a') + Tabs.compare.renderPassportCard(resultB, winner === 'b') +
+        '<div class="result-actions">' + renderCopyButton('compare-copy') + '</div>';
       $('compare-single-results').hidden = false;
       $('compare-all-results').hidden = true;
+
+      // Build copy text
+      var destName = getCountry($('compare-destination-country').dataset.selectedCode);
+      var cmpLines = ['PASSPORT COMPARISON: ' + (destName ? destName.name : '')];
+      cmpLines.push(resultA.label + ': ' + resultA.ruleName + (resultA.duration ? ' (' + resultA.duration + ')' : ''));
+      cmpLines.push(resultB.label + ': ' + resultB.ruleName + (resultB.duration ? ' (' + resultB.duration + ')' : ''));
+      cmpLines.push('Recommendation: ' + recommendationText);
+      cmpLines.push('');
+      cmpLines.push('Source: Travel Buddy API via Ascend Tools');
+      AppState.compare.copyText = cmpLines.join('\n');
+      var cmpCopyBtn = document.querySelector('[data-copy-id="compare-copy"]');
+      if (cmpCopyBtn) { cmpCopyBtn.addEventListener('click', function() { copyToClipboard(AppState.compare.copyText, this); }); }
     },
 
     buildAllComparisonRows: function(passportA, passportB, statusMapA, statusMapB) {

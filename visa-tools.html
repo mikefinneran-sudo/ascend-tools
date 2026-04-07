@@ -309,6 +309,21 @@ input:focus, select:focus {
 .registration-card h3 { margin: 0 0 4px; font-size: 16px; }
 .registration-card p { margin: 0; }
 .disclaimer { margin-top: 16px; font-size: 13px; color: var(--text-secondary); }
+.glossary {
+  margin-top: 16px; padding: 14px 16px; border-radius: 10px;
+  background: var(--metric-bg); border: 1px solid var(--metric-border);
+}
+.glossary-toggle {
+  display: flex; align-items: center; justify-content: space-between; cursor: pointer;
+  font-size: 13px; font-weight: 600; color: var(--text-secondary); user-select: none;
+  background: none; border: none; width: 100%; padding: 0; font-family: var(--sans);
+}
+.glossary-toggle:hover { color: var(--text); }
+.glossary-body { display: none; margin-top: 10px; }
+.glossary.open .glossary-body { display: block; }
+.glossary-body dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; font-size: 13px; }
+.glossary-body dt { font-weight: 600; color: var(--text); white-space: nowrap; }
+.glossary-body dd { margin: 0; color: var(--text-secondary); line-height: 1.4; }
 .copy-btn {
   display: inline-flex; align-items: center; gap: 4px; padding: 6px 14px;
   font-size: 13px; font-weight: 500; font-family: var(--sans);
@@ -933,6 +948,19 @@ function copyToClipboard(text, buttonEl) {
 
 function renderCopyButton(copyId) {
   return '<button type="button" class="copy-btn" data-copy-id="' + copyId + '">Copy</button>';
+}
+
+function renderGlossary() {
+  return '<div class="glossary" onclick="this.classList.toggle(\'open\')">' +
+    '<button type="button" class="glossary-toggle" aria-expanded="false">What do these terms mean? <span>&#9662;</span></button>' +
+    '<div class="glossary-body"><dl>' +
+      '<dt>Visa not required</dt><dd>No visa needed. Present your passport at the border and enter. Easiest entry type.</dd>' +
+      '<dt>eTA</dt><dd>Electronic Travel Authorization. A lightweight online approval (usually under $20, approved in minutes). Required before boarding your flight. Not a visa.</dd>' +
+      '<dt>eVisa</dt><dd>Electronic Visa. Applied for online before travel. Typically takes 1-5 business days to process. More involved than an eTA but no embassy visit needed.</dd>' +
+      '<dt>Visa on arrival</dt><dd>Visa issued at the airport or border crossing when you land. May require cash payment, passport photos, or proof of onward travel. No pre-approval needed.</dd>' +
+      '<dt>Free visa on arrival</dt><dd>Same as visa on arrival but with no fee. Stamp or sticker issued at the border at no cost.</dd>' +
+      '<dt>Visa required</dt><dd>Must apply at an embassy or consulate before travel. Longest lead time — plan weeks or months ahead. May require interview, invitation letter, or proof of funds.</dd>' +
+    '</dl></div></div>';
 }
 
 function safeHref(url) {
@@ -1783,6 +1811,7 @@ const Tabs = {
         Tabs.check.renderRegistration(data.mandatory_registration) +
         '<div class="result-actions">' + renderCopyButton('check-copy') + '</div>' +
         '<p class="disclaimer">Verify requirements with the official embassy before advising clients.</p>' +
+        renderGlossary() +
       '</div>');
 
       // Store text for copy
@@ -2121,7 +2150,8 @@ const Tabs = {
 
         $('trip-summary-card').innerHTML = Tabs.trip.buildSummaryMarkup(results);
         $('trip-results-list').innerHTML = results.map(Tabs.trip.buildLegMarkup).join('') +
-          '<div class="result-actions">' + renderCopyButton('trip-copy') + '</div>';
+          '<div class="result-actions">' + renderCopyButton('trip-copy') + '</div>' +
+          renderGlossary();
         $('trip-results-shell').hidden = false;
         Tabs.trip.setNotice('Itinerary check complete. Review red and yellow legs before clearing travel.', false);
 
@@ -2282,7 +2312,8 @@ const Tabs = {
       '</div>';
 
       $('compare-grid').innerHTML = Tabs.compare.renderPassportCard(resultA, winner === 'a') + Tabs.compare.renderPassportCard(resultB, winner === 'b') +
-        '<div class="result-actions">' + renderCopyButton('compare-copy') + '</div>';
+        '<div class="result-actions">' + renderCopyButton('compare-copy') + '</div>' +
+        renderGlossary();
       $('compare-single-results').hidden = false;
       $('compare-all-results').hidden = true;
 

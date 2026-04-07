@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ascend | Visa Check</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #ffffff; --text: #1a1a1a; --text-muted: #666; --text-secondary: #444;
+  --text-detail: #333; --metric-bg: #F1EEFF; --metric-border: #E8E8E8;
+  --hero-bg: #D9FDD2; --hero-border: #6F57FF; --footer-bg: #161616;
+  --footer-text: #999; --footer-link: #B4A7FF;
+  --accent: #6F57FF; --accent-hover: #5A44E0; --accent-light: #F1EEFF;
+  --success: #D9FDD2; --success-text: #1a5c1a;
+  --input-bg: #fff; --input-border: #E8E8E8; --input-focus: #6F57FF;
+  --table-stripe: #F9F8FF; --chart-text: #1a1a1a;
+  --card-dark: #161616; --card-dark-text: #fff; --card-dark-muted: #aaa;
+  --amber-bg: #FEF3C7; --amber-border: #D97706; --amber-text: #92400E;
+  --bonus-bg: #F1EEFF; --bonus-border: #6F57FF;
+  --mono: 'DM Mono', monospace;
+}
+[data-theme="dark"] {
+  --bg: #0e0e12; --text: #e8e8e8; --text-muted: #888; --text-secondary: #bbb;
+  --text-detail: #ccc; --metric-bg: #1c1a28; --metric-border: #2d2b3a;
+  --hero-bg: #1a2e1f; --hero-border: #6F57FF; --footer-bg: #0a0a0e;
+  --footer-text: #666; --footer-link: #B4A7FF;
+  --accent: #8B7AFF; --accent-hover: #A090FF; --accent-light: #1c1a28;
+  --success: #1a2e1f; --success-text: #a3d98f;
+  --input-bg: #1c1a28; --input-border: #2d2b3a; --input-focus: #8B7AFF;
+  --table-stripe: #1c1a28; --chart-text: #e8e8e8;
+  --card-dark: #1c1a28; --card-dark-text: #e8e8e8; --card-dark-muted: #888;
+  --amber-bg: #2a2015; --amber-border: #b45309; --amber-text: #fbbf24;
+  --bonus-bg: #1c1a28; --bonus-border: #6F57FF;
+}
+*, *::before, *::after { box-sizing: border-box; }
+html, body {
+  margin: 0; padding: 0; font-family: 'Inter', -apple-system, sans-serif;
+  background: var(--bg); color: var(--text); line-height: 1.5;
+}
+a { color: var(--accent); }
+.container { max-width: 960px; margin: 0 auto; padding: 28px 16px 48px; }
+
+.asc-nav {
+  background: #111118; padding: 0 28px; height: 56px;
+  display: flex; justify-content: space-between; align-items: center;
+  position: sticky; top: 0; z-index: 200;
+}
+.asc-nav-left { display: flex; align-items: center; gap: 8px; text-decoration: none; }
+.asc-nav-left span { font-size: 1.15rem; font-weight: 700; color: #fff; letter-spacing: -0.02em; }
+.asc-nav-links {
+  display: flex; align-items: center; gap: 6px; min-width: 0;
+  overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none;
+}
+.asc-nav-links::-webkit-scrollbar { display: none; }
+.asc-nav-links a {
+  color: #888; font-size: 13px; font-weight: 500; text-decoration: none;
+  padding: 6px 14px; border-radius: 100px; transition: all 0.2s;
+  border: 1px solid transparent;
+}
+.asc-nav-links a, .asc-nav-toggle { flex: 0 0 auto; }
+.asc-nav-links a:hover { color: #fff; background: rgba(255,255,255,0.06); }
+.asc-nav-links a.active { color: #fff; background: rgba(111,87,255,0.15); border-color: rgba(111,87,255,0.3); }
+.asc-nav-toggle {
+  color: #888; border: 1px solid #333; padding: 5px 14px; border-radius: 32px;
+  font-size: 12px; cursor: pointer; background: transparent; font-family: 'Inter', sans-serif;
+  transition: all 0.2s; margin-left: 12px;
+}
+.asc-nav-toggle:hover { color: #fff; border-color: #666; background: rgba(255,255,255,0.06); }
+
+.page-head { margin-bottom: 24px; }
+.eyebrow {
+  margin: 0 0 8px; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--accent); font-family: var(--mono);
+}
+h1 {
+  margin: 0 0 10px; font-size: 40px; line-height: 1.05; letter-spacing: -0.04em;
+}
+.page-copy {
+  margin: 0; max-width: 720px; color: var(--text-secondary); font-size: 15px;
+}
+
+.lookup-card,
+.state-card {
+  background: var(--metric-bg); border: 1px solid var(--metric-border);
+  border-radius: 14px; padding: 20px;
+}
+.lookup-card { margin-bottom: 18px; }
+.row { display: grid; gap: 16px; }
+.row-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+label {
+  display: block; font-size: 13px; font-weight: 500;
+  color: var(--text-secondary); margin-bottom: 6px;
+}
+input, select {
+  width: 100%; padding: 10px 12px; font-size: 14px; font-family: 'Inter', sans-serif;
+  background: var(--input-bg); color: var(--text); border: 1px solid var(--input-border);
+  border-radius: 8px; transition: border-color 0.2s;
+}
+input:focus, select:focus {
+  outline: none; border-color: var(--input-focus); box-shadow: 0 0 0 3px rgba(111,87,255,0.1);
+}
+.country-field { display: flex; flex-direction: column; }
+.country-select {
+  min-height: 230px; padding: 6px; font-size: 14px;
+}
+.country-select option {
+  padding: 10px 12px; border-radius: 6px;
+}
+.helper-text {
+  margin: 8px 0 0; font-size: 13px; color: var(--text-muted);
+}
+.actions {
+  display: flex; align-items: center; gap: 14px; margin-top: 18px; flex-wrap: wrap;
+}
+.profile-panel {
+  margin-bottom: 18px; padding-bottom: 18px; border-bottom: 1px solid var(--metric-border);
+}
+.profile-grid {
+  display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr);
+}
+.profile-save-row {
+  display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+}
+.profile-save-row input { flex: 1 1 200px; }
+.profile-summary {
+  margin: 8px 0 0; font-size: 13px; color: var(--text-muted);
+}
+.profile-summary.is-error { color: #991B1B; }
+[data-theme="dark"] .profile-summary.is-error { color: #FCA5A5; }
+.btn-primary {
+  background: var(--accent); color: #fff; border: none; padding: 12px 28px;
+  border-radius: 32px; font-size: 15px; font-weight: 600; cursor: pointer;
+  font-family: 'Inter', sans-serif; transition: background 0.2s;
+}
+.btn-primary:hover { background: var(--accent-hover); }
+.btn-primary:disabled { opacity: 0.6; cursor: wait; }
+.btn-secondary,
+.btn-ghost {
+  border-radius: 999px; font-size: 13px; font-weight: 600; cursor: pointer;
+  font-family: 'Inter', sans-serif; transition: all 0.2s; padding: 10px 16px;
+}
+.btn-secondary {
+  background: transparent; color: var(--accent); border: 1px solid var(--accent);
+}
+.btn-secondary:hover { background: var(--accent-light); }
+.btn-ghost {
+  background: transparent; color: var(--text-secondary); border: 1px solid var(--metric-border);
+}
+.btn-ghost:hover { border-color: var(--text-muted); }
+.btn-ghost:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.empty-state {
+  color: var(--text-secondary); border-style: dashed;
+}
+.loading-state {
+  display: flex; align-items: center; gap: 12px; color: var(--text-secondary);
+}
+.error-state {
+  background: rgba(220, 38, 38, 0.1); border-color: rgba(220, 38, 38, 0.35);
+  color: #991B1B;
+}
+[data-theme="dark"] .error-state { color: #FCA5A5; }
+.spinner {
+  width: 18px; height: 18px; border: 2px solid var(--accent);
+  border-top-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.result-card {
+  background: var(--bg); border: 1px solid var(--metric-border); border-radius: 14px; padding: 22px;
+}
+.result-header {
+  display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 18px;
+}
+.result-title {
+  margin: 0; font-size: 28px; letter-spacing: -0.03em;
+}
+.result-subtitle {
+  margin: 8px 0 0; color: var(--text-secondary); font-size: 14px;
+}
+.status-pill {
+  display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px;
+  border-radius: 999px; font-size: 13px; font-weight: 700; white-space: nowrap;
+  border: 1px solid transparent;
+}
+.rule-grid {
+  display: grid; gap: 14px; margin: 18px 0;
+}
+.rule-card {
+  border-radius: 12px; padding: 16px; border: 1px solid transparent;
+}
+.rule-label {
+  margin: 0 0 6px; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase;
+  font-family: var(--mono);
+}
+.rule-name {
+  margin: 0; font-size: 20px; letter-spacing: -0.02em;
+}
+.rule-meta {
+  margin: 12px 0 0; font-size: 14px;
+}
+.detail-grid {
+  display: grid; gap: 12px; grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 18px 0;
+}
+.detail-card {
+  background: var(--metric-bg); border: 1px solid var(--metric-border);
+  border-radius: 10px; padding: 14px 16px;
+}
+.detail-card .detail-label {
+  display: block; font-size: 12px; color: var(--text-muted); text-transform: uppercase;
+  letter-spacing: 0.05em; margin-bottom: 6px;
+}
+.detail-card .detail-value {
+  color: var(--text); font-size: 15px; font-weight: 600;
+}
+.registration-card {
+  background: var(--amber-bg); border: 1px solid var(--amber-border);
+  color: var(--amber-text); border-radius: 12px; padding: 16px; margin-bottom: 16px;
+}
+.registration-card h3 {
+  margin: 0 0 4px; font-size: 16px;
+}
+.registration-card p {
+  margin: 0;
+}
+.disclaimer {
+  margin-top: 16px; font-size: 13px; color: var(--text-secondary);
+}
+.tone-green {
+  background: rgba(52, 168, 83, 0.12);
+  border-color: rgba(52, 168, 83, 0.3);
+  color: #166534;
+}
+.tone-red {
+  background: rgba(220, 38, 38, 0.1);
+  border-color: rgba(220, 38, 38, 0.3);
+  color: #991B1B;
+}
+.tone-blue {
+  background: rgba(37, 99, 235, 0.12);
+  border-color: rgba(37, 99, 235, 0.28);
+  color: #1D4ED8;
+}
+.tone-yellow {
+  background: rgba(217, 119, 6, 0.12);
+  border-color: rgba(217, 119, 6, 0.3);
+  color: #92400E;
+}
+[data-theme="dark"] .tone-green { color: #86EFAC; }
+[data-theme="dark"] .tone-red { color: #FCA5A5; }
+[data-theme="dark"] .tone-blue { color: #93C5FD; }
+[data-theme="dark"] .tone-yellow { color: #FCD34D; }
+
+.asc-footer {
+  background: var(--footer-bg); padding: 18px 24px; border-radius: 8px;
+  margin: 0 auto 24px; max-width: 960px;
+}
+.asc-footer p { color: var(--footer-text); font-size: 11px; margin: 0 0 4px; line-height: 1.5; }
+.asc-footer a { color: var(--footer-link); font-weight: 600; text-decoration: none; }
+
+@media (max-width: 700px) {
+  .row-2, .detail-grid, .profile-grid { grid-template-columns: 1fr; }
+  .asc-nav {
+    height: auto; min-height: 56px; padding: 12px 16px;
+    align-items: flex-start; gap: 10px; flex-wrap: wrap;
+  }
+  .asc-nav-links { width: 100%; flex-wrap: wrap; }
+  .asc-nav-links a { padding: 6px 12px; }
+  .asc-nav-toggle { margin-left: 0; }
+  .container { padding-top: 22px; }
+  h1 { font-size: 32px; }
+  .country-select { min-height: 180px; }
+  .result-header { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+
+<nav class="asc-nav">
+  <a href="index.html" class="asc-nav-left"><span>ascend</span></a>
+  <div class="asc-nav-links">
+    <a href="index.html">ROI Calculator</a>
+    <a href="trip-planner.html">Trip Planner</a>
+    <a href="pricing.html">Pricing</a>
+    <a href="visa-check.html" class="active">Visa Check</a>
+    <a href="trip-check.html">Trip Check</a>
+    <a href="passport-compare.html">Passport Compare</a>
+    <a href="passport-map.html">Passport Map</a>
+    <a href="travel-advisory.html">Travel Advisory</a>
+    <button class="asc-nav-toggle" onclick="toggleTheme()" id="theme-toggle">Dark mode</button>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="page-head">
+    <p class="eyebrow">Internal Concierge Tool</p>
+    <h1>Visa requirements at a glance.</h1>
+    <p class="page-copy">Select the traveler&apos;s passport country and destination country, then check the latest status returned by the Travel Buddy visa API. Always confirm requirements with the official embassy before advising clients.</p>
+  </div>
+
+  <div class="lookup-card">
+    <div class="profile-panel">
+      <div id="profile-selector-root"></div>
+    </div>
+    <div class="row row-2">
+      <div class="country-field">
+        <label for="passport-filter">Passport Country</label>
+        <input type="text" id="passport-filter" placeholder="Search by country or code">
+        <select id="passport-country" class="country-select" size="8" aria-label="Passport country"></select>
+        <p class="helper-text" id="passport-selection">No passport country selected.</p>
+      </div>
+      <div class="country-field">
+        <label for="destination-filter">Destination Country</label>
+        <input type="text" id="destination-filter" placeholder="Search by country or code">
+        <select id="destination-country" class="country-select" size="8" aria-label="Destination country"></select>
+        <p class="helper-text" id="destination-selection">No destination country selected.</p>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="btn-primary" id="check-button">Check Requirements</button>
+      <span class="helper-text">Verify requirements with the official embassy before advising clients.</span>
+    </div>
+  </div>
+
+  <div id="status-panel" class="state-card empty-state">Select a passport country and destination country, then click Check Requirements.</div>
+</div>
+
+<footer class="asc-footer">
+  <p>Ascend internal tooling for concierge operations.</p>
+  <p>Visa policies can change quickly. Verify advice with the official embassy or government source before final guidance.</p>
+</footer>
+
+<script>
+const ASCEND_KEY = 'd77aac0f45529a85c72dced8d4f1ce2d';
+const PROFILE_STORAGE_KEY = 'ascend_client_profiles';
+const MAX_PROFILES = 50;
+const COUNTRIES = [{"code":"AF","name":"Afghanistan"},{"code":"AX","name":"Aland Islands"},{"code":"AL","name":"Albania"},{"code":"DZ","name":"Algeria"},{"code":"AD","name":"Andorra"},{"code":"AO","name":"Angola"},{"code":"AI","name":"Anguilla"},{"code":"AQ","name":"Antarctica"},{"code":"AG","name":"Antigua & Barbuda"},{"code":"AR","name":"Argentina"},{"code":"AM","name":"Armenia"},{"code":"AW","name":"Aruba"},{"code":"AU","name":"Australia"},{"code":"AT","name":"Austria"},{"code":"AZ","name":"Azerbaijan"},{"code":"BS","name":"Bahamas"},{"code":"BH","name":"Bahrain"},{"code":"BD","name":"Bangladesh"},{"code":"BB","name":"Barbados"},{"code":"BY","name":"Belarus"},{"code":"BE","name":"Belgium"},{"code":"BZ","name":"Belize"},{"code":"BJ","name":"Benin"},{"code":"BM","name":"Bermuda"},{"code":"BT","name":"Bhutan"},{"code":"BO","name":"Bolivia"},{"code":"BA","name":"Bosnia & Herzegovina"},{"code":"BW","name":"Botswana"},{"code":"BV","name":"Bouvet Island"},{"code":"BR","name":"Brazil"},{"code":"IO","name":"British Indian Ocean Territory"},{"code":"BN","name":"Brunei"},{"code":"BG","name":"Bulgaria"},{"code":"BF","name":"Burkina Faso"},{"code":"BI","name":"Burundi"},{"code":"KH","name":"Cambodia"},{"code":"CM","name":"Cameroon"},{"code":"CA","name":"Canada"},{"code":"CV","name":"Cape Verde"},{"code":"BQ","name":"Caribbean Netherlands"},{"code":"KY","name":"Cayman Islands"},{"code":"CF","name":"Central African Rep."},{"code":"TD","name":"Chad"},{"code":"CL","name":"Chile"},{"code":"CN","name":"China"},{"code":"CX","name":"Christmas Island"},{"code":"CC","name":"Cocos (Keeling) Islands"},{"code":"CO","name":"Colombia"},{"code":"KM","name":"Comoros"},{"code":"CD","name":"Congo (Dem. Rep.)"},{"code":"CG","name":"Congo (Rep.)"},{"code":"CK","name":"Cook Islands"},{"code":"CR","name":"Costa Rica"},{"code":"CI","name":"Cote d'Ivoire"},{"code":"HR","name":"Croatia"},{"code":"CU","name":"Cuba"},{"code":"CW","name":"Curacao"},{"code":"CY","name":"Cyprus"},{"code":"CZ","name":"Czech Republic"},{"code":"DK","name":"Denmark"},{"code":"DJ","name":"Djibouti"},{"code":"DM","name":"Dominica"},{"code":"DO","name":"Dominican Republic"},{"code":"EC","name":"Ecuador"},{"code":"EG","name":"Egypt"},{"code":"SV","name":"El Salvador"},{"code":"GQ","name":"Equatorial Guinea"},{"code":"ER","name":"Eritrea"},{"code":"EE","name":"Estonia"},{"code":"SZ","name":"Eswatini (Swaziland)"},{"code":"ET","name":"Ethiopia"},{"code":"FK","name":"Falkland Islands"},{"code":"FO","name":"Faroe Islands"},{"code":"FJ","name":"Fiji"},{"code":"FI","name":"Finland"},{"code":"FR","name":"France"},{"code":"GF","name":"French Guiana"},{"code":"PF","name":"French Polynesia"},{"code":"TF","name":"French S. Terr."},{"code":"GA","name":"Gabon"},{"code":"GM","name":"Gambia"},{"code":"GE","name":"Georgia"},{"code":"DE","name":"Germany"},{"code":"GH","name":"Ghana"},{"code":"GI","name":"Gibraltar"},{"code":"GR","name":"Greece"},{"code":"GL","name":"Greenland"},{"code":"GD","name":"Grenada"},{"code":"GP","name":"Guadeloupe"},{"code":"GU","name":"Guam"},{"code":"GT","name":"Guatemala"},{"code":"GG","name":"Guernsey"},{"code":"GN","name":"Guinea"},{"code":"GW","name":"Guinea-Bissau"},{"code":"GY","name":"Guyana"},{"code":"HT","name":"Haiti"},{"code":"HM","name":"Heard Island & McDonald Islands"},{"code":"HN","name":"Honduras"},{"code":"HK","name":"Hong Kong"},{"code":"HU","name":"Hungary"},{"code":"IS","name":"Iceland"},{"code":"IN","name":"India"},{"code":"ID","name":"Indonesia"},{"code":"IR","name":"Iran"},{"code":"IQ","name":"Iraq"},{"code":"IE","name":"Ireland"},{"code":"IM","name":"Isle of Man"},{"code":"IL","name":"Israel"},{"code":"IT","name":"Italy"},{"code":"JM","name":"Jamaica"},{"code":"JP","name":"Japan"},{"code":"JE","name":"Jersey"},{"code":"JO","name":"Jordan"},{"code":"KZ","name":"Kazakhstan"},{"code":"KE","name":"Kenya"},{"code":"KI","name":"Kiribati"},{"code":"KW","name":"Kuwait"},{"code":"KG","name":"Kyrgyzstan"},{"code":"LA","name":"Laos"},{"code":"LV","name":"Latvia"},{"code":"LB","name":"Lebanon"},{"code":"LS","name":"Lesotho"},{"code":"LR","name":"Liberia"},{"code":"LY","name":"Libya"},{"code":"LI","name":"Liechtenstein"},{"code":"LT","name":"Lithuania"},{"code":"LU","name":"Luxembourg"},{"code":"MO","name":"Macau"},{"code":"MG","name":"Madagascar"},{"code":"MW","name":"Malawi"},{"code":"MY","name":"Malaysia"},{"code":"MV","name":"Maldives"},{"code":"ML","name":"Mali"},{"code":"MT","name":"Malta"},{"code":"MH","name":"Marshall Islands"},{"code":"MQ","name":"Martinique"},{"code":"MR","name":"Mauritania"},{"code":"MU","name":"Mauritius"},{"code":"YT","name":"Mayotte"},{"code":"MX","name":"Mexico"},{"code":"FM","name":"Micronesia"},{"code":"MD","name":"Moldova"},{"code":"MC","name":"Monaco"},{"code":"MN","name":"Mongolia"},{"code":"ME","name":"Montenegro"},{"code":"MS","name":"Montserrat"},{"code":"MA","name":"Morocco"},{"code":"MZ","name":"Mozambique"},{"code":"MM","name":"Myanmar (Burma)"},{"code":"NA","name":"Namibia"},{"code":"NR","name":"Nauru"},{"code":"NP","name":"Nepal"},{"code":"NL","name":"Netherlands"},{"code":"NC","name":"New Caledonia"},{"code":"NZ","name":"New Zealand"},{"code":"NI","name":"Nicaragua"},{"code":"NE","name":"Niger"},{"code":"NG","name":"Nigeria"},{"code":"NU","name":"Niue"},{"code":"NF","name":"Norfolk Island"},{"code":"KP","name":"North Korea"},{"code":"MK","name":"North Macedonia"},{"code":"MP","name":"Northern Mariana Islands"},{"code":"NO","name":"Norway"},{"code":"OM","name":"Oman"},{"code":"PK","name":"Pakistan"},{"code":"PW","name":"Palau"},{"code":"PS","name":"Palestine"},{"code":"PA","name":"Panama"},{"code":"PG","name":"Papua New Guinea"},{"code":"PY","name":"Paraguay"},{"code":"PE","name":"Peru"},{"code":"PH","name":"Philippines"},{"code":"PN","name":"Pitcairn"},{"code":"PL","name":"Poland"},{"code":"PT","name":"Portugal"},{"code":"PR","name":"Puerto Rico"},{"code":"QA","name":"Qatar"},{"code":"RE","name":"Reunion"},{"code":"RO","name":"Romania"},{"code":"RU","name":"Russia"},{"code":"RW","name":"Rwanda"},{"code":"AS","name":"Samoa (American)"},{"code":"WS","name":"Samoa (western)"},{"code":"SM","name":"San Marino"},{"code":"ST","name":"Sao Tome & Principe"},{"code":"SA","name":"Saudi Arabia"},{"code":"SN","name":"Senegal"},{"code":"RS","name":"Serbia"},{"code":"SC","name":"Seychelles"},{"code":"SL","name":"Sierra Leone"},{"code":"SG","name":"Singapore"},{"code":"SX","name":"Sint Maarten"},{"code":"SK","name":"Slovakia"},{"code":"SI","name":"Slovenia"},{"code":"SB","name":"Solomon Islands"},{"code":"SO","name":"Somalia"},{"code":"ZA","name":"South Africa"},{"code":"GS","name":"South Georgia & the South Sandwich Islands"},{"code":"KR","name":"South Korea"},{"code":"SS","name":"South Sudan"},{"code":"ES","name":"Spain"},{"code":"LK","name":"Sri Lanka"},{"code":"BL","name":"St Barthelemy"},{"code":"SH","name":"St Helena"},{"code":"KN","name":"St Kitts & Nevis"},{"code":"LC","name":"St Lucia"},{"code":"MF","name":"St Martin (French)"},{"code":"PM","name":"St Pierre & Miquelon"},{"code":"VC","name":"St Vincent"},{"code":"SD","name":"Sudan"},{"code":"SR","name":"Suriname"},{"code":"SJ","name":"Svalbard & Jan Mayen"},{"code":"SE","name":"Sweden"},{"code":"CH","name":"Switzerland"},{"code":"SY","name":"Syria"},{"code":"TW","name":"Taiwan"},{"code":"TJ","name":"Tajikistan"},{"code":"TZ","name":"Tanzania"},{"code":"TH","name":"Thailand"},{"code":"TL","name":"Timor-Leste"},{"code":"TG","name":"Togo"},{"code":"TK","name":"Tokelau"},{"code":"TO","name":"Tonga"},{"code":"TT","name":"Trinidad & Tobago"},{"code":"TN","name":"Tunisia"},{"code":"TR","name":"Turkey"},{"code":"TM","name":"Turkmenistan"},{"code":"TC","name":"Turks & Caicos Is"},{"code":"TV","name":"Tuvalu"},{"code":"UM","name":"US minor outlying islands"},{"code":"UG","name":"Uganda"},{"code":"UA","name":"Ukraine"},{"code":"AE","name":"United Arab Emirates"},{"code":"GB","name":"United Kingdom"},{"code":"US","name":"United States"},{"code":"UY","name":"Uruguay"},{"code":"UZ","name":"Uzbekistan"},{"code":"VU","name":"Vanuatu"},{"code":"VA","name":"Vatican City"},{"code":"VE","name":"Venezuela"},{"code":"VN","name":"Vietnam"},{"code":"VG","name":"Virgin Islands (UK)"},{"code":"VI","name":"Virgin Islands (US)"},{"code":"WF","name":"Wallis & Futuna"},{"code":"EH","name":"Western Sahara"},{"code":"YE","name":"Yemen"},{"code":"ZM","name":"Zambia"},{"code":"ZW","name":"Zimbabwe"}];
+const COUNTRY_LOOKUP = COUNTRIES.reduce(function(map, country) {
+  map[country.code] = country;
+  return map;
+}, {});
+
+function $(id) {
+  return document.getElementById(id);
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function safeHref(url) {
+  try {
+    var parsed = new URL(url);
+    return (parsed.protocol === 'https:' || parsed.protocol === 'http:') ? escapeHtml(url) : '#';
+  } catch (e) {
+    return '#';
+  }
+}
+
+function normalizeCountryCode(value) {
+  if (typeof value !== 'string') {
+    return '';
+  }
+
+  return value.trim().toUpperCase();
+}
+
+function updateThemeButton() {
+  var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  $('theme-toggle').textContent = isDark ? 'Light mode' : 'Dark mode';
+}
+
+function toggleTheme() {
+  var html = document.documentElement;
+  var isDark = html.getAttribute('data-theme') === 'dark';
+  html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  updateThemeButton();
+
+  var url = new URL(window.location);
+  if (isDark) {
+    url.searchParams.delete('theme');
+  } else {
+    url.searchParams.set('theme', 'dark');
+  }
+
+  history.replaceState(null, '', url);
+}
+
+function initTheme() {
+  var params = new URLSearchParams(window.location.search);
+  if (params.get('theme') === 'dark') {
+    document.documentElement.setAttribute('data-theme', 'dark');
+  }
+  updateThemeButton();
+}
+
+function getCountry(code) {
+  return COUNTRY_LOOKUP[code] || null;
+}
+
+function setCountrySelection(selectId, filterId, noteId, emptyMessage, code) {
+  var normalized = normalizeCountryCode(code);
+  var select = $(selectId);
+
+  if (normalized && getCountry(normalized)) {
+    select.dataset.selectedCode = normalized;
+    if ($(filterId)) {
+      $(filterId).value = '';
+    }
+  } else {
+    delete select.dataset.selectedCode;
+  }
+
+  renderCountryOptions(selectId, filterId);
+  updateSelectionNote(selectId, noteId, emptyMessage);
+
+  return Boolean(normalized && getCountry(normalized));
+}
+
+function filterCountries(query) {
+  var normalized = query.trim().toLowerCase();
+  if (!normalized) {
+    return COUNTRIES.slice();
+  }
+
+  return COUNTRIES.filter(function(country) {
+    return country.name.toLowerCase().indexOf(normalized) !== -1 ||
+      country.code.toLowerCase().indexOf(normalized) !== -1;
+  });
+}
+
+function renderCountryOptions(selectId, filterId) {
+  var select = $(selectId);
+  var selectedCode = select.dataset.selectedCode || '';
+  var matches = filterCountries($(filterId).value);
+  var selectedCountry = selectedCode ? getCountry(selectedCode) : null;
+
+  if (selectedCountry && !matches.some(function(country) { return country.code === selectedCode; })) {
+    matches.unshift(selectedCountry);
+  }
+
+  select.innerHTML = '';
+
+  if (!matches.length && !selectedCode) {
+    var noMatch = document.createElement('option');
+    noMatch.value = '';
+    noMatch.textContent = 'No countries match this search';
+    noMatch.disabled = true;
+    noMatch.selected = true;
+    select.appendChild(noMatch);
+    return;
+  }
+
+  if (!selectedCode) {
+    var placeholder = document.createElement('option');
+    placeholder.value = '';
+    placeholder.textContent = 'Select a country';
+    placeholder.disabled = true;
+    placeholder.selected = true;
+    select.appendChild(placeholder);
+  }
+
+  matches.forEach(function(country) {
+    var option = document.createElement('option');
+    option.value = country.code;
+    option.textContent = country.name + ' (' + country.code + ')';
+    if (country.code === selectedCode) {
+      option.selected = true;
+    }
+    select.appendChild(option);
+  });
+}
+
+function updateSelectionNote(selectId, noteId, emptyMessage) {
+  var select = $(selectId);
+  var code = select.dataset.selectedCode || '';
+  var note = $(noteId);
+  var country = code ? getCountry(code) : null;
+  note.textContent = country ? country.name + ' (' + country.code + ') selected.' : emptyMessage;
+}
+
+function setupCountryField(selectId, filterId, noteId, emptyMessage) {
+  var select = $(selectId);
+  var filter = $(filterId);
+
+  renderCountryOptions(selectId, filterId);
+  updateSelectionNote(selectId, noteId, emptyMessage);
+
+  filter.addEventListener('input', function() {
+    renderCountryOptions(selectId, filterId);
+  });
+
+  select.addEventListener('change', function() {
+    select.dataset.selectedCode = select.value;
+    updateSelectionNote(selectId, noteId, emptyMessage);
+    renderCountryOptions(selectId, filterId);
+  });
+}
+
+function collectProfileDraft() {
+  return {
+    passport: $('passport-country').dataset.selectedCode || '',
+    passport2: ''
+  };
+}
+
+function updateProfileSummary(message, isError) {
+  var summary = $('profile-summary');
+  if (!summary) {
+    return;
+  }
+
+  summary.textContent = message;
+  summary.classList.toggle('is-error', Boolean(isError));
+}
+
+function loadProfiles() {
+  try {
+    var raw = localStorage.getItem(PROFILE_STORAGE_KEY);
+    if (!raw) {
+      return [];
+    }
+
+    var parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) {
+      return [];
+    }
+
+    return parsed
+      .map(function(profile) {
+        if (!profile || typeof profile !== 'object') {
+          return null;
+        }
+
+        var name = typeof profile.name === 'string' ? profile.name.trim() : '';
+        var passport = normalizeCountryCode(profile.passport);
+        var passport2 = normalizeCountryCode(profile.passport2);
+
+        if (!name || !getCountry(passport)) {
+          return null;
+        }
+
+        if (passport2 && !getCountry(passport2)) {
+          passport2 = '';
+        }
+
+        return {
+          name: name,
+          passport: passport,
+          passport2: passport2 || ''
+        };
+      })
+      .filter(Boolean)
+      .slice(0, MAX_PROFILES);
+  } catch (error) {
+    return [];
+  }
+}
+
+function writeProfiles(profiles) {
+  localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(profiles.slice(0, MAX_PROFILES)));
+}
+
+function saveProfile(name, passport, passport2) {
+  var trimmedName = typeof name === 'string' ? name.trim() : '';
+  var normalizedPassport = normalizeCountryCode(passport);
+  var normalizedPassport2 = normalizeCountryCode(passport2);
+
+  if (!trimmedName) {
+    throw new Error('Enter a client name before saving.');
+  }
+
+  if (!getCountry(normalizedPassport)) {
+    throw new Error('Select a valid passport before saving this client.');
+  }
+
+  if (normalizedPassport2 && !getCountry(normalizedPassport2)) {
+    normalizedPassport2 = '';
+  }
+
+  var profiles = loadProfiles();
+  var existingIndex = profiles.findIndex(function(profile) {
+    return profile.name.toLowerCase() === trimmedName.toLowerCase();
+  });
+
+  var nextProfile = {
+    name: trimmedName,
+    passport: normalizedPassport,
+    passport2: normalizedPassport2 || ''
+  };
+
+  if (existingIndex >= 0) {
+    profiles[existingIndex] = nextProfile;
+  } else {
+    if (profiles.length >= MAX_PROFILES) {
+      throw new Error('Profile limit reached. Delete a client before saving another.');
+    }
+    profiles.push(nextProfile);
+  }
+
+  profiles.sort(function(a, b) {
+    return a.name.localeCompare(b.name);
+  });
+  writeProfiles(profiles);
+  return nextProfile;
+}
+
+function deleteProfile(name) {
+  var trimmedName = typeof name === 'string' ? name.trim() : '';
+  if (!trimmedName) {
+    return;
+  }
+
+  var profiles = loadProfiles().filter(function(profile) {
+    return profile.name.toLowerCase() !== trimmedName.toLowerCase();
+  });
+
+  writeProfiles(profiles);
+}
+
+function getProfileByName(name) {
+  var trimmedName = typeof name === 'string' ? name.trim() : '';
+  if (!trimmedName) {
+    return null;
+  }
+
+  return loadProfiles().find(function(profile) {
+    return profile.name.toLowerCase() === trimmedName.toLowerCase();
+  }) || null;
+}
+
+function renderProfileSelector(onSelect) {
+  var root = $('profile-selector-root');
+  var profiles = loadProfiles();
+  var selectedName = root.dataset.selectedName || '';
+  var hasSelection = Boolean(selectedName && getProfileByName(selectedName));
+
+  root.innerHTML = '<div class="profile-grid">' +
+    '<div>' +
+      '<label for="profile-select">Clients</label>' +
+      '<select id="profile-select" aria-label="Saved clients">' +
+        '<option value="">Select a saved client</option>' +
+        profiles.map(function(profile) {
+          return '<option value="' + escapeHtml(profile.name) + '"' + (profile.name === selectedName ? ' selected' : '') + '>' +
+            escapeHtml(profile.name) +
+          '</option>';
+        }).join('') +
+      '</select>' +
+      '<p class="helper-text" id="profile-selected-note">' +
+        (hasSelection ? escapeHtml(selectedName) + ' loaded.' : 'Store up to 50 client passport profiles in this browser.') +
+      '</p>' +
+    '</div>' +
+    '<div>' +
+      '<label for="profile-name">Save current passport</label>' +
+      '<div class="profile-save-row">' +
+        '<input type="text" id="profile-name" placeholder="John Smith" value="' + escapeHtml(selectedName) + '">' +
+        '<button type="button" class="btn-secondary" id="save-profile-button">Save client</button>' +
+        '<button type="button" class="btn-ghost" id="delete-profile-button"' + (hasSelection ? '' : ' disabled') + '>Delete</button>' +
+      '</div>' +
+      '<p class="profile-summary" id="profile-summary">Load a saved client to prefill the passport field.</p>' +
+    '</div>' +
+  '</div>';
+
+  var select = $('profile-select');
+  var nameInput = $('profile-name');
+  var selectedNote = $('profile-selected-note');
+  var deleteButton = $('delete-profile-button');
+
+  function syncSummary(profile) {
+    if (!profile) {
+      updateProfileSummary('Load a saved client to prefill the passport field.', false);
+      selectedNote.textContent = profiles.length ? 'Choose a saved client to prefill the passport field.' : 'No saved clients yet. Store up to 50 profiles in this browser.';
+      deleteButton.disabled = true;
+      return;
+    }
+
+    var message = profile.name + ': ' + profile.passport;
+    if (profile.passport2) {
+      message += ' + ' + profile.passport2;
+    }
+
+    updateProfileSummary(message, false);
+    selectedNote.textContent = profile.name + ' loaded.';
+    deleteButton.disabled = false;
+  }
+
+  syncSummary(hasSelection ? getProfileByName(selectedName) : null);
+
+  select.addEventListener('change', function() {
+    root.dataset.selectedName = select.value;
+    nameInput.value = select.value;
+    var profile = getProfileByName(select.value);
+    syncSummary(profile);
+    onSelect(profile || null);
+  });
+
+  $('save-profile-button').addEventListener('click', function() {
+    try {
+      var draft = collectProfileDraft();
+      var savedProfile = saveProfile(nameInput.value, draft.passport, draft.passport2);
+      root.dataset.selectedName = savedProfile.name;
+      renderProfileSelector(onSelect);
+      updateProfileSummary('Saved ' + savedProfile.name + ' (' + savedProfile.passport + ').', false);
+    } catch (error) {
+      updateProfileSummary(error.message || 'Unable to save client profile.', true);
+    }
+  });
+
+  deleteButton.addEventListener('click', function() {
+    var targetName = select.value || nameInput.value;
+    if (!targetName) {
+      updateProfileSummary('Select a saved client before deleting.', true);
+      return;
+    }
+
+    deleteProfile(targetName);
+    root.dataset.selectedName = '';
+    renderProfileSelector(onSelect);
+    onSelect(null);
+    updateProfileSummary('Deleted ' + targetName + '.', false);
+  });
+}
+
+function toneClass(color) {
+  switch ((color || '').toLowerCase()) {
+    case 'green':
+      return 'tone-green';
+    case 'red':
+      return 'tone-red';
+    case 'blue':
+      return 'tone-blue';
+    case 'yellow':
+      return 'tone-yellow';
+    default:
+      return 'tone-blue';
+  }
+}
+
+function renderState(className, markup) {
+  var panel = $('status-panel');
+  panel.className = 'state-card ' + className;
+  panel.innerHTML = markup;
+}
+
+function renderEmptyState() {
+  renderState('empty-state', 'Select a passport country and destination country, then click Check Requirements.');
+}
+
+function renderLoadingState() {
+  renderState('loading-state', '<div class="spinner" aria-hidden="true"></div><div>Checking the latest visa rules...</div>');
+}
+
+function renderErrorState(message) {
+  renderState('error-state', escapeHtml(message));
+}
+
+function renderRuleBlock(title, rule) {
+  if (!rule || !rule.name) {
+    return '';
+  }
+
+  return '<article class="rule-card ' + toneClass(rule.color) + '">' +
+    '<p class="rule-label">' + escapeHtml(title) + '</p>' +
+    '<h3 class="rule-name">' + escapeHtml(rule.name) + '</h3>' +
+    (rule.duration ? '<p class="rule-meta">Duration: <strong>' + escapeHtml(rule.duration) + '</strong></p>' : '') +
+  '</article>';
+}
+
+function renderRegistration(registration) {
+  if (!registration || !registration.name) {
+    return '';
+  }
+
+  return '<div class="registration-card">' +
+    '<h3>Mandatory registration</h3>' +
+    '<p>' + escapeHtml(registration.name) +
+    (registration.link ? ' <a href="' + safeHref(registration.link) + '" target="_blank" rel="noreferrer">Open registration</a>' : '') +
+    '</p>' +
+  '</div>';
+}
+
+function renderDetailCard(label, textValue) {
+  return '<div class="detail-card">' +
+    '<span class="detail-label">' + escapeHtml(label) + '</span>' +
+    '<div class="detail-value">' + escapeHtml(textValue) + '</div>' +
+  '</div>';
+}
+
+function renderDetailCardHtml(label, html) {
+  return '<div class="detail-card">' +
+    '<span class="detail-label">' + escapeHtml(label) + '</span>' +
+    '<div class="detail-value">' + html + '</div>' +
+  '</div>';
+}
+
+function renderResultState(payload) {
+  var data = payload && payload.data;
+  var visaRules = data && data.visa_rules;
+  var primaryRule = visaRules && visaRules.primary_rule;
+
+  if (!data || !primaryRule || !primaryRule.name) {
+    renderErrorState('The visa service returned an unexpected response.');
+    return;
+  }
+
+  var passport = data.passport || {};
+  var destination = data.destination || {};
+  var titleParts = [];
+
+  if (passport.name || passport.code) {
+    titleParts.push(escapeHtml(passport.name || passport.code));
+  }
+  if (destination.name || destination.code) {
+    titleParts.push('to ' + escapeHtml(destination.name || destination.code));
+  }
+
+  var detailMarkup = [
+    renderDetailCard('Passport validity', destination.passport_validity || 'Not provided'),
+    renderDetailCardHtml('Embassy info', destination.embassy_url ? '<a href="' + safeHref(destination.embassy_url) + '" target="_blank" rel="noreferrer">Open embassy link</a>' : escapeHtml('Not provided'))
+  ].join('');
+
+  renderState('result-state', '<div class="result-card">' +
+    '<div class="result-header">' +
+      '<div>' +
+        '<p class="eyebrow">Latest Result</p>' +
+        '<h2 class="result-title">' + titleParts.join(' ') + '</h2>' +
+        '<p class="result-subtitle">Primary status returned by the Travel Buddy API for ' + escapeHtml(passport.code || 'this passport') + ' travelers.</p>' +
+      '</div>' +
+      '<div class="status-pill ' + toneClass(primaryRule.color) + '">' + escapeHtml(primaryRule.name) + '</div>' +
+    '</div>' +
+    '<div class="rule-grid">' +
+      renderRuleBlock('Primary rule', primaryRule) +
+      renderRuleBlock('Secondary rule', visaRules.secondary_rule) +
+      renderRuleBlock('Exception rule', visaRules.exception_rule) +
+    '</div>' +
+    '<div class="detail-grid">' + detailMarkup + '</div>' +
+    renderRegistration(data.mandatory_registration) +
+    '<p class="disclaimer">Verify requirements with the official embassy before advising clients.</p>' +
+  '</div>');
+}
+
+function getErrorMessage(status, payload) {
+  if (payload && typeof payload.error === 'string') {
+    return payload.error;
+  }
+
+  if (status === 429) {
+    return 'The visa service is rate limited right now. Please try again shortly.';
+  }
+
+  if (status === 403) {
+    return 'This page is missing a valid Ascend proxy key.';
+  }
+
+  if (status === 400) {
+    return 'Select valid passport and destination countries before checking requirements.';
+  }
+
+  if (status === 502) {
+    return 'The upstream visa service is unavailable right now.';
+  }
+
+  if (status === 500) {
+    return 'The visa proxy is missing required environment configuration.';
+  }
+
+  return 'Something went wrong while checking visa requirements.';
+}
+
+async function checkRequirements() {
+  var passport = $('passport-country').dataset.selectedCode || '';
+  var destination = $('destination-country').dataset.selectedCode || '';
+  var button = $('check-button');
+
+  if (!passport || !destination) {
+    renderErrorState('Select both a passport country and a destination country.');
+    return;
+  }
+
+  if (!ASCEND_KEY) {
+    renderErrorState('ASCEND_KEY is not configured in this page yet.');
+    return;
+  }
+
+  button.disabled = true;
+  renderLoadingState();
+
+  try {
+    var response = await fetch('/api/visa-check', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Ascend-Key': ASCEND_KEY
+      },
+      body: JSON.stringify({
+        passport: passport,
+        destination: destination
+      })
+    });
+
+    var payload = {};
+    try {
+      payload = await response.json();
+    } catch (error) {
+      payload = {};
+    }
+
+    if (!response.ok) {
+      renderErrorState(getErrorMessage(response.status, payload));
+      return;
+    }
+
+    renderResultState(payload);
+  } catch (error) {
+    renderErrorState('Unable to reach the visa proxy right now.');
+  } finally {
+    button.disabled = false;
+  }
+}
+
+function applyPrefillFromUrl() {
+  var params = new URLSearchParams(window.location.search);
+  var passportApplied = setCountrySelection('passport-country', 'passport-filter', 'passport-selection', 'No passport country selected.', params.get('passport'));
+  var destinationApplied = setCountrySelection('destination-country', 'destination-filter', 'destination-selection', 'No destination country selected.', params.get('destination'));
+
+  if (passportApplied || destinationApplied) {
+    updateProfileSummary('Prefilled from the page link. Review and run a fresh check.', false);
+  }
+}
+
+function init() {
+  initTheme();
+  setupCountryField('passport-country', 'passport-filter', 'passport-selection', 'No passport country selected.');
+  setupCountryField('destination-country', 'destination-filter', 'destination-selection', 'No destination country selected.');
+  renderProfileSelector(function(profile) {
+    if (!profile) {
+      return;
+    }
+
+    setCountrySelection('passport-country', 'passport-filter', 'passport-selection', 'No passport country selected.', profile.passport);
+  });
+  applyPrefillFromUrl();
+  $('check-button').addEventListener('click', checkRequirements);
+  renderEmptyState();
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>

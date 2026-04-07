@@ -66,12 +66,17 @@ html, body {
 }
 .asc-nav-left { display: flex; align-items: center; gap: 8px; text-decoration: none; }
 .asc-nav-left span { font-size: 1.15rem; font-weight: 700; color: #fff; letter-spacing: -0.02em; }
-.asc-nav-links { display: flex; align-items: center; gap: 6px; }
+.asc-nav-links {
+  display: flex; align-items: center; gap: 6px; min-width: 0;
+  overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none;
+}
+.asc-nav-links::-webkit-scrollbar { display: none; }
 .asc-nav-links a {
   color: #888; font-size: 13px; font-weight: 500; text-decoration: none;
   padding: 6px 14px; border-radius: 100px; transition: all 0.2s;
   border: 1px solid transparent;
 }
+.asc-nav-links a, .asc-nav-toggle { flex: 0 0 auto; }
 .asc-nav-links a:hover { color: #fff; background: rgba(255,255,255,0.06); }
 .asc-nav-links a.active { color: #fff; background: rgba(111,87,255,0.15); border-color: rgba(111,87,255,0.3); }
 .asc-nav-toggle {
@@ -246,7 +251,13 @@ tr:nth-child(even) { background: var(--table-stripe); }
   <a href="index.html" class="asc-nav-left"><span>ascend</span></a>
   <div class="asc-nav-links">
     <a href="index.html" class="active">ROI Calculator</a>
+    <a href="trip-planner.html">Trip Planner</a>
     <a href="pricing.html">Pricing</a>
+    <a href="visa-check.html">Visa Check</a>
+    <a href="trip-check.html">Trip Check</a>
+    <a href="passport-compare.html">Passport Compare</a>
+    <a href="passport-map.html">Passport Map</a>
+    <a href="travel-advisory.html">Travel Advisory</a>
     <button class="asc-nav-toggle" onclick="toggleTheme()" id="theme-toggle">Dark mode</button>
   </div>
 </nav>

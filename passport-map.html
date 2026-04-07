@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ascend | Passport Map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-chart-geo@4.3.6/build/index.umd.min.js"></script>
+<style>
+:root {
+  --bg: #ffffff; --text: #1a1a1a; --text-muted: #666; --text-secondary: #444;
+  --text-detail: #333; --metric-bg: #F1EEFF; --metric-border: #E8E8E8;
+  --hero-bg: #D9FDD2; --hero-border: #6F57FF; --footer-bg: #161616;
+  --footer-text: #999; --footer-link: #B4A7FF;
+  --accent: #6F57FF; --accent-hover: #5A44E0; --accent-light: #F1EEFF;
+  --success: #D9FDD2; --success-text: #1a5c1a;
+  --input-bg: #fff; --input-border: #E8E8E8; --input-focus: #6F57FF;
+  --table-stripe: #F9F8FF; --chart-text: #1a1a1a;
+  --card-dark: #161616; --card-dark-text: #fff; --card-dark-muted: #aaa;
+  --amber-bg: #FEF3C7; --amber-border: #D97706; --amber-text: #92400E;
+  --bonus-bg: #F1EEFF; --bonus-border: #6F57FF;
+  --mono: 'DM Mono', monospace;
+}
+[data-theme="dark"] {
+  --bg: #0e0e12; --text: #e8e8e8; --text-muted: #888; --text-secondary: #bbb;
+  --text-detail: #ccc; --metric-bg: #1c1a28; --metric-border: #2d2b3a;
+  --hero-bg: #1a2e1f; --hero-border: #6F57FF; --footer-bg: #0a0a0e;
+  --footer-text: #666; --footer-link: #B4A7FF;
+  --accent: #8B7AFF; --accent-hover: #A090FF; --accent-light: #1c1a28;
+  --success: #1a2e1f; --success-text: #a3d98f;
+  --input-bg: #1c1a28; --input-border: #2d2b3a; --input-focus: #8B7AFF;
+  --table-stripe: #1c1a28; --chart-text: #e8e8e8;
+  --card-dark: #1c1a28; --card-dark-text: #e8e8e8; --card-dark-muted: #888;
+  --amber-bg: #2a2015; --amber-border: #b45309; --amber-text: #fbbf24;
+  --bonus-bg: #1c1a28; --bonus-border: #6F57FF;
+}
+*, *::before, *::after { box-sizing: border-box; }
+html, body {
+  margin: 0; padding: 0; font-family: 'Inter', -apple-system, sans-serif;
+  background: var(--bg); color: var(--text); line-height: 1.5;
+}
+a { color: var(--accent); }
+.container { max-width: 1180px; margin: 0 auto; padding: 28px 16px 48px; }
+
+.asc-nav {
+  background: #111118; padding: 0 28px; height: 56px;
+  display: flex; justify-content: space-between; align-items: center;
+  position: sticky; top: 0; z-index: 200;
+}
+.asc-nav-left { display: flex; align-items: center; gap: 8px; text-decoration: none; }
+.asc-nav-left span { font-size: 1.15rem; font-weight: 700; color: #fff; letter-spacing: -0.02em; }
+.asc-nav-links {
+  display: flex; align-items: center; gap: 6px; min-width: 0;
+  overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none;
+}
+.asc-nav-links::-webkit-scrollbar { display: none; }
+.asc-nav-links a {
+  color: #888; font-size: 13px; font-weight: 500; text-decoration: none;
+  padding: 6px 14px; border-radius: 100px; transition: all 0.2s;
+  border: 1px solid transparent;
+}
+.asc-nav-links a, .asc-nav-toggle { flex: 0 0 auto; }
+.asc-nav-links a:hover { color: #fff; background: rgba(255,255,255,0.06); }
+.asc-nav-links a.active { color: #fff; background: rgba(111,87,255,0.15); border-color: rgba(111,87,255,0.3); }
+.asc-nav-toggle {
+  color: #888; border: 1px solid #333; padding: 5px 14px; border-radius: 32px;
+  font-size: 12px; cursor: pointer; background: transparent; font-family: 'Inter', sans-serif;
+  transition: all 0.2s; margin-left: 12px;
+}
+.asc-nav-toggle:hover { color: #fff; border-color: #666; background: rgba(255,255,255,0.06); }
+
+.page-head { margin-bottom: 24px; }
+.eyebrow {
+  margin: 0 0 8px; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--accent); font-family: var(--mono);
+}
+h1 {
+  margin: 0 0 10px; font-size: 42px; line-height: 1.02; letter-spacing: -0.04em;
+}
+.page-copy {
+  margin: 0; max-width: 760px; color: var(--text-secondary); font-size: 15px;
+}
+
+.lookup-card,
+.state-card,
+.map-card,
+.stat-chip {
+  background: var(--metric-bg); border: 1px solid var(--metric-border); border-radius: 16px;
+}
+.lookup-card { padding: 22px; margin-bottom: 20px; }
+.state-card { padding: 18px 20px; color: var(--text-secondary); }
+.state-card.is-error {
+  background: rgba(220, 38, 38, 0.1); border-color: rgba(220, 38, 38, 0.35); color: #991B1B;
+}
+[data-theme="dark"] .state-card.is-error { color: #FCA5A5; }
+
+.field-grid {
+  display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+}
+.profile-panel {
+  margin-bottom: 18px; padding-bottom: 18px; border-bottom: 1px solid var(--metric-border);
+}
+.profile-grid {
+  display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr);
+}
+.profile-save-row {
+  display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+}
+.profile-save-row input { flex: 1 1 200px; }
+.profile-summary {
+  margin: 8px 0 0; font-size: 13px; color: var(--text-muted);
+}
+.profile-summary.is-error { color: #991B1B; }
+[data-theme="dark"] .profile-summary.is-error { color: #FCA5A5; }
+
+label {
+  display: block; font-size: 13px; font-weight: 500; color: var(--text-secondary); margin-bottom: 6px;
+}
+input, select, button { font-family: 'Inter', sans-serif; }
+input, select {
+  width: 100%; padding: 10px 12px; font-size: 14px;
+  background: var(--input-bg); color: var(--text); border: 1px solid var(--input-border);
+  border-radius: 8px; transition: border-color 0.2s;
+}
+input:focus, select:focus {
+  outline: none; border-color: var(--input-focus); box-shadow: 0 0 0 3px rgba(111,87,255,0.1);
+}
+.helper-text {
+  margin: 8px 0 0; font-size: 13px; color: var(--text-muted);
+}
+.btn-primary,
+.btn-secondary,
+.btn-ghost {
+  border-radius: 999px; font-size: 14px; font-weight: 600; cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-primary {
+  background: var(--accent); color: #fff; border: none; padding: 12px 28px;
+}
+.btn-primary:hover { background: var(--accent-hover); }
+.btn-primary:disabled { opacity: 0.6; cursor: wait; }
+.btn-secondary {
+  background: transparent; color: var(--accent); border: 1px solid var(--accent); padding: 10px 16px;
+}
+.btn-secondary:hover { background: var(--accent-light); }
+.btn-ghost {
+  background: transparent; color: var(--text-secondary); border: 1px solid var(--metric-border); padding: 10px 16px;
+}
+.btn-ghost:hover { border-color: var(--text-muted); }
+.btn-ghost:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.results-shell {
+  display: grid; gap: 16px;
+}
+.results-shell[hidden] { display: none; }
+.stats-grid {
+  display: grid; gap: 12px; grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.stat-chip { padding: 16px; }
+.stat-label {
+  display: block; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin-bottom: 8px;
+}
+.stat-value {
+  font-size: 24px; font-weight: 700; color: var(--accent); font-family: var(--mono);
+}
+.map-card {
+  padding: 20px;
+}
+.map-head {
+  display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 12px;
+}
+.map-head h2 {
+  margin: 0; font-size: 28px; letter-spacing: -0.03em;
+}
+.map-head p { margin: 6px 0 0; color: var(--text-secondary); font-size: 14px; }
+.map-canvas-wrap {
+  position: relative; min-height: 580px; border-radius: 16px; overflow: hidden;
+  background:
+    radial-gradient(circle at top left, rgba(111, 87, 255, 0.08), transparent 34%),
+    radial-gradient(circle at bottom right, rgba(52, 168, 83, 0.08), transparent 30%),
+    var(--bg);
+  border: 1px solid var(--metric-border);
+  padding: 18px;
+}
+.map-canvas-wrap canvas {
+  width: 100% !important; height: 100% !important;
+}
+.legend {
+  display: flex; gap: 12px; flex-wrap: wrap; margin-top: 16px;
+}
+.legend-item {
+  display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 999px;
+  background: var(--bg); border: 1px solid var(--metric-border); font-size: 13px;
+}
+.legend-swatch {
+  width: 12px; height: 12px; border-radius: 999px;
+}
+.legend-swatch.green { background: #34A853; }
+.legend-swatch.blue { background: #2563EB; }
+.legend-swatch.yellow { background: #D97706; }
+.legend-swatch.red { background: #DC2626; }
+
+.asc-footer {
+  background: var(--footer-bg); padding: 18px 24px; border-radius: 8px;
+  margin: 0 auto 24px; max-width: 1180px;
+}
+.asc-footer p { color: var(--footer-text); font-size: 11px; margin: 0 0 4px; line-height: 1.5; }
+.asc-footer a { color: var(--footer-link); font-weight: 600; text-decoration: none; }
+
+@media (max-width: 900px) {
+  .field-grid, .profile-grid, .stats-grid { grid-template-columns: 1fr; }
+  .map-head { flex-direction: column; align-items: flex-start; }
+}
+@media (max-width: 700px) {
+  .asc-nav {
+    height: auto; min-height: 56px; padding: 12px 16px;
+    align-items: flex-start; gap: 10px; flex-wrap: wrap;
+  }
+  .asc-nav-links { width: 100%; flex-wrap: wrap; }
+  .asc-nav-links a { padding: 6px 12px; }
+  .asc-nav-toggle { margin-left: 0; }
+  .container { padding-top: 22px; }
+  h1 { font-size: 34px; }
+  .map-canvas-wrap { min-height: 440px; padding: 12px; }
+}
+</style>
+</head>
+<body>
+
+<nav class="asc-nav">
+  <a href="index.html" class="asc-nav-left"><span>ascend</span></a>
+  <div class="asc-nav-links">
+    <a href="index.html">ROI Calculator</a>
+    <a href="trip-planner.html">Trip Planner</a>
+    <a href="pricing.html">Pricing</a>
+    <a href="visa-check.html">Visa Check</a>
+    <a href="trip-check.html">Trip Check</a>
+    <a href="passport-compare.html">Passport Compare</a>
+    <a href="passport-map.html" class="active">Passport Map</a>
+    <a href="travel-advisory.html">Travel Advisory</a>
+    <button class="asc-nav-toggle" onclick="toggleTheme()" id="theme-toggle">Dark mode</button>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="page-head">
+    <p class="eyebrow">Internal Concierge Tool</p>
+    <h1>Show the client where their passport works best.</h1>
+    <p class="page-copy">Load a passport and paint the visa map by entry status. Hover for the status, then click any country to jump into a focused `visa-check` lookup with both countries prefilled.</p>
+  </div>
+
+  <div class="lookup-card">
+    <div class="profile-panel">
+      <div id="profile-selector-root"></div>
+    </div>
+
+    <div class="field-grid">
+      <div>
+        <label for="passport-input">Passport Country</label>
+        <input type="text" id="passport-input" list="country-list" placeholder="Type country or code">
+        <p class="helper-text" id="passport-note">No passport selected.</p>
+      </div>
+      <button type="button" class="btn-primary" id="show-map-button">Show Map</button>
+    </div>
+  </div>
+
+  <div id="notice-card" class="state-card">Select a passport country, then load the map.</div>
+
+  <section id="results-shell" class="results-shell" hidden>
+    <div id="stats-grid" class="stats-grid"></div>
+
+    <div class="map-card">
+      <div class="map-head">
+        <div>
+          <p class="eyebrow">Visa-Free World Map</p>
+          <h2 id="map-title">Passport map</h2>
+          <p>Hover for the status. Click a country to open a focused visa check for that route.</p>
+        </div>
+      </div>
+      <div class="map-canvas-wrap">
+        <canvas id="passport-map-canvas"></canvas>
+      </div>
+      <div class="legend">
+        <div class="legend-item"><span class="legend-swatch green"></span>Visa-free</div>
+        <div class="legend-item"><span class="legend-swatch blue"></span>eVisa / eTA</div>
+        <div class="legend-item"><span class="legend-swatch yellow"></span>Visa on arrival</div>
+        <div class="legend-item"><span class="legend-swatch red"></span>Visa required</div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<footer class="asc-footer">
+  <p>Ascend internal tooling for concierge operations.</p>
+  <p>Visa policies can change quickly. Verify advice with the official embassy or government source before final guidance.</p>
+</footer>
+
+<datalist id="country-list"></datalist>
+
+<script>
+const ASCEND_KEY = 'd77aac0f45529a85c72dced8d4f1ce2d';
+const PROFILE_STORAGE_KEY = 'ascend_client_profiles';
+const MAX_PROFILES = 50;
+const GEOJSON_URL = 'https://raw.githubusercontent.com/datasets/geo-countries/main/data/countries.geojson';
+const STATUS_LABEL = {
+  green: 'Visa-free',
+  blue: 'eVisa / eTA',
+  yellow: 'Visa on arrival',
+  red: 'Visa required',
+  unknown: 'Unknown'
+};
+const STATUS_COLORS = {
+  green: '#34A853',
+  blue: '#2563EB',
+  yellow: '#D97706',
+  red: '#DC2626',
+  unknown: '#CBD5E1'
+};
+const COUNTRIES = [{"code":"AF","name":"Afghanistan"},{"code":"AX","name":"Aland Islands"},{"code":"AL","name":"Albania"},{"code":"DZ","name":"Algeria"},{"code":"AD","name":"Andorra"},{"code":"AO","name":"Angola"},{"code":"AI","name":"Anguilla"},{"code":"AQ","name":"Antarctica"},{"code":"AG","name":"Antigua & Barbuda"},{"code":"AR","name":"Argentina"},{"code":"AM","name":"Armenia"},{"code":"AW","name":"Aruba"},{"code":"AU","name":"Australia"},{"code":"AT","name":"Austria"},{"code":"AZ","name":"Azerbaijan"},{"code":"BS","name":"Bahamas"},{"code":"BH","name":"Bahrain"},{"code":"BD","name":"Bangladesh"},{"code":"BB","name":"Barbados"},{"code":"BY","name":"Belarus"},{"code":"BE","name":"Belgium"},{"code":"BZ","name":"Belize"},{"code":"BJ","name":"Benin"},{"code":"BM","name":"Bermuda"},{"code":"BT","name":"Bhutan"},{"code":"BO","name":"Bolivia"},{"code":"BA","name":"Bosnia & Herzegovina"},{"code":"BW","name":"Botswana"},{"code":"BV","name":"Bouvet Island"},{"code":"BR","name":"Brazil"},{"code":"IO","name":"British Indian Ocean Territory"},{"code":"BN","name":"Brunei"},{"code":"BG","name":"Bulgaria"},{"code":"BF","name":"Burkina Faso"},{"code":"BI","name":"Burundi"},{"code":"KH","name":"Cambodia"},{"code":"CM","name":"Cameroon"},{"code":"CA","name":"Canada"},{"code":"CV","name":"Cape Verde"},{"code":"BQ","name":"Caribbean Netherlands"},{"code":"KY","name":"Cayman Islands"},{"code":"CF","name":"Central African Rep."},{"code":"TD","name":"Chad"},{"code":"CL","name":"Chile"},{"code":"CN","name":"China"},{"code":"CX","name":"Christmas Island"},{"code":"CC","name":"Cocos (Keeling) Islands"},{"code":"CO","name":"Colombia"},{"code":"KM","name":"Comoros"},{"code":"CD","name":"Congo (Dem. Rep.)"},{"code":"CG","name":"Congo (Rep.)"},{"code":"CK","name":"Cook Islands"},{"code":"CR","name":"Costa Rica"},{"code":"CI","name":"Cote d'Ivoire"},{"code":"HR","name":"Croatia"},{"code":"CU","name":"Cuba"},{"code":"CW","name":"Curacao"},{"code":"CY","name":"Cyprus"},{"code":"CZ","name":"Czech Republic"},{"code":"DK","name":"Denmark"},{"code":"DJ","name":"Djibouti"},{"code":"DM","name":"Dominica"},{"code":"DO","name":"Dominican Republic"},{"code":"EC","name":"Ecuador"},{"code":"EG","name":"Egypt"},{"code":"SV","name":"El Salvador"},{"code":"GQ","name":"Equatorial Guinea"},{"code":"ER","name":"Eritrea"},{"code":"EE","name":"Estonia"},{"code":"SZ","name":"Eswatini (Swaziland)"},{"code":"ET","name":"Ethiopia"},{"code":"FK","name":"Falkland Islands"},{"code":"FO","name":"Faroe Islands"},{"code":"FJ","name":"Fiji"},{"code":"FI","name":"Finland"},{"code":"FR","name":"France"},{"code":"GF","name":"French Guiana"},{"code":"PF","name":"French Polynesia"},{"code":"TF","name":"French S. Terr."},{"code":"GA","name":"Gabon"},{"code":"GM","name":"Gambia"},{"code":"GE","name":"Georgia"},{"code":"DE","name":"Germany"},{"code":"GH","name":"Ghana"},{"code":"GI","name":"Gibraltar"},{"code":"GR","name":"Greece"},{"code":"GL","name":"Greenland"},{"code":"GD","name":"Grenada"},{"code":"GP","name":"Guadeloupe"},{"code":"GU","name":"Guam"},{"code":"GT","name":"Guatemala"},{"code":"GG","name":"Guernsey"},{"code":"GN","name":"Guinea"},{"code":"GW","name":"Guinea-Bissau"},{"code":"GY","name":"Guyana"},{"code":"HT","name":"Haiti"},{"code":"HM","name":"Heard Island & McDonald Islands"},{"code":"HN","name":"Honduras"},{"code":"HK","name":"Hong Kong"},{"code":"HU","name":"Hungary"},{"code":"IS","name":"Iceland"},{"code":"IN","name":"India"},{"code":"ID","name":"Indonesia"},{"code":"IR","name":"Iran"},{"code":"IQ","name":"Iraq"},{"code":"IE","name":"Ireland"},{"code":"IM","name":"Isle of Man"},{"code":"IL","name":"Israel"},{"code":"IT","name":"Italy"},{"code":"JM","name":"Jamaica"},{"code":"JP","name":"Japan"},{"code":"JE","name":"Jersey"},{"code":"JO","name":"Jordan"},{"code":"KZ","name":"Kazakhstan"},{"code":"KE","name":"Kenya"},{"code":"KI","name":"Kiribati"},{"code":"KW","name":"Kuwait"},{"code":"KG","name":"Kyrgyzstan"},{"code":"LA","name":"Laos"},{"code":"LV","name":"Latvia"},{"code":"LB","name":"Lebanon"},{"code":"LS","name":"Lesotho"},{"code":"LR","name":"Liberia"},{"code":"LY","name":"Libya"},{"code":"LI","name":"Liechtenstein"},{"code":"LT","name":"Lithuania"},{"code":"LU","name":"Luxembourg"},{"code":"MO","name":"Macau"},{"code":"MG","name":"Madagascar"},{"code":"MW","name":"Malawi"},{"code":"MY","name":"Malaysia"},{"code":"MV","name":"Maldives"},{"code":"ML","name":"Mali"},{"code":"MT","name":"Malta"},{"code":"MH","name":"Marshall Islands"},{"code":"MQ","name":"Martinique"},{"code":"MR","name":"Mauritania"},{"code":"MU","name":"Mauritius"},{"code":"YT","name":"Mayotte"},{"code":"MX","name":"Mexico"},{"code":"FM","name":"Micronesia"},{"code":"MD","name":"Moldova"},{"code":"MC","name":"Monaco"},{"code":"MN","name":"Mongolia"},{"code":"ME","name":"Montenegro"},{"code":"MS","name":"Montserrat"},{"code":"MA","name":"Morocco"},{"code":"MZ","name":"Mozambique"},{"code":"MM","name":"Myanmar (Burma)"},{"code":"NA","name":"Namibia"},{"code":"NR","name":"Nauru"},{"code":"NP","name":"Nepal"},{"code":"NL","name":"Netherlands"},{"code":"NC","name":"New Caledonia"},{"code":"NZ","name":"New Zealand"},{"code":"NI","name":"Nicaragua"},{"code":"NE","name":"Niger"},{"code":"NG","name":"Nigeria"},{"code":"NU","name":"Niue"},{"code":"NF","name":"Norfolk Island"},{"code":"KP","name":"North Korea"},{"code":"MK","name":"North Macedonia"},{"code":"MP","name":"Northern Mariana Islands"},{"code":"NO","name":"Norway"},{"code":"OM","name":"Oman"},{"code":"PK","name":"Pakistan"},{"code":"PW","name":"Palau"},{"code":"PS","name":"Palestine"},{"code":"PA","name":"Panama"},{"code":"PG","name":"Papua New Guinea"},{"code":"PY","name":"Paraguay"},{"code":"PE","name":"Peru"},{"code":"PH","name":"Philippines"},{"code":"PN","name":"Pitcairn"},{"code":"PL","name":"Poland"},{"code":"PT","name":"Portugal"},{"code":"PR","name":"Puerto Rico"},{"code":"QA","name":"Qatar"},{"code":"RE","name":"Reunion"},{"code":"RO","name":"Romania"},{"code":"RU","name":"Russia"},{"code":"RW","name":"Rwanda"},{"code":"AS","name":"Samoa (American)"},{"code":"WS","name":"Samoa (western)"},{"code":"SM","name":"San Marino"},{"code":"ST","name":"Sao Tome & Principe"},{"code":"SA","name":"Saudi Arabia"},{"code":"SN","name":"Senegal"},{"code":"RS","name":"Serbia"},{"code":"SC","name":"Seychelles"},{"code":"SL","name":"Sierra Leone"},{"code":"SG","name":"Singapore"},{"code":"SX","name":"Sint Maarten"},{"code":"SK","name":"Slovakia"},{"code":"SI","name":"Slovenia"},{"code":"SB","name":"Solomon Islands"},{"code":"SO","name":"Somalia"},{"code":"ZA","name":"South Africa"},{"code":"GS","name":"South Georgia & the South Sandwich Islands"},{"code":"KR","name":"South Korea"},{"code":"SS","name":"South Sudan"},{"code":"ES","name":"Spain"},{"code":"LK","name":"Sri Lanka"},{"code":"BL","name":"St Barthelemy"},{"code":"SH","name":"St Helena"},{"code":"KN","name":"St Kitts & Nevis"},{"code":"LC","name":"St Lucia"},{"code":"MF","name":"St Martin (French)"},{"code":"PM","name":"St Pierre & Miquelon"},{"code":"VC","name":"St Vincent"},{"code":"SD","name":"Sudan"},{"code":"SR","name":"Suriname"},{"code":"SJ","name":"Svalbard & Jan Mayen"},{"code":"SE","name":"Sweden"},{"code":"CH","name":"Switzerland"},{"code":"SY","name":"Syria"},{"code":"TW","name":"Taiwan"},{"code":"TJ","name":"Tajikistan"},{"code":"TZ","name":"Tanzania"},{"code":"TH","name":"Thailand"},{"code":"TL","name":"Timor-Leste"},{"code":"TG","name":"Togo"},{"code":"TK","name":"Tokelau"},{"code":"TO","name":"Tonga"},{"code":"TT","name":"Trinidad & Tobago"},{"code":"TN","name":"Tunisia"},{"code":"TR","name":"Turkey"},{"code":"TM","name":"Turkmenistan"},{"code":"TC","name":"Turks & Caicos Is"},{"code":"TV","name":"Tuvalu"},{"code":"UM","name":"US minor outlying islands"},{"code":"UG","name":"Uganda"},{"code":"UA","name":"Ukraine"},{"code":"AE","name":"United Arab Emirates"},{"code":"GB","name":"United Kingdom"},{"code":"US","name":"United States"},{"code":"UY","name":"Uruguay"},{"code":"UZ","name":"Uzbekistan"},{"code":"VU","name":"Vanuatu"},{"code":"VA","name":"Vatican City"},{"code":"VE","name":"Venezuela"},{"code":"VN","name":"Vietnam"},{"code":"VG","name":"Virgin Islands (UK)"},{"code":"VI","name":"Virgin Islands (US)"},{"code":"WF","name":"Wallis & Futuna"},{"code":"EH","name":"Western Sahara"},{"code":"YE","name":"Yemen"},{"code":"ZM","name":"Zambia"},{"code":"ZW","name":"Zimbabwe"}];
+const COUNTRY_LOOKUP = COUNTRIES.reduce(function(map, country) {
+  map[country.code] = country;
+  return map;
+}, {});
+var geoFeaturesPromise = null;
+var mapChart = null;
+
+function $(id) {
+  return document.getElementById(id);
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function normalizeCountryCode(value) {
+  if (typeof value !== 'string') {
+    return '';
+  }
+
+  return value.trim().toUpperCase();
+}
+
+function updateThemeButton() {
+  var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  $('theme-toggle').textContent = isDark ? 'Light mode' : 'Dark mode';
+}
+
+function toggleTheme() {
+  var html = document.documentElement;
+  var isDark = html.getAttribute('data-theme') === 'dark';
+  html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  updateThemeButton();
+
+  var url = new URL(window.location);
+  if (isDark) {
+    url.searchParams.delete('theme');
+  } else {
+    url.searchParams.set('theme', 'dark');
+  }
+
+  history.replaceState(null, '', url);
+}
+
+function initTheme() {
+  var params = new URLSearchParams(window.location.search);
+  if (params.get('theme') === 'dark') {
+    document.documentElement.setAttribute('data-theme', 'dark');
+  }
+  updateThemeButton();
+}
+
+function getCountry(code) {
+  return COUNTRY_LOOKUP[code] || null;
+}
+
+function formatCountryLabel(country) {
+  return country ? country.name + ' (' + country.code + ')' : '';
+}
+
+function resolveCountryInput(value) {
+  var raw = String(value || '').trim();
+  if (!raw) {
+    return null;
+  }
+
+  var fromCode = getCountry(normalizeCountryCode(raw));
+  if (fromCode) {
+    return fromCode;
+  }
+
+  var labelMatch = raw.match(/\(([A-Za-z]{2})\)\s*$/);
+  if (labelMatch) {
+    var fromLabel = getCountry(normalizeCountryCode(labelMatch[1]));
+    if (fromLabel) {
+      return fromLabel;
+    }
+  }
+
+  var normalized = raw.toLowerCase();
+  return COUNTRIES.find(function(country) {
+    return country.name.toLowerCase() === normalized;
+  }) || null;
+}
+
+function setCountryInputValue(inputId, noteId, emptyMessage, code) {
+  var input = $(inputId);
+  var note = $(noteId);
+  var country = getCountry(normalizeCountryCode(code));
+
+  if (country) {
+    input.value = formatCountryLabel(country);
+    input.dataset.selectedCode = country.code;
+    note.textContent = country.name + ' (' + country.code + ') selected.';
+    return true;
+  }
+
+  input.value = '';
+  delete input.dataset.selectedCode;
+  note.textContent = emptyMessage;
+  return false;
+}
+
+function bindCountryInput(inputId, noteId, emptyMessage) {
+  var input = $(inputId);
+  var note = $(noteId);
+
+  function applyMatch() {
+    var country = resolveCountryInput(input.value);
+    if (country) {
+      input.value = formatCountryLabel(country);
+      input.dataset.selectedCode = country.code;
+      note.textContent = country.name + ' (' + country.code + ') selected.';
+      return;
+    }
+
+    delete input.dataset.selectedCode;
+    note.textContent = input.value.trim() ? 'Choose a valid country from the list.' : emptyMessage;
+  }
+
+  input.addEventListener('change', applyMatch);
+  input.addEventListener('blur', applyMatch);
+}
+
+function populateCountryDatalist() {
+  $('country-list').innerHTML = COUNTRIES.map(function(country) {
+    return '<option value="' + escapeHtml(formatCountryLabel(country)) + '"></option>';
+  }).join('');
+}
+
+function setNotice(message, isError) {
+  var card = $('notice-card');
+  card.textContent = message;
+  card.className = 'state-card' + (isError ? ' is-error' : '');
+}
+
+function loadProfiles() {
+  try {
+    var raw = localStorage.getItem(PROFILE_STORAGE_KEY);
+    if (!raw) {
+      return [];
+    }
+
+    var parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) {
+      return [];
+    }
+
+    return parsed
+      .map(function(profile) {
+        if (!profile || typeof profile !== 'object') {
+          return null;
+        }
+
+        var name = typeof profile.name === 'string' ? profile.name.trim() : '';
+        var passport = normalizeCountryCode(profile.passport);
+        var passport2 = normalizeCountryCode(profile.passport2);
+
+        if (!name || !getCountry(passport)) {
+          return null;
+        }
+
+        if (passport2 && !getCountry(passport2)) {
+          passport2 = '';
+        }
+
+        return {
+          name: name,
+          passport: passport,
+          passport2: passport2 || ''
+        };
+      })
+      .filter(Boolean)
+      .slice(0, MAX_PROFILES);
+  } catch (error) {
+    return [];
+  }
+}
+
+function writeProfiles(profiles) {
+  localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(profiles.slice(0, MAX_PROFILES)));
+}
+
+function collectProfileDraft() {
+  return {
+    passport: $('passport-input').dataset.selectedCode || '',
+    passport2: ''
+  };
+}
+
+function updateProfileSummary(message, isError) {
+  var summary = $('profile-summary');
+  if (!summary) {
+    return;
+  }
+
+  summary.textContent = message;
+  summary.classList.toggle('is-error', Boolean(isError));
+}
+
+function saveProfile(name, passport, passport2) {
+  var trimmedName = typeof name === 'string' ? name.trim() : '';
+  var normalizedPassport = normalizeCountryCode(passport);
+  var normalizedPassport2 = normalizeCountryCode(passport2);
+
+  if (!trimmedName) {
+    throw new Error('Enter a client name before saving.');
+  }
+
+  if (!getCountry(normalizedPassport)) {
+    throw new Error('Select a passport before saving this client.');
+  }
+
+  if (normalizedPassport2 && !getCountry(normalizedPassport2)) {
+    normalizedPassport2 = '';
+  }
+
+  var profiles = loadProfiles();
+  var existingIndex = profiles.findIndex(function(profile) {
+    return profile.name.toLowerCase() === trimmedName.toLowerCase();
+  });
+
+  var nextProfile = {
+    name: trimmedName,
+    passport: normalizedPassport,
+    passport2: normalizedPassport2 || ''
+  };
+
+  if (existingIndex >= 0) {
+    profiles[existingIndex] = nextProfile;
+  } else {
+    if (profiles.length >= MAX_PROFILES) {
+      throw new Error('Profile limit reached. Delete a client before saving another.');
+    }
+    profiles.push(nextProfile);
+  }
+
+  profiles.sort(function(a, b) {
+    return a.name.localeCompare(b.name);
+  });
+  writeProfiles(profiles);
+  return nextProfile;
+}
+
+function deleteProfile(name) {
+  var trimmedName = typeof name === 'string' ? name.trim() : '';
+  if (!trimmedName) {
+    return;
+  }
+
+  var profiles = loadProfiles().filter(function(profile) {
+    return profile.name.toLowerCase() !== trimmedName.toLowerCase();
+  });
+
+  writeProfiles(profiles);
+}
+
+function getProfileByName(name) {
+  var trimmedName = typeof name === 'string' ? name.trim() : '';
+  if (!trimmedName) {
+    return null;
+  }
+
+  return loadProfiles().find(function(profile) {
+    return profile.name.toLowerCase() === trimmedName.toLowerCase();
+  }) || null;
+}
+
+function renderProfileSelector(onSelect) {
+  var root = $('profile-selector-root');
+  var profiles = loadProfiles();
+  var selectedName = root.dataset.selectedName || '';
+  var hasSelection = Boolean(selectedName && getProfileByName(selectedName));
+
+  root.innerHTML = '<div class="profile-grid">' +
+    '<div>' +
+      '<label for="profile-select">Clients</label>' +
+      '<select id="profile-select" aria-label="Saved clients">' +
+        '<option value="">Select a saved client</option>' +
+        profiles.map(function(profile) {
+          return '<option value="' + escapeHtml(profile.name) + '"' + (profile.name === selectedName ? ' selected' : '') + '>' +
+            escapeHtml(profile.name) +
+          '</option>';
+        }).join('') +
+      '</select>' +
+      '<p class="helper-text" id="profile-selected-note">' +
+        (hasSelection ? escapeHtml(selectedName) + ' loaded.' : 'Store up to 50 client passport profiles in this browser.') +
+      '</p>' +
+    '</div>' +
+    '<div>' +
+      '<label for="profile-name">Save current passport</label>' +
+      '<div class="profile-save-row">' +
+        '<input type="text" id="profile-name" placeholder="John Smith" value="' + escapeHtml(selectedName) + '">' +
+        '<button type="button" class="btn-secondary" id="save-profile-button">Save client</button>' +
+        '<button type="button" class="btn-ghost" id="delete-profile-button"' + (hasSelection ? '' : ' disabled') + '>Delete</button>' +
+      '</div>' +
+      '<p class="profile-summary" id="profile-summary">Load a saved client to prefill the passport field.</p>' +
+    '</div>' +
+  '</div>';
+
+  var select = $('profile-select');
+  var nameInput = $('profile-name');
+  var selectedNote = $('profile-selected-note');
+  var deleteButton = $('delete-profile-button');
+
+  function syncSummary(profile) {
+    if (!profile) {
+      updateProfileSummary('Load a saved client to prefill the passport field.', false);
+      selectedNote.textContent = profiles.length ? 'Choose a saved client to prefill the passport field.' : 'No saved clients yet. Store up to 50 profiles in this browser.';
+      deleteButton.disabled = true;
+      return;
+    }
+
+    var message = profile.name + ': ' + profile.passport;
+    if (profile.passport2) {
+      message += ' + ' + profile.passport2;
+    }
+
+    updateProfileSummary(message, false);
+    selectedNote.textContent = profile.name + ' loaded.';
+    deleteButton.disabled = false;
+  }
+
+  syncSummary(hasSelection ? getProfileByName(selectedName) : null);
+
+  select.addEventListener('change', function() {
+    root.dataset.selectedName = select.value;
+    nameInput.value = select.value;
+    var profile = getProfileByName(select.value);
+    syncSummary(profile);
+    onSelect(profile || null);
+  });
+
+  $('save-profile-button').addEventListener('click', function() {
+    try {
+      var draft = collectProfileDraft();
+      var savedProfile = saveProfile(nameInput.value, draft.passport, draft.passport2);
+      root.dataset.selectedName = savedProfile.name;
+      renderProfileSelector(onSelect);
+      updateProfileSummary('Saved ' + savedProfile.name + ' (' + savedProfile.passport + ').', false);
+    } catch (error) {
+      updateProfileSummary(error.message || 'Unable to save client profile.', true);
+    }
+  });
+
+  deleteButton.addEventListener('click', function() {
+    var targetName = select.value || nameInput.value;
+    if (!targetName) {
+      updateProfileSummary('Select a saved client before deleting.', true);
+      return;
+    }
+
+    deleteProfile(targetName);
+    root.dataset.selectedName = '';
+    renderProfileSelector(onSelect);
+    onSelect(null);
+    updateProfileSummary('Deleted ' + targetName + '.', false);
+  });
+}
+
+function getErrorMessage(status, payload) {
+  if (payload && typeof payload.error === 'string') {
+    return payload.error;
+  }
+
+  if (status === 429) {
+    return 'Visa service rate limited. Try again shortly.';
+  }
+
+  if (status === 403) {
+    return 'Missing valid Ascend proxy key.';
+  }
+
+  if (status === 400) {
+    return 'Invalid passport country.';
+  }
+
+  if (status === 500) {
+    return 'The visa proxy is missing required environment configuration.';
+  }
+
+  return 'Unable to retrieve the passport map right now.';
+}
+
+async function fetchVisaMap(passport) {
+  var response = await fetch('/api/visa-map', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Ascend-Key': ASCEND_KEY
+    },
+    body: JSON.stringify({
+      passport: passport
+    })
+  });
+
+  var payload = {};
+  try {
+    payload = await response.json();
+  } catch (error) {
+    payload = {};
+  }
+
+  if (!response.ok) {
+    throw new Error(getErrorMessage(response.status, payload));
+  }
+
+  return payload;
+}
+
+function parseMapPayload(payload) {
+  var colors = payload && payload.data && payload.data.colors ? payload.data.colors : {};
+  var statusMap = {};
+  var counts = {};
+
+  Object.keys(STATUS_LABEL).forEach(function(key) {
+    counts[key] = 0;
+  });
+
+  Object.keys(colors).forEach(function(color) {
+    var normalizedColor = color.toLowerCase();
+    String(colors[color] || '')
+      .split(',')
+      .map(function(code) {
+        return normalizeCountryCode(code);
+      })
+      .filter(Boolean)
+      .forEach(function(code) {
+        statusMap[code] = normalizedColor;
+      });
+  });
+
+  Object.keys(statusMap).forEach(function(code) {
+    counts[statusMap[code]] = (counts[statusMap[code]] || 0) + 1;
+  });
+
+  return {
+    passport: payload && payload.data ? payload.data.passport : '',
+    statusMap: statusMap,
+    counts: counts
+  };
+}
+
+async function getGeoFeatures() {
+  if (!geoFeaturesPromise) {
+    geoFeaturesPromise = fetch(GEOJSON_URL)
+      .then(function(response) {
+        return response.json();
+      })
+      .then(function(payload) {
+        return (payload.features || []).map(function(feature) {
+          var properties = feature.properties || {};
+          var code = normalizeCountryCode(
+            properties['ISO3166-1-Alpha-2'] ||
+            properties.iso_a2 ||
+            properties.ISO_A2 ||
+            ''
+          );
+
+          feature.properties = {
+            code: code,
+            name: properties.name || properties.ADMIN || code || 'Unknown'
+          };
+
+          return feature;
+        });
+      });
+  }
+
+  return geoFeaturesPromise;
+}
+
+function buildVisaCheckUrl(passport, destination) {
+  var url = new URL('visa-check.html', window.location.href);
+  url.searchParams.set('passport', passport);
+  url.searchParams.set('destination', destination);
+  if (document.documentElement.getAttribute('data-theme') === 'dark') {
+    url.searchParams.set('theme', 'dark');
+  }
+  return url.toString();
+}
+
+function renderStats(counts) {
+  $('stats-grid').innerHTML = [
+    '<div class="stat-chip"><span class="stat-label">Visa-Free</span><div class="stat-value">' + (counts.green || 0) + '</div></div>',
+    '<div class="stat-chip"><span class="stat-label">eVisa / eTA</span><div class="stat-value">' + (counts.blue || 0) + '</div></div>',
+    '<div class="stat-chip"><span class="stat-label">Visa on Arrival</span><div class="stat-value">' + (counts.yellow || 0) + '</div></div>',
+    '<div class="stat-chip"><span class="stat-label">Visa Required</span><div class="stat-value">' + (counts.red || 0) + '</div></div>'
+  ].join('');
+}
+
+async function renderPassportMap(passportCode, parsedMap) {
+  if (!window.ChartGeo) {
+    throw new Error('The map library did not load correctly.');
+  }
+
+  Chart.register(
+    ChartGeo.ChoroplethController,
+    ChartGeo.GeoFeature,
+    ChartGeo.ProjectionScale,
+    ChartGeo.ColorScale
+  );
+
+  var features = await getGeoFeatures();
+  var dataset = features.map(function(feature) {
+    var code = feature.properties.code;
+    var status = parsedMap.statusMap[code] || 'unknown';
+    return {
+      feature: feature,
+      value: 1,
+      status: status,
+      color: STATUS_COLORS[status] || STATUS_COLORS.unknown
+    };
+  });
+
+  if (mapChart) {
+    mapChart.destroy();
+  }
+
+  mapChart = new Chart($('passport-map-canvas').getContext('2d'), {
+    type: 'choropleth',
+    data: {
+      labels: dataset.map(function(item) {
+        return item.feature.properties.name;
+      }),
+      datasets: [{
+        label: 'Visa Map',
+        showOutline: true,
+        data: dataset,
+        borderColor: function(context) {
+          return context.raw && context.raw.status === 'unknown' ? 'rgba(148, 163, 184, 0.45)' : 'rgba(15, 23, 42, 0.18)';
+        },
+        borderWidth: 0.4,
+        backgroundColor: function(context) {
+          return context.raw ? context.raw.color : STATUS_COLORS.unknown;
+        },
+        hoverBorderColor: '#111118',
+        hoverBorderWidth: 1.1
+      }]
+    },
+    options: {
+      maintainAspectRatio: false,
+      showGraticule: false,
+      scales: {
+        projection: {
+          axis: 'x',
+          projection: 'equalEarth'
+        }
+      },
+      plugins: {
+        legend: {
+          display: false
+        },
+        tooltip: {
+          callbacks: {
+            title: function(items) {
+              return items.length ? items[0].raw.feature.properties.name : '';
+            },
+            label: function(context) {
+              var code = context.raw.feature.properties.code || '';
+              var status = context.raw.status || 'unknown';
+              return (code ? code + ' • ' : '') + (STATUS_LABEL[status] || 'Unknown');
+            }
+          }
+        }
+      },
+      onClick: function(event, elements) {
+        if (!elements.length) {
+          return;
+        }
+
+        var hit = elements[0];
+        var raw = mapChart.data.datasets[hit.datasetIndex].data[hit.index];
+        var code = raw && raw.feature && raw.feature.properties ? raw.feature.properties.code : '';
+        if (!code) {
+          return;
+        }
+
+        window.location.href = buildVisaCheckUrl(passportCode, code);
+      }
+    }
+  });
+}
+
+async function showMap() {
+  var passportCode = $('passport-input').dataset.selectedCode || '';
+
+  if (!passportCode) {
+    setNotice('Select a passport country before loading the visa map.', true);
+    $('results-shell').hidden = true;
+    return;
+  }
+
+  $('show-map-button').disabled = true;
+  setNotice('Loading passport map and world geometry...', false);
+
+  try {
+    var parsedMap = parseMapPayload(await fetchVisaMap(passportCode));
+    renderStats(parsedMap.counts);
+    $('map-title').textContent = (getCountry(passportCode) ? getCountry(passportCode).name : passportCode) + ' passport map';
+    await renderPassportMap(passportCode, parsedMap);
+    $('results-shell').hidden = false;
+    setNotice('Map ready. Hover for status and click any country to open a focused visa check.', false);
+  } catch (error) {
+    setNotice(error && error.message ? error.message : 'Unable to render the passport map right now.', true);
+    $('results-shell').hidden = true;
+  } finally {
+    $('show-map-button').disabled = false;
+  }
+}
+
+function init() {
+  initTheme();
+  populateCountryDatalist();
+  bindCountryInput('passport-input', 'passport-note', 'No passport selected.');
+  renderProfileSelector(function(profile) {
+    if (!profile) {
+      return;
+    }
+
+    setCountryInputValue('passport-input', 'passport-note', 'No passport selected.', profile.passport);
+  });
+  $('show-map-button').addEventListener('click', showMap);
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>

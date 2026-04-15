@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ascend for Athletes — Landing Page Mockup</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      color: #1a1a2e;
+      background: #fff;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+    ::selection { background: rgba(111, 87, 255, .15); }
+    a { color: inherit; text-decoration: none; }
+
+    :root {
+      --pri: #6f57ff;
+      --pri-hover: #5a44e6;
+      --pri-light: #f8f7ff;
+      --pri-ring: rgba(111, 87, 255, .1);
+      --text: #1a1a2e;
+      --text-secondary: #667085;
+      --text-muted: #98a2b3;
+      --bg-alt: #f9f8f7;
+      --bg-purple: #f8f7ff;
+      --border: #e8e8e8;
+      --border-light: rgba(111, 87, 255, .08);
+      --radius-sm: 6px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --max-w: 1200px;
+    }
+    h1, h2, h3, h4, h5 { letter-spacing: -.02em; line-height: 1.2; font-weight: 600; }
+    h1 { font-size: 60px; line-height: 72px; }
+    h2 { font-size: 48px; line-height: 58px; }
+    h3 { font-size: 36px; line-height: 43px; }
+    p { font-size: 18px; line-height: 1.6; color: var(--text-secondary); }
+    .label { font-size: 13px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--text-muted); }
+    .container { max-width: var(--max-w); margin: 0 auto; padding: 0 24px; }
+    section { padding: 80px 0; }
+
+    /* Nav */
+    .asc-nav {
+      background: #fff; padding: 0 28px; height: 56px; border-bottom: 1px solid #e8e8e8;
+      display: flex; justify-content: space-between; align-items: center;
+      position: sticky; top: 0; z-index: 200;
+    }
+    .asc-nav-left { display: flex; align-items: center; gap: 8px; text-decoration: none; }
+    .asc-nav-links {
+      display: flex; align-items: center; gap: 6px;
+    }
+    .asc-nav-links a {
+      color: #667085; font-size: 13px; font-weight: 500; text-decoration: none;
+      padding: 6px 14px; border-radius: 6px; transition: all 0.2s;
+      border: 1px solid transparent;
+    }
+    .asc-nav-links a:hover { color: #1a1a2e; background: rgba(111,87,255,0.06); }
+    .asc-nav-links a.active { color: #6f57ff; background: rgba(111,87,255,0.1); border-color: rgba(111,87,255,0.3); }
+    .btn { display: inline-flex; align-items: center; justify-content: center; padding: 12px 24px; border-radius: var(--radius-sm); font-weight: 600; font-size: 13px; letter-spacing: .04em; border: none; cursor: pointer; transition: background .2s, box-shadow .2s; }
+    .btn--pri { background: var(--pri); color: #fff; }
+    .btn--pri:hover { background: var(--pri-hover); box-shadow: 0 0 24px rgba(111, 87, 255, .25); }
+    .btn--lg { padding: 14px 32px; font-size: 14px; }
+    .btn--ghost { background: transparent; color: var(--text-secondary); padding: 12px 16px; }
+    .btn--white { background: #fff; color: var(--pri); }
+
+    /* Hero */
+    .hero { background: #fff; padding: 120px 0 100px; text-align: center; }
+    .hero .label { color: #98a2b3; margin-bottom: 20px; display: block; }
+    .hero h1 { max-width: 800px; margin: 0 auto 20px; color: #1a1a2e; }
+    .hero h1 em { font-style: normal; color: #6f57ff; }
+    .hero p { color: #667085; max-width: 560px; margin: 0 auto 36px; }
+    .hero .btn { margin-bottom: 16px; }
+    .hero .proof { font-size: 14px; color: #98a2b3; }
+
+    /* Pain Grid */
+    .pain-section { background: var(--bg-alt); }
+    .pain-section h2 { text-align: center; margin-bottom: 48px; }
+    .pain-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+    .pain-card { background: #fff; border-radius: var(--radius-lg); padding: 32px; box-shadow: 0 1px 3px rgba(0,0,0,.03), 0 6px 24px rgba(0,0,0,.04); }
+    .pain-card .icon { font-size: 32px; margin-bottom: 16px; }
+    .pain-card h4 { font-size: 18px; font-weight: 600; margin-bottom: 8px; }
+    .pain-card p { font-size: 15px; }
+
+    /* Comparison */
+    .comparison { background: var(--bg-alt); }
+    .comparison h2 { text-align: center; margin-bottom: 8px; }
+    .comparison .subtitle { text-align: center; margin-bottom: 48px; }
+    .comp-table { width: 100%; max-width: 800px; margin: 0 auto; border-radius: var(--radius-lg); overflow: hidden; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.04); }
+    .comp-header { display: grid; grid-template-columns: 2fr 1fr 1fr; background: #f8f7ff; color: #1a1a2e; font-weight: 600; font-size: 14px; }
+    .comp-header > div { padding: 16px 20px; }
+    .comp-row { display: grid; grid-template-columns: 2fr 1fr 1fr; border-bottom: 1px solid #f0f0f0; align-items: center; }
+    .comp-row:last-child { border-bottom: none; }
+    .comp-row > div { padding: 14px 20px; font-size: 14px; }
+    .comp-row .name { font-weight: 500; }
+    .comp-row .price { font-weight: 700; }
+    .comp-row .tag { font-size: 11px; padding: 3px 10px; border-radius: 4px; display: inline-block; font-weight: 600; }
+    .comp-row .tag--muted { background: #f0f0f0; color: var(--text-muted); }
+    .comp-row.highlight { background: var(--pri-light); }
+    .comp-row.highlight .name { color: var(--pri); font-weight: 600; }
+    .comp-row.highlight .tag { background: var(--pri); color: #fff; }
+
+    /* Services */
+    .services { background: var(--bg-purple); }
+    .services h2 { text-align: center; margin-bottom: 8px; }
+    .services .subtitle { text-align: center; margin-bottom: 48px; }
+    .svc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; max-width: 900px; margin: 0 auto; }
+    .svc-grid--three { grid-template-columns: 1fr 1fr 1fr; }
+    .svc-card { background: #fff; border-radius: var(--radius-lg); padding: 32px; box-shadow: 0 1px 3px rgba(0,0,0,.03), 0 6px 24px rgba(0,0,0,.04); transition: transform .3s, box-shadow .3s; }
+    .svc-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,.06), 0 12px 36px rgba(0,0,0,.06); }
+    .svc-card.primary { border: 2px solid var(--pri); }
+    .svc-badge { display: inline-block; font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 4px; margin-bottom: 16px; letter-spacing: .04em; }
+    .svc-badge--launch { background: var(--pri); color: #fff; }
+    .svc-badge--soon { background: #f0f0f0; color: var(--text-muted); }
+    .svc-card h4 { font-size: 22px; margin-bottom: 8px; }
+    .svc-card p { font-size: 14px; margin-bottom: 16px; }
+    .svc-list { list-style: none; }
+    .svc-list li { padding: 6px 0; font-size: 14px; color: var(--text-secondary); display: flex; gap: 10px; align-items: flex-start; }
+    .svc-list li::before { content: '✓'; color: var(--pri); font-weight: 700; flex-shrink: 0; }
+    .svc-card.secondary .svc-list li::before { color: var(--text-muted); }
+
+    /* How It Works */
+    .how-it-works h2 { text-align: center; margin-bottom: 48px; }
+    .steps { max-width: 700px; margin: 0 auto; display: flex; flex-direction: column; gap: 32px; }
+    .step { display: flex; gap: 20px; align-items: flex-start; }
+    .step-num { width: 40px; height: 40px; border-radius: 50%; background: var(--pri); color: #fff; display: grid; place-items: center; font-weight: 700; font-size: 16px; flex-shrink: 0; }
+    .step h4 { font-size: 18px; margin-bottom: 4px; }
+    .step p { font-size: 15px; }
+
+    /* Final CTA */
+    .final-cta { text-align: center; background: var(--bg-purple); }
+    .final-cta h2 { margin-bottom: 8px; }
+    .final-cta p { margin-bottom: 32px; max-width: 500px; margin-left: auto; margin-right: auto; }
+    .final-cta .pricing-hint { margin-top: 16px; font-size: 14px; color: var(--text-muted); }
+
+    /* Footer */
+    .footer { background: #f8f7ff; color: #1a1a2e; padding: 60px 0 32px; }
+    .footer__inner { display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr; gap: 40px; max-width: var(--max-w); margin: 0 auto; padding: 0 24px; }
+    .footer__brand p { color: #667085; font-size: 14px; margin-top: 12px; }
+    .footer__logo { height: 28px; }
+    .footer__col h5 { font-size: 14px; font-weight: 600; margin-bottom: 16px; color: #98a2b3; letter-spacing: .04em; text-transform: uppercase; }
+    .footer__link { display: block; font-size: 14px; color: #667085; margin-bottom: 10px; }
+    .footer__bottom { margin-top: 48px; padding-top: 24px; border-top: 1px solid #e8e8e8; font-size: 13px; color: #98a2b3; text-align: center; max-width: var(--max-w); margin-left: auto; margin-right: auto; padding-left: 24px; padding-right: 24px; }
+  </style>
+</head>
+<body>
+  <nav class="asc-nav">
+    <a href="hub.html" class="asc-nav-left"><img src="logo-purple.svg" alt="Ascend" style="height:24px;"></a>
+    <div class="asc-nav-links" style="display:none;">
+      <a href="hub.html">Hub</a>
+      <a href="index.html">ROI Calculator</a>
+      <a href="trip-planner.html">Trip Planner</a>
+      <a href="visa-tools.html">Visa Tools</a>
+      <a href="templates.html">Partners</a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="container">
+      <span class="label">FOR ATHLETES & ENTERTAINMENT PROFESSIONALS</span>
+      <h1>Your agent handles your career.<br><em>We handle everything else.</em></h1>
+      <p>AI-powered concierge for professional athletes. Travel, tax planning, brand management, and lifestyle — handled by a team that works as fast as your schedule demands.</p>
+      <a href="#" class="btn btn--pri btn--lg">Get Started</a>
+      <div class="proof">Plans starting at 2% of gross income</div>
+    </div>
+  </section>
+
+  <!-- PAIN POINTS -->
+  <section class="pain-section">
+    <div class="container">
+      <h2>You have an agent and a CPA. That's it.</h2>
+      <div class="pain-grid">
+        <div class="pain-card">
+          <div class="icon">&#9992;&#65039;</div>
+          <h4>Constant Travel, Zero Support</h4>
+          <p>Training camp, away games, offseason moves, family visits — you're booking flights at midnight between film sessions.</p>
+        </div>
+        <div class="pain-card">
+          <div class="icon">&#128200;</div>
+          <h4>Multi-State Tax Nightmare</h4>
+          <p>You play in 8 states a year. Each one taxes you differently. Your CPA sees it once at filing time — too late to optimize.</p>
+        </div>
+        <div class="pain-card">
+          <div class="icon">&#128232;</div>
+          <h4>Brand Deals You Can't Evaluate</h4>
+          <p>Endorsement offers land in your DMs. Some are good. Most aren't. Nobody's screening them unless you pay a full-time manager.</p>
+        </div>
+        <div class="pain-card">
+          <div class="icon">&#127968;</div>
+          <h4>Relocation Every Contract Cycle</h4>
+          <p>New city, new apartment, new schools for the kids, new everything — and you have two weeks before camp starts.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- COMPARISON -->
+  <section class="comparison">
+    <div class="container">
+      <h2>Premium Support Without the Premium Price</h2>
+      <p class="subtitle">Traditional concierge services are built for billionaires. Ascend is built for athletes earning $1M–$5M.</p>
+      <div class="comp-table">
+        <div class="comp-header">
+          <div>Option</div>
+          <div>Annual Cost</div>
+          <div>Coverage</div>
+        </div>
+        <div class="comp-row">
+          <div class="name">Full personal staff</div>
+          <div class="price">$150K–$400K/yr</div>
+          <div><span class="tag tag--muted">Overkill</span></div>
+        </div>
+        <div class="comp-row">
+          <div class="name">Traditional concierge</div>
+          <div class="price">$60K–$300K/yr</div>
+          <div><span class="tag tag--muted">Expensive & Slow</span></div>
+        </div>
+        <div class="comp-row highlight">
+          <div class="name">Ascend AI Player Services</div>
+          <div class="price">$24K–$72K/yr</div>
+          <div><span class="tag">Full Coverage</span></div>
+        </div>
+        <div class="comp-row">
+          <div class="name">DIY + point tools</div>
+          <div class="price">$0–$5K/yr</div>
+          <div><span class="tag tag--muted">Gaps Everywhere</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SERVICES -->
+  <section class="services">
+    <div class="container">
+      <h2>Five Verticals. One Team.</h2>
+      <p class="subtitle">Launch with Money Intelligence and Brand. Expand into any vertical based on what you actually need.</p>
+      <div class="svc-grid">
+        <div class="svc-card primary">
+          <span class="svc-badge svc-badge--launch">LAUNCH VERTICAL</span>
+          <h4>Money Intelligence</h4>
+          <p>Your finances across every state, every season, every deal — organized and optimized proactively.</p>
+          <ul class="svc-list">
+            <li>Multi-state tax maps per game schedule</li>
+            <li>Investment deal screening</li>
+            <li>Expense categorization and alerts</li>
+            <li>Contract comparison analysis</li>
+          </ul>
+        </div>
+        <div class="svc-card primary">
+          <span class="svc-badge svc-badge--launch">LAUNCH VERTICAL</span>
+          <h4>Brand & Visibility</h4>
+          <p>Build your brand without hiring a full-time manager. AI handles the research, humans handle the relationships.</p>
+          <ul class="svc-list">
+            <li>Social content calendar</li>
+            <li>Endorsement opportunity screening</li>
+            <li>Media prep packets</li>
+            <li>Brand risk monitoring</li>
+          </ul>
+        </div>
+      </div>
+      <div class="svc-grid svc-grid--three" style="margin-top: 24px;">
+        <div class="svc-card secondary">
+          <span class="svc-badge svc-badge--soon">COMING SOON</span>
+          <h4>Real Estate & Relocation</h4>
+          <p>Market analysis, lease reviews, neighborhood research — ready before you land in your new city.</p>
+          <ul class="svc-list">
+            <li>Market comparison reports</li>
+            <li>Lease/purchase review</li>
+            <li>School and neighborhood research</li>
+          </ul>
+        </div>
+        <div class="svc-card secondary">
+          <span class="svc-badge svc-badge--soon">COMING SOON</span>
+          <h4>Career & Post-Career</h4>
+          <p>Planning for what comes after the game, starting while you're still playing.</p>
+          <ul class="svc-list">
+            <li>Post-career pathway maps</li>
+            <li>Performance analytics briefs</li>
+            <li>Business opportunity screening</li>
+          </ul>
+        </div>
+        <div class="svc-card secondary">
+          <span class="svc-badge svc-badge--soon">COMING SOON</span>
+          <h4>Family & Lifestyle</h4>
+          <p>The logistics of life off the field — handled so you can focus on what matters.</p>
+          <ul class="svc-list">
+            <li>School research and enrollment</li>
+            <li>Event and travel planning for family</li>
+            <li>Personal errands and concierge requests</li>
+            <li>Household vendor coordination</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="how-it-works">
+    <div class="container">
+      <h2>How It Works</h2>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div>
+            <h4>Send a request via WhatsApp</h4>
+            <p>Text your concierge like you'd text a friend. "I need to fly to Nashville Tuesday, apartment for 3 months, near Titans facility."</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div>
+            <h4>Human concierge classifies it</h4>
+            <p>Your dedicated relationship manager reads the request, adds context, and routes it to the right AI workflow.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div>
+            <h4>AI executes the deliverable</h4>
+            <p>Research, analysis, options, and recommendations — produced in minutes, not days. A domain expert reviews before delivery.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <div>
+            <h4>Concierge delivers to you</h4>
+            <p>Polished results back in your WhatsApp. Flight options, tax maps, endorsement evaluations — ready to act on.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FINAL CTA -->
+  <section class="final-cta">
+    <div class="container">
+      <h2>Ready to upgrade your support team?</h2>
+      <p>Join the athletes who stopped doing everything themselves and started letting AI handle the 70% that doesn't need a human touch.</p>
+      <a href="#" class="btn btn--pri btn--lg">Apply Now</a>
+      <div class="pricing-hint">Plans from $2,000/mo &middot; 2–4% of take-home income</div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer__inner">
+      <div class="footer__brand">
+        <img src="https://www.joinascend.com/assets/images/logo-white.svg" alt="Ascend" class="footer__logo">
+        <p>Your 24/7 travel concierge for premium, stress-free journeys.</p>
+      </div>
+      <div class="footer__col">
+        <h5>Product</h5>
+        <a href="#" class="footer__link">Membership</a>
+        <a href="#" class="footer__link">How it works</a>
+        <a href="#" class="footer__link">Pricing</a>
+        <a href="#" class="footer__link">Case Studies</a>
+        <a href="#" class="footer__link">FAQs</a>
+      </div>
+      <div class="footer__col">
+        <h5>Company</h5>
+        <a href="#" class="footer__link">Press</a>
+        <a href="#" class="footer__link">Terms of Service</a>
+        <a href="#" class="footer__link">Privacy Policy</a>
+      </div>
+      <div class="footer__col">
+        <h5>Contact</h5>
+        <p style="color:rgba(255,255,255,.7);font-size:14px;">Available 24/7<br>on WhatsApp for<br>our members</p>
+      </div>
+    </div>
+    <div class="footer__bottom">&copy; 2026 Ascend. All rights reserved.</div>
+  </footer>
+</body>
+</html>

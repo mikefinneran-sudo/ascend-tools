@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ascend | Book Travel</title>
+<style>
+/* ===== TOKENS ===== */
+:root {
+  --bg: #ffffff; --bg-card: #ffffff; --bg-alt: #f8f7ff; --bg-input: #fff;
+  --text: #1a1a2e; --text-secondary: #667085; --text-muted: #98a2b3; --text-hint: #bbb;
+  --accent: #6F57FF; --accent-hover: #5a44e6; --accent-glow: rgba(111,87,255,0.12);
+  --accent-light: #f8f7ff; --accent-soft: #E8E3FF;
+  --border: #E8E8E8; --border-focus: #6F57FF; --border-light: #F0F0F0;
+  --metric-bg: #F1EEFF; --metric-border: #E8E8E8;
+  --success-bg: #E8F9E4; --success-text: #1a6b1a; --success-border: #6CBF5B;
+  --amber-bg: #FEF3C7; --amber-border: #D97706; --amber-text: #92400E;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 20px rgba(0,0,0,0.06);
+  --radius-sm: 6px; --radius-md: 12px; --radius-lg: 16px;
+  --sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --nav-height: 56px;
+  --xeni: #FF6B35; --onewurld: #0EA5E9; --le: #B8960F; --retail: #98a2b3;
+}
+[data-theme="dark"] {
+  --bg: #0C0C10; --bg-card: #161620; --bg-alt: #1A1828; --bg-input: #1E1E2A;
+  --text: #EAEAEF; --text-secondary: #A0A0B0; --text-muted: #666680; --text-hint: #444460;
+  --accent: #8B7AFF; --accent-hover: #A090FF; --accent-glow: rgba(139,122,255,0.15);
+  --accent-light: #1E1A30; --accent-soft: #2A2540;
+  --border: #2A2A3A; --border-focus: #8B7AFF; --border-light: #1E1E2E;
+  --metric-bg: #1c1a28; --metric-border: #2d2b3a;
+  --success-bg: #142014; --success-text: #8ED88A; --success-border: #2A5A2A;
+  --amber-bg: #422006; --amber-border: #D97706; --amber-text: #FDE68A;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.2);
+  --shadow-md: 0 4px 20px rgba(0,0,0,0.3);
+  --le: #D4AF37;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: var(--sans); background: var(--bg); color: var(--text); line-height: 1.6; -webkit-font-smoothing: antialiased; }
+
+/* ===== NAV ===== */
+.asc-nav {
+  background: #fff; padding: 0 28px; height: var(--nav-height); border-bottom: 1px solid #e8e8e8;
+  display: flex; justify-content: space-between; align-items: center;
+  position: sticky; top: 0; z-index: 200;
+}
+[data-theme="dark"] .asc-nav { background: #0C0C10; border-color: #2A2A3A; }
+.asc-nav-left { display: flex; align-items: center; gap: 8px; text-decoration: none; }
+.asc-nav-links { display: flex; align-items: center; gap: 6px; }
+.asc-nav-links a {
+  color: #667085; font-size: 13px; font-weight: 500; text-decoration: none;
+  padding: 6px 14px; border-radius: 6px; transition: all 0.2s; border: 1px solid transparent;
+}
+.asc-nav-links a:hover { color: #1a1a2e; background: rgba(111,87,255,0.06); }
+.asc-nav-links a.active { color: #6f57ff; background: rgba(111,87,255,0.1); border-color: rgba(111,87,255,0.3); }
+[data-theme="dark"] .asc-nav-links a { color: #A0A0B0; }
+[data-theme="dark"] .asc-nav-links a:hover { color: #EAEAEF; background: rgba(139,122,255,0.1); }
+[data-theme="dark"] .asc-nav-links a.active { color: #8B7AFF; background: rgba(139,122,255,0.15); border-color: rgba(139,122,255,0.3); }
+.asc-nav-toggle {
+  color: var(--text-muted); border: 1px solid var(--border); padding: 5px 14px; border-radius: 6px;
+  font-size: 12px; cursor: pointer; background: transparent; font-family: var(--sans); transition: all 0.2s;
+}
+.asc-nav-toggle:hover { color: var(--text); border-color: var(--accent); }
+
+/* ===== PAGE HEAD ===== */
+.page-head {
+  padding: 28px; border-radius: 20px; margin-bottom: 24px;
+  background: radial-gradient(circle at top left, rgba(111,87,255,0.18), transparent 36%), linear-gradient(135deg, var(--metric-bg), rgba(217,253,210,0.7));
+  border: 1px solid var(--metric-border);
+}
+[data-theme="dark"] .page-head {
+  background: radial-gradient(circle at top left, rgba(111,87,255,0.25), transparent 36%), linear-gradient(135deg, var(--metric-bg), rgba(26,46,31,0.5));
+}
+.eyebrow { margin: 0 0 8px; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); font-weight: 600; }
+h1 { margin: 0 0 10px; font-size: 42px; line-height: 1.02; letter-spacing: -0.04em; }
+.page-copy { margin: 0; color: var(--text-secondary); font-size: 15px; }
+
+.container { max-width: 1500px; margin: 0 auto; padding: 28px 16px 64px; }
+
+/* ===== SEARCH ===== */
+.search-card {
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg);
+  padding: 20px; margin-bottom: 20px; box-shadow: var(--shadow-sm);
+}
+.search-row { display: flex; gap: 12px; align-items: end; flex-wrap: wrap; }
+.search-field { flex: 1; min-width: 120px; }
+.search-field label {
+  display: block; font-size: 11px; font-weight: 600; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px;
+}
+.search-field input, .search-field select {
+  width: 100%; padding: 10px 14px; font-size: 14px; font-family: var(--sans);
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+  background: var(--bg-input); color: var(--text); transition: border-color 0.2s;
+}
+.search-field input:focus, .search-field select:focus {
+  outline: none; border-color: var(--border-focus); box-shadow: 0 0 0 3px var(--accent-glow);
+}
+.search-btn {
+  padding: 10px 28px; font-size: 14px; font-weight: 600; font-family: var(--sans);
+  background: var(--accent); color: #fff; border: none; border-radius: var(--radius-sm);
+  cursor: pointer; transition: background 0.2s; white-space: nowrap;
+}
+.search-btn:hover { background: var(--accent-hover); }
+
+/* ===== FILTER PANEL ===== */
+.filter-panel {
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md);
+  padding: 14px 18px; margin-bottom: 16px; box-shadow: var(--shadow-sm);
+}
+.filter-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.filter-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); }
+.filter-clear {
+  font-size: 12px; color: var(--accent); cursor: pointer; background: none; border: none;
+  font-family: var(--sans); font-weight: 600; padding: 0;
+}
+.filter-clear:hover { text-decoration: underline; }
+.filter-groups { display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-end; }
+.filter-group { min-width: 0; }
+.filter-group-label {
+  font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;
+  color: var(--text-hint); margin-bottom: 4px;
+}
+.filter-group select {
+  padding: 5px 8px; font-size: 12px; font-family: var(--sans);
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+  background: var(--bg-input); color: var(--text); min-width: 120px;
+}
+.filter-group select:focus { outline: none; border-color: var(--border-focus); }
+.filter-chips { display: flex; gap: 4px; flex-wrap: wrap; }
+.f-chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 4px 10px; font-size: 11px; font-weight: 600; font-family: var(--sans);
+  border: 1px solid var(--border); border-radius: 100px; cursor: pointer;
+  background: var(--bg-card); color: var(--text-secondary); transition: all 0.15s;
+}
+.f-chip:hover { border-color: var(--accent); color: var(--accent); }
+.f-chip.active { background: var(--accent-light); border-color: var(--accent); color: var(--accent); }
+.f-chip .dot { width: 7px; height: 7px; border-radius: 50%; }
+.dot-xeni { background: var(--xeni); }
+.dot-onewurld { background: var(--onewurld); }
+.dot-le { background: var(--le); }
+.price-range { display: flex; align-items: center; gap: 4px; }
+.price-range input {
+  width: 70px; padding: 5px 6px; font-size: 12px; font-family: var(--sans);
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+  background: var(--bg-input); color: var(--text); text-align: center;
+}
+.price-range input:focus { outline: none; border-color: var(--border-focus); }
+.price-range .dash { color: var(--text-hint); font-size: 12px; }
+.rating-chips { display: flex; gap: 3px; }
+.r-chip {
+  padding: 4px 8px; font-size: 10px; font-weight: 600; font-family: var(--sans);
+  border: 1px solid var(--border); border-radius: 100px; cursor: pointer;
+  background: var(--bg-card); color: var(--text-secondary); transition: all 0.15s;
+}
+.r-chip:hover { border-color: var(--amber-border); color: var(--amber-text); }
+.r-chip.active { background: var(--amber-bg); border-color: var(--amber-border); color: var(--amber-text); }
+
+/* Active filter tags */
+.active-filters { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; align-items: center; }
+.active-filter-tag {
+  display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px;
+  font-size: 11px; font-weight: 600; background: var(--accent-light);
+  border: 1px solid var(--accent-soft); border-radius: 100px; color: var(--accent);
+}
+.active-filter-tag .x {
+  cursor: pointer; font-size: 13px; margin-left: 2px; font-weight: 700;
+  opacity: 0.6; transition: opacity 0.15s;
+}
+.active-filter-tag .x:hover { opacity: 1; }
+.active-filters-label { font-size: 11px; color: var(--text-muted); font-weight: 600; margin-right: 4px; }
+
+/* ===== TWO-COLUMN LAYOUT ===== */
+.columns { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+@media (max-width: 1100px) { .columns { grid-template-columns: 1fr; } }
+
+.column-panel {
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md);
+  overflow: hidden; box-shadow: var(--shadow-sm);
+}
+.column-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 18px; background: var(--bg-alt); border-bottom: 1px solid var(--border);
+}
+.column-title { font-size: 15px; font-weight: 700; letter-spacing: -0.01em; }
+.column-count { font-size: 12px; color: var(--text-muted); font-weight: 500; }
+.column-sort {
+  padding: 4px 10px; font-size: 11px; font-family: var(--sans);
+  border: 1px solid var(--border); border-radius: 100px; background: var(--bg-card);
+  color: var(--text-secondary); cursor: pointer;
+}
+
+/* ===== COMPACT TABLE ===== */
+.col-table { width: 100%; border-collapse: collapse; }
+.col-table thead th {
+  padding: 10px 12px; font-size: 10px; font-weight: 700; letter-spacing: 0.06em;
+  text-transform: uppercase; text-align: left; color: var(--text-hint);
+  border-bottom: 1px solid var(--border); background: var(--bg-card);
+  position: sticky; top: var(--nav-height); z-index: 40;
+}
+.col-table thead th.tc { text-align: center; }
+.col-table thead th .sd {
+  display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+  margin-right: 4px; vertical-align: middle;
+}
+.col-table tbody tr { transition: background 0.15s; }
+.col-table tbody tr:hover { background: var(--accent-light); }
+.col-table tbody tr:not(:last-child) td { border-bottom: 1px solid var(--border-light); }
+.col-table td { padding: 10px 12px; vertical-align: middle; font-size: 13px; }
+
+/* Property in column table */
+.ct-prop { min-width: 180px; }
+.ct-name { font-weight: 700; font-size: 13px; line-height: 1.3; }
+.ct-loc { font-size: 11px; color: var(--text-secondary); }
+.ct-detail { font-size: 10px; color: var(--text-muted); margin-top: 1px; }
+.ct-amenities { display: flex; gap: 3px; flex-wrap: wrap; margin-top: 3px; }
+.ct-am {
+  font-size: 8px; font-weight: 600; padding: 1px 5px; border-radius: 3px;
+  background: var(--metric-bg); color: var(--text-muted); text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+/* Price cells */
+.ct-price { text-align: center; white-space: nowrap; }
+.ct-pv { font-size: 14px; font-weight: 800; letter-spacing: -0.02em; }
+.ct-pu { font-size: 9px; color: var(--text-muted); }
+.ct-na { font-size: 11px; color: var(--text-hint); }
+.ct-retail .ct-pv { text-decoration: line-through; font-weight: 600; color: var(--text-muted); }
+.ct-best { position: relative; }
+.ct-best .ct-pv { color: var(--success-text); }
+.ct-best::before {
+  content: ''; position: absolute; inset: 2px; border-radius: 6px;
+  background: var(--success-bg); border: 1px solid var(--success-border); z-index: -1;
+}
+
+/* Savings */
+.ct-save { text-align: center; }
+.ct-sbadge {
+  display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 8px;
+  border-radius: 100px; background: var(--success-bg); color: var(--success-text);
+  border: 1px solid var(--success-border);
+}
+.ct-sbadge.high { background: #059669; color: #fff; border-color: #059669; }
+
+/* Rating */
+.ct-rating { text-align: center; }
+.ct-rbadge {
+  display: inline-block; font-size: 11px; font-weight: 700; padding: 1px 8px;
+  border-radius: 100px; background: var(--amber-bg); color: var(--amber-text);
+}
+
+/* Book */
+.ct-book { text-align: center; }
+.ct-btn {
+  padding: 5px 14px; font-size: 12px; font-weight: 600; font-family: var(--sans);
+  background: var(--accent); color: #fff; border: none; border-radius: var(--radius-sm);
+  cursor: pointer; transition: background 0.2s;
+}
+.ct-btn:hover { background: var(--accent-hover); }
+
+/* ===== WIZARD STEPS (cars, activities) ===== */
+.next-steps {
+  margin-top: 24px; display: flex; gap: 12px; justify-content: center;
+}
+.next-step-card {
+  display: flex; align-items: center; gap: 12px; padding: 16px 24px;
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md);
+  cursor: pointer; transition: all 0.2s; flex: 1; max-width: 320px;
+}
+.next-step-card:hover { border-color: var(--accent); box-shadow: var(--shadow-md); }
+.ns-icon {
+  width: 44px; height: 44px; border-radius: 10px; display: flex;
+  align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0;
+}
+.ns-icon-car { background: linear-gradient(135deg, #667085, #D1D5DB); }
+.ns-icon-activity { background: linear-gradient(135deg, #D4AF37, #FEF3C7); }
+.ns-title { font-size: 14px; font-weight: 700; }
+.ns-desc { font-size: 12px; color: var(--text-secondary); }
+.ns-badge {
+  font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;
+  letter-spacing: 0.06em; margin-top: 2px;
+}
+
+/* ===== FOOTER ===== */
+footer {
+  background: var(--accent-light); padding: 24px 28px; text-align: center;
+  font-size: 13px; color: var(--text-muted); border-top: 1px solid var(--border);
+}
+footer a { color: var(--accent); text-decoration: none; }
+footer a:hover { text-decoration: underline; }
+
+.empty-msg {
+  padding: 40px 16px; text-align: center; color: var(--text-muted); font-size: 13px;
+}
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+}
+
+@media (max-width: 700px) {
+  h1 { font-size: 28px; }
+  .search-row { flex-direction: column; }
+  .search-field { min-width: 100%; }
+  .page-head { padding: 20px; border-radius: 14px; }
+  .filter-groups { flex-direction: column; }
+  .next-steps { flex-direction: column; align-items: center; }
+}
+</style>
+</head>
+<body>
+
+<nav class="asc-nav">
+  <div style="display:flex;align-items:center;gap:16px;">
+    <a href="hub.html" class="asc-nav-left">
+      <img src="logo-purple.svg" alt="Ascend" style="height:22px;">
+    </a>
+    <div class="asc-nav-links">
+      <a href="index.html">ROI</a>
+      <a href="trip-planner.html">Planner</a>
+      <a href="visa-tools.html">Visa</a>
+      <a href="booking.html" class="active">Booking</a>
+    </div>
+  </div>
+  <button class="asc-nav-toggle" onclick="toggleTheme()">Dark</button>
+</nav>
+
+<div class="container">
+
+  <div class="page-head">
+    <div class="eyebrow">Book Travel</div>
+    <h1>Compare &amp; book across all platforms</h1>
+    <p class="page-copy">Retail vs. Xeni, Onewurld, and Little Emperors side by side. Best price highlighted.</p>
+  </div>
+
+  <!-- SEARCH -->
+  <div class="search-card">
+    <div class="search-row">
+      <div class="search-field" style="flex:2;">
+        <label for="searchDest">Destination</label>
+        <input type="text" id="searchDest" placeholder="City, hotel, airline..." oninput="filterResults()">
+      </div>
+      <div class="search-field">
+        <label for="searchIn">Check-in</label>
+        <input type="date" id="searchIn" value="2026-05-15">
+      </div>
+      <div class="search-field">
+        <label for="searchOut">Check-out</label>
+        <input type="date" id="searchOut" value="2026-05-20">
+      </div>
+      <div class="search-field" style="flex:0.5;">
+        <label for="searchGuests">Guests</label>
+        <select id="searchGuests"><option>1</option><option selected>2</option><option>3</option><option>4+</option></select>
+      </div>
+      <button class="search-btn" onclick="filterResults()">Search</button>
+    </div>
+  </div>
+
+  <!-- FILTERS -->
+  <div class="filter-panel">
+    <div class="filter-header">
+      <span class="filter-title">Filters</span>
+      <button class="filter-clear" onclick="clearFilters()">Clear all</button>
+    </div>
+    <div class="filter-groups">
+      <div class="filter-group">
+        <div class="filter-group-label">Country</div>
+        <select id="filterCountry" onchange="filterResults()"><option value="">All</option></select>
+      </div>
+      <div class="filter-group">
+        <div class="filter-group-label">City</div>
+        <select id="filterCity" onchange="filterResults()"><option value="">All</option></select>
+      </div>
+      <div class="filter-group">
+        <div class="filter-group-label">Brand</div>
+        <select id="filterBrand" onchange="filterResults()"><option value="">All</option></select>
+      </div>
+      <div class="filter-group">
+        <div class="filter-group-label">Source</div>
+        <div class="filter-chips">
+          <button class="f-chip active" data-source="" onclick="setSource('')">All</button>
+          <button class="f-chip" data-source="xeni" onclick="setSource('xeni')"><span class="dot dot-xeni"></span> Xeni</button>
+          <button class="f-chip" data-source="onewurld" onclick="setSource('onewurld')"><span class="dot dot-onewurld"></span> Onewurld</button>
+          <button class="f-chip" data-source="le" onclick="setSource('le')"><span class="dot dot-le"></span> Little Emperors</button>
+        </div>
+      </div>
+      <div class="filter-group">
+        <div class="filter-group-label">Amenity</div>
+        <select id="filterAmenity" onchange="filterResults()"><option value="">All</option></select>
+      </div>
+      <div class="filter-group">
+        <div class="filter-group-label">Price</div>
+        <div class="price-range">
+          <input type="number" id="priceMin" placeholder="Min" oninput="filterResults()">
+          <span class="dash">&ndash;</span>
+          <input type="number" id="priceMax" placeholder="Max" oninput="filterResults()">
+        </div>
+      </div>
+      <div class="filter-group">
+        <div class="filter-group-label">Rating</div>
+        <div class="rating-chips">
+          <button class="r-chip active" data-rating="0" onclick="setRating(0)">Any</button>
+          <button class="r-chip" data-rating="4" onclick="setRating(4)">4+</button>
+          <button class="r-chip" data-rating="4.5" onclick="setRating(4.5)">4.5+</button>
+          <button class="r-chip" data-rating="4.8" onclick="setRating(4.8)">4.8+</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="active-filters" id="activeFilters"></div>
+
+  <!-- TWO COLUMNS: HOTELS + FLIGHTS -->
+  <div class="columns">
+
+    <!-- HOTELS -->
+    <div class="column-panel" id="hotelPanel">
+      <div class="column-header">
+        <span class="column-title">Hotels</span>
+        <span class="column-count" id="hotelCount"></span>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="col-table">
+          <thead>
+            <tr>
+              <th>Property</th>
+              <th class="tc"><span class="sd" style="background:var(--retail);"></span>Retail</th>
+              <th class="tc"><span class="sd" style="background:var(--xeni);"></span>Xeni</th>
+              <th class="tc"><span class="sd" style="background:var(--onewurld);"></span>Onew.</th>
+              <th class="tc"><span class="sd" style="background:var(--le);"></span>L.E.</th>
+              <th class="tc">Save</th>
+              <th class="tc" scope="col"><span class="sr-only">Actions</span></th>
+            </tr>
+          </thead>
+          <tbody id="hotelBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- FLIGHTS -->
+    <div class="column-panel" id="flightPanel">
+      <div class="column-header">
+        <span class="column-title">Flights</span>
+        <span class="column-count" id="flightCount"></span>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="col-table">
+          <thead>
+            <tr>
+              <th>Route</th>
+              <th class="tc"><span class="sd" style="background:var(--retail);"></span>Retail</th>
+              <th class="tc"><span class="sd" style="background:var(--xeni);"></span>Xeni</th>
+              <th class="tc"><span class="sd" style="background:var(--onewurld);"></span>Onew.</th>
+              <th class="tc"><span class="sd" style="background:var(--le);"></span>L.E.</th>
+              <th class="tc">Save</th>
+              <th class="tc"></th>
+            </tr>
+          </thead>
+          <tbody id="flightBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- NEXT STEPS: Cars + Activities -->
+  <div class="next-steps">
+    <div class="next-step-card" onclick="alert('Cars step coming soon')">
+      <div class="ns-icon ns-icon-car">&#128663;</div>
+      <div>
+        <div class="ns-title">Add a Car</div>
+        <div class="ns-desc">Rental cars at your destination</div>
+        <div class="ns-badge">Next Step</div>
+      </div>
+    </div>
+    <div class="next-step-card" onclick="alert('Activities step coming soon')">
+      <div class="ns-icon ns-icon-activity">&#127947;</div>
+      <div>
+        <div class="ns-title">Add Activities</div>
+        <div class="ns-desc">Tours, dining, experiences</div>
+        <div class="ns-badge">Next Step</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  Ascend Travel &middot; Powered by Xeni, Onewurld &amp; Little Emperors &middot; <a href="hub.html">Back to Tools</a>
+</footer>
+
+<script>
+// ===== DATA =====
+var HOTELS = [
+  { id:1, name:'The Ritz-Carlton', location:'Tokyo, Japan', city:'Tokyo', country:'Japan', brand:'Ritz-Carlton', rating:4.9, retail:650, xeni:null, onewurld:null, le:485, unit:'/night', amenities:['Spa','Pool','Club Lounge','Concierge','Gym'], detail:'Roppongi' },
+  { id:2, name:'Four Seasons Resort', location:'Ubud, Bali', city:'Ubud', country:'Indonesia', brand:'Four Seasons', rating:4.8, retail:820, xeni:695, onewurld:null, le:620, unit:'/night', amenities:['Pool','Spa','Fine Dining','Yoga','Garden'], detail:'Sayan Valley' },
+  { id:3, name:'Marriott Marquis', location:'New York, NY', city:'New York', country:'United States', brand:'Marriott', rating:4.3, retail:389, xeni:289, onewurld:310, le:null, unit:'/night', amenities:['Gym','Restaurant','Bar','Business Center'], detail:'Midtown' },
+  { id:4, name:'Hilton Bankside', location:'London, UK', city:'London', country:'United Kingdom', brand:'Hilton', rating:4.4, retail:295, xeni:215, onewurld:240, le:null, unit:'/night', amenities:['Gym','Restaurant','Bar'], detail:'Southwark' },
+  { id:5, name:'Mandarin Oriental', location:'Paris, France', city:'Paris', country:'France', brand:'Mandarin Oriental', rating:4.9, retail:1150, xeni:null, onewurld:980, le:890, unit:'/night', amenities:['Spa','Michelin Dining','Bar','Pool','Concierge'], detail:'Rue Saint-Honor\u00E9' },
+  { id:6, name:'Hyatt Regency', location:'Sydney, Australia', city:'Sydney', country:'Australia', brand:'Hyatt', rating:4.5, retail:275, xeni:210, onewurld:198, le:null, unit:'/night', amenities:['Pool','Gym','Harbor View','Restaurant'], detail:'Darling Harbour' },
+  { id:7, name:'W Hotel', location:'Barcelona, Spain', city:'Barcelona', country:'Spain', brand:'W Hotels', rating:4.6, retail:450, xeni:365, onewurld:345, le:null, unit:'/night', amenities:['Rooftop Pool','Spa','Beach','DJ Bar','Gym'], detail:'Barceloneta' },
+  { id:8, name:'Aman Tokyo', location:'Tokyo, Japan', city:'Tokyo', country:'Japan', brand:'Aman', rating:4.9, retail:1450, xeni:null, onewurld:null, le:1120, unit:'/night', amenities:['Spa','Pool','Japanese Garden','Concierge','Library'], detail:'Otemachi' },
+  { id:9, name:'Courtyard Marriott', location:'Chicago, IL', city:'Chicago', country:'United States', brand:'Marriott', rating:4.1, retail:189, xeni:149, onewurld:165, le:null, unit:'/night', amenities:['Gym','Business Center','Restaurant'], detail:'Magnificent Mile' },
+  { id:10, name:'Rosewood', location:'Hong Kong', city:'Hong Kong', country:'Hong Kong', brand:'Rosewood', rating:4.8, retail:750, xeni:620, onewurld:580, le:595, unit:'/night', amenities:['Spa','Pool','Harbor View','Concierge','Fine Dining'], detail:'Victoria Dockside' },
+  { id:11, name:'Conrad Maldives', location:'Rangali Island', city:'Rangali Island', country:'Maldives', brand:'Conrad', rating:4.9, retail:1280, xeni:1050, onewurld:null, le:950, unit:'/night', amenities:['Overwater Villa','Spa','Diving','Snorkeling','Fine Dining'], detail:'Rangali Island' },
+  { id:12, name:'Holiday Inn Express', location:'Miami, FL', city:'Miami', country:'United States', brand:'Holiday Inn', rating:3.8, retail:155, xeni:112, onewurld:128, le:null, unit:'/night', amenities:['Pool','Breakfast','Parking'], detail:'Miami Beach' },
+  { id:13, name:'Peninsula', location:'Hong Kong', city:'Hong Kong', country:'Hong Kong', brand:'Peninsula', rating:4.9, retail:880, xeni:null, onewurld:720, le:695, unit:'/night', amenities:['Spa','Pool','Rolls-Royce Transfer','Helipad','Concierge'], detail:'Tsim Sha Tsui' },
+  { id:14, name:'St. Regis Bali', location:'Nusa Dua, Bali', city:'Nusa Dua', country:'Indonesia', brand:'St. Regis', rating:4.8, retail:780, xeni:640, onewurld:null, le:590, unit:'/night', amenities:['Butler','Spa','Pool','Beach','Fine Dining'], detail:'Nusa Dua' },
+  { id:15, name:'Ace Hotel', location:'New York, NY', city:'New York', country:'United States', brand:'Ace Hotel', rating:4.2, retail:320, xeni:255, onewurld:270, le:null, unit:'/night', amenities:['Restaurant','Bar','Lobby Workspace'], detail:'NoMad' },
+];
+
+var FLIGHTS = [
+  { id:20, name:'Delta Air Lines', location:'New York \u2192 London', city:'London', country:'United Kingdom', brand:'Delta', rating:4.2, retail:1680, xeni:1340, onewurld:1245, le:null, unit:'/person', amenities:['Lie-Flat','Lounge','Wi-Fi'], detail:'JFK\u2192LHR \u00B7 Business \u00B7 7h10m \u00B7 Nonstop' },
+  { id:21, name:'United Airlines', location:'San Francisco \u2192 Tokyo', city:'Tokyo', country:'Japan', brand:'United', rating:4.0, retail:3600, xeni:2890, onewurld:3100, le:null, unit:'/person', amenities:['Polaris Suite','Lounge','Wi-Fi'], detail:'SFO\u2192NRT \u00B7 First \u00B7 11h25m \u00B7 Nonstop' },
+  { id:22, name:'Emirates', location:'New York \u2192 Dubai', city:'Dubai', country:'UAE', brand:'Emirates', rating:4.7, retail:4200, xeni:null, onewurld:3450, le:null, unit:'/person', amenities:['Shower Spa','Bar','Chauffeur'], detail:'JFK\u2192DXB \u00B7 Business \u00B7 12h30m \u00B7 Nonstop' },
+  { id:23, name:'British Airways', location:'Chicago \u2192 London', city:'London', country:'United Kingdom', brand:'British Airways', rating:4.1, retail:1150, xeni:890, onewurld:920, le:null, unit:'/person', amenities:['Extra Legroom','Priority Boarding'], detail:'ORD\u2192LHR \u00B7 Premium Econ \u00B7 9h45m \u00B7 1 Stop' },
+  { id:24, name:'Singapore Airlines', location:'Los Angeles \u2192 Singapore', city:'Singapore', country:'Singapore', brand:'Singapore Airlines', rating:4.8, retail:5100, xeni:null, onewurld:4200, le:null, unit:'/person', amenities:['Suite','Lounge','Book the Cook','Wi-Fi'], detail:'LAX\u2192SIN \u00B7 First \u00B7 17h50m \u00B7 Nonstop' },
+  { id:25, name:'Qatar Airways', location:'New York \u2192 Doha', city:'Doha', country:'Qatar', brand:'Qatar Airways', rating:4.6, retail:3800, xeni:3100, onewurld:2950, le:null, unit:'/person', amenities:['Qsuite','Lounge','Wi-Fi','Dine on Demand'], detail:'JFK\u2192DOH \u00B7 Business \u00B7 13h15m \u00B7 Nonstop' },
+  { id:26, name:'ANA', location:'Los Angeles \u2192 Tokyo', city:'Tokyo', country:'Japan', brand:'ANA', rating:4.5, retail:3200, xeni:2650, onewurld:2800, le:null, unit:'/person', amenities:['The Room','Lounge','Multi-course Meal'], detail:'LAX\u2192HND \u00B7 Business \u00B7 12h05m \u00B7 Nonstop' },
+  { id:27, name:'Cathay Pacific', location:'San Francisco \u2192 Hong Kong', city:'Hong Kong', country:'Hong Kong', brand:'Cathay Pacific', rating:4.4, retail:2900, xeni:null, onewurld:2350, le:null, unit:'/person', amenities:['Lie-Flat','Lounge','Wi-Fi'], detail:'SFO\u2192HKG \u00B7 Business \u00B7 14h20m \u00B7 Nonstop' },
+];
+
+// ===== STATE =====
+var currentSource = '';
+var currentRating = 0;
+
+// ===== HELPERS =====
+function getBestPrice(l) {
+  var p = [l.xeni, l.onewurld, l.le].filter(function(v) { return v !== null && v !== undefined; });
+  return p.length > 0 ? Math.min.apply(null, p) : null;
+}
+// Use Math.round to normalize prices to integers for safe comparison (avoids float equality bugs)
+function priceMatch(a, b) { return a != null && b != null && Math.round(a) === Math.round(b); }
+function fmt(v) { return v != null ? '$' + v.toLocaleString() : null; }
+
+function matchesFilters(l) {
+  var query = document.getElementById('searchDest').value.toLowerCase().trim();
+  var country = document.getElementById('filterCountry').value;
+  var city = document.getElementById('filterCity').value;
+  var brand = document.getElementById('filterBrand').value;
+  var amenity = document.getElementById('filterAmenity').value;
+  var pMin = parseInt(document.getElementById('priceMin').value) || 0;
+  var pMax = parseInt(document.getElementById('priceMax').value) || Infinity;
+
+  if (query && l.name.toLowerCase().indexOf(query) === -1 && l.location.toLowerCase().indexOf(query) === -1 && l.city.toLowerCase().indexOf(query) === -1) return false;
+  if (country && l.country !== country) return false;
+  if (city && l.city !== city) return false;
+  if (brand && l.brand !== brand) return false;
+  if (currentSource) {
+    if (l[currentSource] === null || l[currentSource] === undefined) return false;
+  }
+  if (amenity && (!l.amenities || l.amenities.indexOf(amenity) === -1)) return false;
+  if (l.rating < currentRating) return false;
+  // When a specific source is selected, check price against that source's price, not best overall
+  var check;
+  if (currentSource && l[currentSource] != null) {
+    check = l[currentSource];
+  } else {
+    var best = getBestPrice(l);
+    check = best !== null ? best : l.retail;
+  }
+  if (check < pMin || check > pMax) return false;
+  return true;
+}
+
+// ===== BUILD ROW =====
+function buildRow(l) {
+  var tr = document.createElement('tr');
+  var best = getBestPrice(l);
+  var savings = (best !== null && l.retail) ? l.retail - best : 0;
+  var pct = (best !== null && l.retail) ? Math.round((savings / l.retail) * 100) : 0;
+
+  // Property
+  var td1 = document.createElement('td');
+  td1.className = 'ct-prop';
+  var n = document.createElement('div'); n.className = 'ct-name'; n.textContent = l.name; td1.appendChild(n);
+  var loc = document.createElement('div'); loc.className = 'ct-loc'; loc.textContent = l.location; td1.appendChild(loc);
+  if (l.detail) { var d = document.createElement('div'); d.className = 'ct-detail'; d.textContent = l.detail; td1.appendChild(d); }
+  if (l.amenities && l.amenities.length) {
+    var am = document.createElement('div'); am.className = 'ct-amenities';
+    l.amenities.slice(0, 3).forEach(function(a) { var s = document.createElement('span'); s.className = 'ct-am'; s.textContent = a; am.appendChild(s); });
+    if (l.amenities.length > 3) { var m = document.createElement('span'); m.className = 'ct-am'; m.textContent = '+' + (l.amenities.length - 3); am.appendChild(m); }
+    td1.appendChild(am);
+  }
+  tr.appendChild(td1);
+
+  // Prices: retail, xeni, onewurld, le
+  ['retail','xeni','onewurld','le'].forEach(function(src) {
+    var td = document.createElement('td');
+    td.className = 'ct-price';
+    var val = l[src];
+    if (val === null || val === undefined) {
+      var na = document.createElement('span'); na.className = 'ct-na'; na.textContent = '\u2014'; td.appendChild(na);
+    } else if (src === 'retail') {
+      td.classList.add('ct-retail');
+      var pv = document.createElement('span'); pv.className = 'ct-pv'; pv.textContent = fmt(val); td.appendChild(pv);
+    } else {
+      if (priceMatch(val, best)) td.classList.add('ct-best');
+      var pv2 = document.createElement('span'); pv2.className = 'ct-pv'; pv2.textContent = fmt(val); td.appendChild(pv2);
+    }
+    tr.appendChild(td);
+  });
+
+  // Savings
+  var tdS = document.createElement('td'); tdS.className = 'ct-save';
+  if (savings > 0) {
+    var sb = document.createElement('span'); sb.className = 'ct-sbadge' + (pct >= 20 ? ' high' : '');
+    sb.textContent = pct + '%'; tdS.appendChild(sb);
+  }
+  tr.appendChild(tdS);
+
+  // Book
+  var tdB = document.createElement('td'); tdB.className = 'ct-book';
+  var btn = document.createElement('button'); btn.className = 'ct-btn'; btn.textContent = 'Book';
+  btn.setAttribute('aria-label', 'Book ' + l.name);
+  btn.addEventListener('click', function() { alert('Booking for ' + l.name + ' coming soon'); });
+  tdB.appendChild(btn); tr.appendChild(tdB);
+
+  return tr;
+}
+
+// ===== RENDER =====
+function filterResults() {
+  var hotels = HOTELS.filter(matchesFilters);
+  var flights = FLIGHTS.filter(matchesFilters);
+
+  // Sort by savings pct desc (clamp negatives to 0 — affiliate can exceed retail with real data)
+  function bySavings(a, b) {
+    var bestA = getBestPrice(a);
+    var bestB = getBestPrice(b);
+    var sa = (a.retail && bestA && bestA < a.retail) ? (a.retail - bestA) / a.retail : 0;
+    var sb = (b.retail && bestB && bestB < b.retail) ? (b.retail - bestB) / b.retail : 0;
+    return sb - sa;
+  }
+  hotels.sort(bySavings);
+  flights.sort(bySavings);
+
+  var hBody = document.getElementById('hotelBody');
+  while (hBody.firstChild) hBody.removeChild(hBody.firstChild);
+  if (hotels.length === 0) {
+    var empty = document.createElement('tr');
+    var td = document.createElement('td'); td.colSpan = 7; td.className = 'empty-msg'; td.textContent = 'No hotels match your filters.';
+    empty.appendChild(td); hBody.appendChild(empty);
+  } else {
+    hotels.forEach(function(h) { hBody.appendChild(buildRow(h)); });
+  }
+  document.getElementById('hotelCount').textContent = hotels.length + ' hotel' + (hotels.length !== 1 ? 's' : '');
+
+  var fBody = document.getElementById('flightBody');
+  while (fBody.firstChild) fBody.removeChild(fBody.firstChild);
+  if (flights.length === 0) {
+    var empty2 = document.createElement('tr');
+    var td2 = document.createElement('td'); td2.colSpan = 7; td2.className = 'empty-msg'; td2.textContent = 'No flights match your filters.';
+    empty2.appendChild(td2); fBody.appendChild(empty2);
+  } else {
+    flights.forEach(function(f) { fBody.appendChild(buildRow(f)); });
+  }
+  document.getElementById('flightCount').textContent = flights.length + ' flight' + (flights.length !== 1 ? 's' : '');
+
+  renderActiveFilters();
+}
+
+// ===== ACTIVE FILTER TAGS =====
+function renderActiveFilters() {
+  var c = document.getElementById('activeFilters');
+  while (c.firstChild) c.removeChild(c.firstChild);
+  var tags = [];
+  var country = document.getElementById('filterCountry').value;
+  var city = document.getElementById('filterCity').value;
+  var brand = document.getElementById('filterBrand').value;
+  var amenity = document.getElementById('filterAmenity').value;
+  var pMin = document.getElementById('priceMin').value;
+  var pMax = document.getElementById('priceMax').value;
+  if (country) tags.push({ l:'Country: '+country, fn:function(){ document.getElementById('filterCountry').value=''; filterResults(); } });
+  if (city) tags.push({ l:'City: '+city, fn:function(){ document.getElementById('filterCity').value=''; filterResults(); } });
+  if (brand) tags.push({ l:'Brand: '+brand, fn:function(){ document.getElementById('filterBrand').value=''; filterResults(); } });
+  if (currentSource) {
+    var sl = currentSource==='xeni'?'Xeni':currentSource==='onewurld'?'Onewurld':'Little Emperors';
+    tags.push({ l:'Source: '+sl, fn:function(){ setSource(''); } });
+  }
+  if (amenity) tags.push({ l:'Amenity: '+amenity, fn:function(){ document.getElementById('filterAmenity').value=''; filterResults(); } });
+  if (currentRating > 0) tags.push({ l:'Rating: '+currentRating+'+', fn:function(){ setRating(0); } });
+  if (pMin) tags.push({ l:'Min $'+pMin, fn:function(){ document.getElementById('priceMin').value=''; filterResults(); } });
+  if (pMax) tags.push({ l:'Max $'+pMax, fn:function(){ document.getElementById('priceMax').value=''; filterResults(); } });
+  if (tags.length) {
+    var lbl = document.createElement('span'); lbl.className = 'active-filters-label'; lbl.textContent = 'Active:'; c.appendChild(lbl);
+    tags.forEach(function(t) {
+      var tag = document.createElement('span'); tag.className = 'active-filter-tag'; tag.textContent = t.l;
+      var x = document.createElement('span'); x.className = 'x'; x.textContent = '\u00D7'; x.addEventListener('click', t.fn);
+      tag.appendChild(x); c.appendChild(tag);
+    });
+  }
+}
+
+// ===== CONTROLS =====
+function setSource(s) {
+  currentSource = s;
+  document.querySelectorAll('.f-chip[data-source]').forEach(function(b) { b.classList.toggle('active', b.dataset.source === s); });
+  filterResults();
+}
+function setRating(r) {
+  currentRating = r;
+  document.querySelectorAll('.r-chip').forEach(function(b) { b.classList.toggle('active', parseFloat(b.dataset.rating) === r); });
+  filterResults();
+}
+function clearFilters() {
+  document.getElementById('searchDest').value = '';
+  document.getElementById('filterCountry').value = '';
+  document.getElementById('filterCity').value = '';
+  document.getElementById('filterBrand').value = '';
+  document.getElementById('filterAmenity').value = '';
+  document.getElementById('priceMin').value = '';
+  document.getElementById('priceMax').value = '';
+  currentSource = ''; currentRating = 0;
+  document.querySelectorAll('.f-chip[data-source]').forEach(function(b) { b.classList.toggle('active', b.dataset.source === ''); });
+  document.querySelectorAll('.r-chip').forEach(function(b) { b.classList.toggle('active', b.dataset.rating === '0'); });
+  filterResults();
+}
+function toggleTheme() {
+  var html = document.documentElement;
+  var next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  html.setAttribute('data-theme', next);
+  document.querySelector('.asc-nav-toggle').textContent = next === 'dark' ? 'Light' : 'Dark';
+  try { localStorage.setItem('ascend-theme', next); } catch(e) {}
+}
+
+// ===== POPULATE DROPDOWNS =====
+// Brands and amenities are scoped: hotel brands + flight brands shown in grouped optgroups
+function populateDropdowns() {
+  var all = HOTELS.concat(FLIGHTS);
+  var countries = [], cities = [];
+  var hotelBrands = [], flightBrands = [];
+  var hotelAmenities = [], flightAmenities = [];
+  all.forEach(function(l) {
+    if (countries.indexOf(l.country) === -1) countries.push(l.country);
+    if (cities.indexOf(l.city) === -1) cities.push(l.city);
+  });
+  HOTELS.forEach(function(l) {
+    if (l.brand && hotelBrands.indexOf(l.brand) === -1) hotelBrands.push(l.brand);
+    (l.amenities || []).forEach(function(a) { if (hotelAmenities.indexOf(a) === -1) hotelAmenities.push(a); });
+  });
+  FLIGHTS.forEach(function(l) {
+    if (l.brand && flightBrands.indexOf(l.brand) === -1) flightBrands.push(l.brand);
+    (l.amenities || []).forEach(function(a) { if (flightAmenities.indexOf(a) === -1) flightAmenities.push(a); });
+  });
+  countries.sort(); cities.sort();
+  hotelBrands.sort(); flightBrands.sort();
+  hotelAmenities.sort(); flightAmenities.sort();
+
+  var cS = document.getElementById('filterCountry');
+  countries.forEach(function(v) { var o = document.createElement('option'); o.value = v; o.textContent = v; cS.appendChild(o); });
+  var ciS = document.getElementById('filterCity');
+  cities.forEach(function(v) { var o = document.createElement('option'); o.value = v; o.textContent = v; ciS.appendChild(o); });
+
+  // Brand dropdown with optgroups
+  var bS = document.getElementById('filterBrand');
+  var hg = document.createElement('optgroup'); hg.label = 'Hotels';
+  hotelBrands.forEach(function(v) { var o = document.createElement('option'); o.value = v; o.textContent = v; hg.appendChild(o); });
+  bS.appendChild(hg);
+  var fg = document.createElement('optgroup'); fg.label = 'Airlines';
+  flightBrands.forEach(function(v) { var o = document.createElement('option'); o.value = v; o.textContent = v; fg.appendChild(o); });
+  bS.appendChild(fg);
+
+  // Amenity dropdown with optgroups
+  var aS = document.getElementById('filterAmenity');
+  var hag = document.createElement('optgroup'); hag.label = 'Hotel Amenities';
+  hotelAmenities.forEach(function(v) { var o = document.createElement('option'); o.value = v; o.textContent = v; hag.appendChild(o); });
+  aS.appendChild(hag);
+  var fag = document.createElement('optgroup'); fag.label = 'Flight Amenities';
+  flightAmenities.forEach(function(v) { var o = document.createElement('option'); o.value = v; o.textContent = v; fag.appendChild(o); });
+  aS.appendChild(fag);
+}
+
+// ===== INIT =====
+(function() {
+  try {
+    var saved = localStorage.getItem('ascend-theme');
+    if (saved === 'dark') {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      document.querySelector('.asc-nav-toggle').textContent = 'Light';
+    }
+  } catch(e) {}
+})();
+populateDropdowns();
+filterResults();
+</script>
+</body>
+</html>

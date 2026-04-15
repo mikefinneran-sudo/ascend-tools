@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Join Ascend — Enhanced Form Mockup</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      color: #1a1a2e;
+      background: #fff;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+    ::selection { background: rgba(111, 87, 255, .15); }
+
+    /* Ascend Brand Tokens */
+    :root {
+      --pri: #6f57ff;
+      --pri-hover: #5a44e6;
+      --pri-light: #f8f7ff;
+      --pri-ring: rgba(111, 87, 255, .1);
+      --text: #1a1a2e;
+      --text-secondary: #667085;
+      --text-muted: #98a2b3;
+      --bg-alt: #f9f8f7;
+      --border: #e8e8e8;
+      --border-light: rgba(111, 87, 255, .08);
+      --error: #e74c3c;
+      --radius-sm: 6px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+    }
+
+    /* Nav */
+    .asc-nav {
+      background: #fff; padding: 0 28px; height: 56px; border-bottom: 1px solid #e8e8e8;
+      display: flex; justify-content: space-between; align-items: center;
+      position: sticky; top: 0; z-index: 200;
+    }
+    .asc-nav-left { display: flex; align-items: center; gap: 8px; text-decoration: none; }
+    .asc-nav-links {
+      display: flex; align-items: center; gap: 6px;
+    }
+    .asc-nav-links a {
+      color: #667085; font-size: 13px; font-weight: 500; text-decoration: none;
+      padding: 6px 14px; border-radius: 6px; transition: all 0.2s;
+      border: 1px solid transparent;
+    }
+    .asc-nav-links a:hover { color: #1a1a2e; background: rgba(111,87,255,0.06); }
+    .asc-nav-links a.active { color: #6f57ff; background: rgba(111,87,255,0.1); border-color: rgba(111,87,255,0.3); }
+
+    /* Form Section */
+    .onboard-section { padding-top: 80px; padding-bottom: 60px; }
+    .container { max-width: 600px; margin: 0 auto; padding: 0 24px; }
+
+    /* Form */
+    .af label { display: block; font-weight: 500; font-size: 13px; color: #33475b; margin-bottom: 6px; }
+    .af label .hint { font-size: 11px; color: rgba(0,0,0,.4); font-weight: 400; }
+    .af input, .af select {
+      width: 100%; padding: 10px 12px; border: 1px solid #cbd6e2;
+      border-radius: var(--radius-sm); font-size: 16px; background: #fff; transition: border .2s;
+    }
+    .af input:focus, .af select:focus { border-color: var(--pri); outline: none; box-shadow: 0 0 0 3px var(--pri-ring); }
+    .af select {
+      -webkit-appearance: none; appearance: none;
+      background-image: linear-gradient(45deg, transparent 50%, #5b6572 50%), linear-gradient(135deg, #5b6572 50%, transparent 50%);
+      background-position: calc(100% - 18px) calc(50% - 3px), calc(100% - 12px) calc(50% - 3px);
+      background-repeat: no-repeat; background-size: 6px 6px, 6px 6px; padding-right: 40px;
+    }
+    .af .row { display: flex; gap: 16px; }
+    .af .field { margin-bottom: 16px; }
+
+    /* New Field Highlight */
+    .af .field.new-field { position: relative; background: rgba(111, 87, 255, .04); border: 1px dashed rgba(111, 87, 255, .25); border-radius: var(--radius-md); padding: 12px; margin-left: -12px; margin-right: -12px; }
+    .af .field.new-field::after { content: 'PROPOSED'; position: absolute; top: -8px; right: 12px; background: var(--pri); color: white; font-size: 9px; font-weight: 700; padding: 2px 8px; border-radius: 4px; letter-spacing: .5px; }
+
+    /* Section Dividers */
+    .section-divider { border: none; border-top: 1px solid var(--border); margin: 24px 0 20px; }
+    .section-label { font-size: 13px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 16px; }
+
+    /* Submit */
+    .af button[type=submit] {
+      background: var(--pri); color: #fff; border: none; padding: 13px 36px;
+      border-radius: var(--radius-sm); font-weight: 600; font-size: 14px; cursor: pointer;
+      width: 100%; transition: background .2s;
+    }
+    .af button[type=submit]:hover { background: var(--pri-hover); }
+
+    /* Proof Banner */
+    .proof-banner {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      text-align: center; padding: 14px 20px; margin-top: 18px; border-radius: 10px;
+      background: var(--pri-light); border: 1px solid rgba(111, 87, 255, .12);
+      font-size: 14px; font-weight: 600; color: var(--pri); letter-spacing: -0.01em; line-height: 1.4;
+    }
+    .proof-banner svg { width: 18px; height: 18px; stroke: var(--pri); opacity: .75; }
+
+    /* Checkbox */
+    .field--check { margin-bottom: 20px; }
+    .check-label { display: flex; align-items: flex-start; gap: 10px; cursor: pointer; font-size: 13px; line-height: 1.5; color: #555; }
+    .check-label input[type=checkbox] { width: 18px; height: 18px; min-width: 18px; margin-top: 1px; accent-color: var(--pri); }
+    .check-label a { color: var(--pri); text-decoration: underline; }
+
+    /* Legend */
+    .legend { max-width: 600px; margin: 24px auto 0; padding: 16px 24px; background: var(--bg-alt); border-radius: var(--radius-md); font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
+    .legend strong { color: var(--text); }
+  </style>
+</head>
+<body>
+  <nav class="asc-nav">
+    <a href="hub.html" class="asc-nav-left"><img src="logo-purple.svg" alt="Ascend" style="height:24px;"></a>
+    <div class="asc-nav-links" style="display:none;">
+      <a href="hub.html">Hub</a>
+      <a href="index.html">ROI Calculator</a>
+      <a href="trip-planner.html">Trip Planner</a>
+      <a href="visa-tools.html">Visa Tools</a>
+      <a href="templates.html">Partners</a>
+    </div>
+  </nav>
+
+  <section class="onboard-section">
+    <div class="container">
+      <form class="af">
+        <div class="section-label">Contact Info</div>
+        <div class="row">
+          <div class="field"><label>First Name*</label><input placeholder="e.g. Alex"></div>
+          <div class="field"><label>Last Name*</label><input placeholder="e.g. Morgan"></div>
+        </div>
+        <div class="field"><label>Company</label><input placeholder="e.g. Bitkraft"></div>
+
+        <div class="field new-field">
+          <label>Your Role <span class="hint">(optional)</span></label>
+          <select>
+            <option value="">Select...</option>
+            <option>Executive / C-Suite</option>
+            <option>Founder / Owner</option>
+            <option>Executive Assistant</option>
+            <option>Travel Manager</option>
+            <option>Professional Athlete</option>
+            <option>Agent / Manager</option>
+            <option>Other</option>
+          </select>
+        </div>
+
+        <div class="field"><label>Email*</label><input type="email" placeholder="e.g. alex@company.com"></div>
+        <div class="field"><label>Phone Number* <span class="hint">(Your WhatsApp number)</span></label><input type="tel" placeholder="+1 555 123 4567"></div>
+
+        <hr class="section-divider">
+        <div class="section-label">Travel Profile</div>
+
+        <div class="row">
+          <div class="field"><label>Trips per month?*</label><input type="number" placeholder="e.g. 2"></div>
+          <div class="field"><label>Avg trip cost (USD)?*</label><input type="number" placeholder="e.g. 5000"></div>
+        </div>
+
+        <div class="field new-field">
+          <label>Travel Type</label>
+          <select>
+            <option value="">Select...</option>
+            <option>Business</option>
+            <option>Leisure</option>
+            <option>Both</option>
+          </select>
+        </div>
+
+        <div class="field new-field">
+          <label>Where do you travel most? <span class="hint">(optional)</span></label>
+          <input placeholder="e.g. NYC, London, Dubai">
+        </div>
+
+        <hr class="section-divider">
+        <div class="section-label">Referral & Attribution</div>
+
+        <div class="field">
+          <label>Referral?</label>
+          <select>
+            <option value="">No referral</option>
+            <option>Zach Resnick</option>
+            <option>Chloe</option>
+            <option>Omar Ismail</option>
+            <option>Cameron</option>
+            <option>Dave Mullen-Muhr</option>
+            <option value="other">Someone else</option>
+          </select>
+        </div>
+        <div class="field"><label>How did you hear about us?</label><input placeholder="Optional"></div>
+
+        <div class="field new-field">
+          <label>What's your biggest travel frustration? <span class="hint">(one sentence)</span></label>
+          <input placeholder="e.g. Last-minute changes always cost me a fortune">
+        </div>
+
+        <hr class="section-divider">
+        <div class="field field--check">
+          <label class="check-label">
+            <input type="checkbox">
+            <span>I agree to receive communications from Ascend about my membership, travel updates, and relevant offers via email, SMS, and WhatsApp. You can unsubscribe at any time. View our <a href="#">Privacy Policy</a>.</span>
+          </label>
+        </div>
+
+        <button type="submit">Get Started</button>
+        <div class="proof-banner">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          78% of customers onboarded in under 15 minutes
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <div class="legend">
+    <strong>Legend:</strong> Fields with purple dashed borders and "PROPOSED" badges are new additions. Existing fields remain unchanged. The referral dropdown has been expanded to include all team members.
+  </div>
+</body>
+</html>

@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Partner Communities — Ascend Landing Pages</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; color: #1a1a2e; background: #fff; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+    a { color: #6f57ff; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    :root {
+      --pri: #6f57ff; --pri-hover: #5a44e6; --pri-light: #f8f7ff;
+      --text: #1a1a2e; --text-secondary: #667085; --text-muted: #98a2b3;
+      --bg-alt: #f9f8f7; --border: #e8e8e8;
+      --radius-sm: 6px; --radius-md: 12px; --radius-lg: 16px;
+    }
+    h1, h2, h3, h4 { letter-spacing: -.02em; line-height: 1.2; font-weight: 600; }
+    .asc-nav {
+      background: #fff; padding: 0 28px; height: 56px; border-bottom: 1px solid #e8e8e8;
+      display: flex; justify-content: space-between; align-items: center;
+      position: sticky; top: 0; z-index: 200;
+    }
+    .asc-nav-left { display: flex; align-items: center; gap: 8px; text-decoration: none; }
+    .asc-nav-links {
+      display: flex; align-items: center; gap: 6px;
+    }
+    .asc-nav-links a {
+      color: #667085; font-size: 13px; font-weight: 500; text-decoration: none;
+      padding: 6px 14px; border-radius: 6px; transition: all 0.2s;
+      border: 1px solid transparent;
+    }
+    .asc-nav-links a:hover { color: #1a1a2e; background: rgba(111,87,255,0.06); }
+    .asc-nav-links a.active { color: #6f57ff; background: rgba(111,87,255,0.1); border-color: rgba(111,87,255,0.3); }
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+    section { padding: 60px 0; }
+
+    /* Partner Table */
+    .partner-table { width: 100%; border-collapse: collapse; margin-top: 24px; font-size: 13px; }
+    .partner-table thead { background: #f8f7ff; color: #1a1a2e; }
+    .partner-table th { padding: 12px 14px; text-align: left; font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; white-space: nowrap; }
+    .partner-table td { padding: 10px 14px; border-bottom: 1px solid #f0f0f0; vertical-align: top; }
+    .partner-table tbody tr:hover { background: var(--pri-light); }
+    .partner-table .name { font-weight: 600; white-space: nowrap; }
+    .owner-badge { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 4px; background: var(--pri-light); color: var(--pri); white-space: nowrap; }
+    .tbl-link { font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 4px; display: inline-block; margin: 1px 0; }
+    .tbl-link--page { background: var(--pri); color: #fff; }
+    .tbl-link--page:hover { background: var(--pri-hover); text-decoration: none; }
+
+    /* How It Works */
+    .how { background: var(--bg-alt); }
+    .how h2 { text-align: center; margin-bottom: 32px; }
+    .feat-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+    .feat-card { background: #fff; border-radius: var(--radius-md); padding: 24px; border: 1px solid var(--border); }
+    .feat-card h4 { font-size: 16px; margin-bottom: 8px; }
+    .feat-card p { font-size: 14px; color: var(--text-secondary); }
+
+    /* Top Bar */
+    .top-bar { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
+    .top-bar h1 { font-size: 24px; margin: 0; }
+    .top-bar .actions { display: flex; align-items: center; gap: 12px; }
+    .btn-create { display: inline-flex; align-items: center; gap: 6px; background: var(--pri); color: #fff; padding: 8px 18px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; letter-spacing: .04em; text-decoration: none; border: none; cursor: pointer; }
+    .btn-create:hover { background: var(--pri-hover); text-decoration: none; }
+
+    /* Filters */
+    .filter-row { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
+    .filter-btn { padding: 5px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; border: 1px solid var(--border); background: #fff; color: var(--text-secondary); cursor: pointer; transition: all .15s; }
+    .filter-btn:hover { border-color: var(--pri); color: var(--pri); }
+    .filter-btn.active { background: var(--pri-light); border-color: rgba(111,87,255,.3); color: var(--pri); }
+
+    /* Create Form */
+    .create-form { }
+    .create-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 12px; }
+    .create-field { position: relative; }
+    .create-label { display: block; font-size: 12px; font-weight: 600; color: #1a1a2e; margin-bottom: 6px; letter-spacing: .02em; }
+    .create-input {
+      width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px;
+      font-size: 14px; font-family: inherit; background: #fff; color: #1a1a2e;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .create-input:focus { border-color: var(--pri); outline: none; box-shadow: 0 0 0 3px rgba(111,87,255,.08); }
+    .create-input::placeholder { color: #c4c9d2; }
+    .create-textarea { min-height: 72px; resize: vertical; line-height: 1.5; }
+    select.create-input {
+      -webkit-appearance: none; appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M3 5l3 3 3-3' fill='none' stroke='%2398a2b3' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px;
+    }
+
+    @media (max-width: 767px) {
+      .feat-grid { grid-template-columns: 1fr; }
+      .top-bar { flex-direction: column; align-items: flex-start; }
+      .create-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="asc-nav">
+    <a href="hub.html" class="asc-nav-left"><img src="logo-purple.svg" alt="Ascend" style="height:24px;"></a>
+    <div class="asc-nav-links" style="display:none;">
+      <a href="hub.html">Hub</a>
+      <a href="index.html">ROI Calculator</a>
+      <a href="trip-planner.html">Trip Planner</a>
+      <a href="visa-tools.html">Visa Tools</a>
+      <a href="templates.html" class="active">Partners</a>
+    </div>
+  </nav>
+
+  <section style="padding: 32px 0;">
+    <div class="container">
+      <div class="top-bar">
+        <h1>Partner Communities</h1>
+        <div class="actions">
+          <button class="btn-create" onclick="toggleCreate()">+ New Partner Page</button>
+        </div>
+      </div>
+
+      <!-- CREATE NEW (inline, hidden by default) -->
+      <div id="create-panel" style="display:none; background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 28px; margin-bottom: 24px; box-shadow: 0 2px 12px rgba(0,0,0,.04);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+          <h3 style="margin:0; font-size: 18px;">Create New Partner Page</h3>
+          <button onclick="toggleCreate()" style="background:none;border:none;font-size:18px;cursor:pointer;color:#98a2b3;padding:4px 8px;">&times;</button>
+        </div>
+        <p style="font-size:13px;color:#98a2b3;margin-bottom:20px;">Start typing a partner name to search HubSpot. If the company exists, select it to pre-fill the form. Otherwise, fill in the details to create a new partner.</p>
+
+        <div class="create-form">
+          <div class="create-row">
+            <div class="create-field" style="position:relative;">
+              <label class="create-label">Partner Name *</label>
+              <input id="f-name" class="create-input" placeholder="Search HubSpot or enter new..." autocomplete="off">
+              <div id="hs-results" style="display:none;border:1px solid #e8e8e8;border-radius:8px;margin-top:2px;max-height:140px;overflow-y:auto;background:#fff;position:absolute;z-index:10;left:0;right:0;box-shadow:0 4px 16px rgba(0,0,0,.08);"></div>
+            </div>
+            <div class="create-field">
+              <label class="create-label">Partner Website</label>
+              <input id="f-website" class="create-input" placeholder="https://tiger21.com/">
+            </div>
+          </div>
+          <div class="create-row">
+            <div class="create-field">
+              <label class="create-label">Owner *</label>
+              <select id="f-owner" class="create-input"><option value="">Select owner...</option><option value="Zach">Zach</option><option value="Chloe">Chloe</option><option value="Omar">Omar</option><option value="Cam">Cam</option></select>
+            </div>
+            <div class="create-field">
+              <label class="create-label">Pricing</label>
+              <input id="f-pricing" class="create-input" placeholder="$1,875/year (25% off annual)">
+            </div>
+          </div>
+          <div class="create-row">
+            <div class="create-field">
+              <label class="create-label">Trial Terms</label>
+              <input id="f-trial" class="create-input" placeholder="Three month free trial">
+            </div>
+            <div class="create-field">
+              <label class="create-label">Calendly URL</label>
+              <input id="f-calendly" class="create-input" placeholder="https://calendly.com/zach-ascend/...">
+            </div>
+          </div>
+          <div class="create-field" style="margin-bottom:12px;">
+            <label class="create-label">Headline</label>
+            <input id="f-headline" class="create-input" placeholder="Exclusive Travel Benefits for Tiger 21 Members">
+          </div>
+          <div class="create-field" style="margin-bottom:12px;">
+            <label class="create-label">Benefits Copy</label>
+            <textarea id="f-subheadline" class="create-input create-textarea" placeholder="As a Tiger 21 member, you receive automatic approval and fast-tracked onboarding..."></textarea>
+          </div>
+          <div class="create-field" style="margin-bottom:0;">
+            <label class="create-label">Special Benefits <span style="font-weight:400;color:#98a2b3;">one per line</span></label>
+            <textarea id="f-benefits" class="create-input create-textarea" placeholder="Automatic approval + fast-tracked onboarding&#10;Valid for EA, assistant, family&#10;Complimentary miles &amp; points consulting call"></textarea>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:10px;margin-top:20px;padding-top:20px;border-top:1px solid var(--border);flex-wrap:wrap;">
+          <button class="btn-create" id="hs-btn" onclick="createInHubspot()">Create in HubSpot</button>
+          <button class="btn-create" style="background:#00b894;" onclick="downloadPage()">Download HTML</button>
+          <button class="filter-btn" id="copy-btn" onclick="copyConfig()">Copy Config</button>
+        </div>
+        <div id="hs-status" style="display:none;margin-top:12px;padding:10px 14px;border-radius:8px;font-size:13px;"></div>
+
+        <details style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border);">
+          <summary style="font-size:13px;font-weight:600;color:#667085;cursor:pointer;">How Partner Pages Work</summary>
+          <div style="margin-top:12px;font-size:13px;color:#667085;line-height:1.7;">
+            <p style="margin-bottom:8px;font-size:13px;"><strong>Shared form script:</strong> All partner pages load <code style="background:#f8f7ff;padding:2px 6px;border-radius:4px;font-size:12px;">onboard.js</code> — handles validation, submission, qualification, and post-submit channel selection (WhatsApp / Voice / Calendly).</p>
+            <p style="margin-bottom:8px;font-size:13px;"><strong>Data flow:</strong> Form submit dual-posts to Railway webhook + HubSpot Forms API. Partner ID flows through to HubSpot contact properties and WhatsApp bot. UTMs persist via sessionStorage.</p>
+            <p style="margin-bottom:8px;font-size:13px;"><strong>To deploy:</strong> Save HTML to <code style="background:#f8f7ff;padding:2px 6px;border-radius:4px;font-size:12px;">website-src/partners/[slug].html</code>, add logo to <code style="background:#f8f7ff;padding:2px 6px;border-radius:4px;font-size:12px;">assets/partners/</code>, run <code style="background:#f8f7ff;padding:2px 6px;border-radius:4px;font-size:12px;">node build.js</code>, deploy with wrangler.</p>
+            <p style="font-size:13px;"><strong>Qualification:</strong> 2+ trips/mo or $1,000+ avg spend = qualified. Routes to WhatsApp, Voice, or Calendly. Unqualified = waitlist (no follow-up).</p>
+          </div>
+        </details>
+      </div>
+
+      <div class="filter-row">
+        <button class="filter-btn active" onclick="filterOwner('all')">All</button>
+        <button class="filter-btn" onclick="filterOwner('Zach')">Zach</button>
+        <button class="filter-btn" onclick="filterOwner('Chloe')">Chloe</button>
+        <button class="filter-btn" onclick="filterOwner('Omar')">Omar</button>
+      </div>
+      <div style="overflow-x: auto;">
+      <table class="partner-table">
+        <thead>
+          <tr>
+            <th>Partner</th>
+            <th>Owner</th>
+            <th>Pricing</th>
+            <th>Trial</th>
+            <th>Key Benefits</th>
+            <th>Page</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="name">INDI</td><td><span class="owner-badge">Chloe</span></td><td>$500/yr (legacy)</td><td>Free EU/US flights (legacy)</td><td>$500 credit, $250/EA booking, 80% off annual</td><td><a href="https://joinascend.com/indi-with-ascend" class="tbl-link tbl-link--page" target="_blank">View</a></td></tr>
+          <tr><td class="name">EA Mafia</td><td><span class="owner-badge">Omar</span></td><td>Standard</td><td>1 month free</td><td>Auto-approval, fast-tracked first call</td><td><a href="https://joinascend.com/ea-mafia-with-ascend" class="tbl-link tbl-link--page" target="_blank">View</a></td></tr>
+          <tr><td class="name">Long Angle</td><td><span class="owner-badge">Zach</span></td><td>Standard</td><td>Basic free trial</td><td>10% membership + 10% txn rev share, fast-tracked</td><td><a href="https://joinascend.com/long-angle-with-ascend" class="tbl-link tbl-link--page" target="_blank">View</a></td></tr>
+          <tr><td class="name">Long Angle Premier</td><td><span class="owner-badge">Zach</span></td><td>$2,250/yr</td><td>Basic free trial</td><td>10% off annual, 10% txn rev share</td><td><a href="https://joinascend.com/long-angle-premier-with-ascend" class="tbl-link tbl-link--page" target="_blank">View</a></td></tr>
+          <tr><td class="name">Tiger 21</td><td><span class="owner-badge">Zach</span></td><td>Standard</td><td>3 months free</td><td>Auto-approval, EA/family valid, miles consulting</td><td><a href="https://joinascend.com/tiger-21-with-ascend" class="tbl-link tbl-link--page" target="_blank">View</a></td></tr>
+          <tr><td class="name">R360</td><td><span class="owner-badge">Zach</span></td><td>Standard</td><td>3 months free</td><td>Auto-approval, EA/family valid, miles consulting</td><td><a href="https://joinascend.com/r360-with-ascend" class="tbl-link tbl-link--page" target="_blank">View</a></td></tr>
+          <tr><td class="name">3i Members</td><td><span class="owner-badge">Zach</span></td><td>$1,250/yr (50% off)</td><td>Basic free trial</td><td>50% off, auto-approval, EA/family, miles consulting</td><td><a href="https://joinascend.com/3imembers-with-ascend" class="tbl-link tbl-link--page" target="_blank">View</a></td></tr>
+          <tr><td class="name">Select</td><td><span class="owner-badge">Zach</span></td><td>Standard</td><td>Basic free trial</td><td>Fast-tracked onboarding</td><td><a href="https://joinascend.com/meetselect-with-ascend" class="tbl-link tbl-link--page" target="_blank">View</a></td></tr>
+          <tr><td class="name">Horizons</td><td><span class="owner-badge">Zach</span></td><td>$1,250/yr (50% off)</td><td>Basic free trial</td><td>50% off, auto-approval, EA/family valid</td><td><a href="https://joinascend.com/horizons-with-ascend" class="tbl-link tbl-link--page" target="_blank">View</a></td></tr>
+          <tr><td class="name">PEF</td><td><span class="owner-badge">Zach</span></td><td>$1,875/yr</td><td>Basic free trial</td><td>Discounted annual, fast-tracked</td><td><a href="https://joinascend.com/pef-with-ascend" class="tbl-link tbl-link--page" target="_blank">View</a></td></tr>
+          <tr><td class="name">Joinpier</td><td><span class="owner-badge">Zach</span></td><td>$1,250/mo (Pier pays)</td><td>N/A (complimentary)</td><td>Free membership, auto-approval, skip to activation</td><td><a href="https://joinascend.com/joinpier-with-ascend" class="tbl-link tbl-link--page" target="_blank">View</a></td></tr>
+          <tr><td class="name">Access Insiders</td><td><span class="owner-badge">Zach</span></td><td>Standard</td><td>Basic free trial</td><td>Fast-tracked onboarding</td><td><a href="https://joinascend.com/access-insiders-with-ascend" class="tbl-link tbl-link--page" target="_blank">View</a></td></tr>
+          <tr><td class="name">Chief of Staff Network</td><td><span class="owner-badge">Zach</span></td><td>$1,875/yr (25% off)</td><td>Basic free trial</td><td>25% off, valid for exec travel</td><td><a href="https://joinascend.com/chief-of-staff-network-with-ascend" class="tbl-link tbl-link--page" target="_blank">View</a></td></tr>
+          <tr><td class="name">Copia Wealth Studios</td><td><span class="owner-badge">Zach</span></td><td>$1,875/yr (25% off)</td><td>Basic free trial</td><td>25% off, auto-approval, EA/family valid</td><td><a href="https://joinascend.com/copia-wealth-studios-with-ascend" class="tbl-link tbl-link--page" target="_blank">View</a></td></tr>
+          <tr><td class="name">The Legacy Alliance</td><td><span class="owner-badge">Zach</span></td><td>Standard</td><td>3 months free</td><td>Auto-approval, EA/family, miles consulting</td><td><a href="https://joinascend.com/the-legacy-alliance-with-ascend" class="tbl-link tbl-link--page" target="_blank">View</a></td></tr>
+          <tr><td class="name">Santangel's Review</td><td><span class="owner-badge">Zach</span></td><td>Standard</td><td>Basic free trial</td><td>Fast-tracked onboarding</td><td><a href="https://joinascend.com/santangels-review-with-ascend" class="tbl-link tbl-link--page" target="_blank">View</a></td></tr>
+          <tr><td class="name">Atlas Assistants</td><td><span class="owner-badge">Chloe</span></td><td>$1,875/yr (25% off)</td><td>Basic free trial</td><td>25% off, valid for EA + exec travel</td><td><a href="https://joinascend.com/atlas-assistants-with-ascend" class="tbl-link tbl-link--page" target="_blank">View</a></td></tr>
+          <tr><td class="name">Bessemer Venture Partners</td><td><span class="owner-badge">Zach</span></td><td>$2,000/yr (20% off)</td><td>Basic free trial</td><td>20% off, complimentary service period</td><td><a href="https://joinascend.com/bessemer-venture-partners-with-ascend" class="tbl-link tbl-link--page" target="_blank">View</a></td></tr>
+          <tr><td class="name">The Family On The Fly</td><td><span class="owner-badge">Zach</span></td><td>$2,500/yr (standard)</td><td>Basic free trial</td><td>Fast-tracked onboarding</td><td><a href="https://joinascend.com/thefamilyonthefly-with-ascend" class="tbl-link tbl-link--page" target="_blank">View</a></td></tr>
+          <tr><td class="name">Founders Pledge</td><td><span class="owner-badge">Chloe</span></td><td>$2,250/yr (10% off)</td><td>Basic free trial</td><td>10% off, Mykonos Retreat concierge, flight savings</td><td><a href="https://joinascend.com/founders-pledge-with-ascend" class="tbl-link tbl-link--page" target="_blank">View</a></td></tr>
+        </tbody>
+      </table>
+      </div>
+    </div>
+  </section>
+
+<script>
+function filterOwner(owner) {
+  document.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.remove('active'); });
+  event.target.classList.add('active');
+  document.querySelectorAll('.partner-table tbody tr').forEach(function(row) {
+    if (owner === 'all') { row.style.display = ''; return; }
+    var badge = row.querySelector('.owner-badge');
+    row.style.display = (badge && badge.textContent.trim() === owner) ? '' : 'none';
+  });
+}
+
+function toggleCreate() {
+  var panel = document.getElementById('create-panel');
+  panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+  if (panel.style.display === 'block') panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function nameToSlug(name) {
+  return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') + '-with-ascend';
+}
+
+function esc(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+function escJs(s) { return s.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\n/g,'\\n'); }
+
+function getFormData() {
+  var name = (document.getElementById('f-name').value || '').trim() || 'Partner Name';
+  return {
+    name: name,
+    slug: nameToSlug(name),
+    website: (document.getElementById('f-website').value || '').trim(),
+    owner: document.getElementById('f-owner').value,
+    pricing: (document.getElementById('f-pricing').value || '').trim() || 'Standard pricing',
+    trial: (document.getElementById('f-trial').value || '').trim() || 'Basic free trial',
+    benefits: (document.getElementById('f-benefits').value || '').trim(),
+    headline: (document.getElementById('f-headline').value || '').trim() || 'Exclusive Travel Benefits for ' + name + ' Members',
+    subheadline: (document.getElementById('f-subheadline').value || '').trim() || 'As a ' + name + ' member, you receive a free trial of our membership services before needing to commit, as well as a fast-tracked onboarding.',
+    calendly: (document.getElementById('f-calendly').value || '').trim()
+  };
+}
+
+function getPageTemplate() {
+  var d = getFormData();
+  return '<!DOCTYPE html>\n<html lang="en">\n<head>\n  <meta charset="utf-8">\n  <meta name="viewport" content="width=device-width, initial-scale=1">\n' +
+    '  <title>' + esc(d.name) + ' Travel Benefits | Ascend<\/title>\n' +
+    '  <meta name="robots" content="noindex, nofollow">\n' +
+    '  <link rel="icon" href="/assets/images/favicon.png">\n' +
+    '  <link rel="stylesheet" href="{{MAIN_CSS}}">\n  <link rel="stylesheet" href="{{ONBOARD_CSS}}">\n' +
+    '  <script>\n    window.ASCEND_PARTNER = {\n' +
+    "      id: '" + escJs(d.slug) + "',\n" +
+    "      name: '" + escJs(d.name) + "',\n" +
+    "      utm_source: 'partner_" + escJs(d.slug.replace(/-/g,'_')) + "',\n" +
+    "      utm_campaign: '" + escJs(d.slug.replace(/-/g,'_')) + "_q2_2026',\n" +
+    "      logo: '/assets/partners/" + escJs(d.slug) + "-logo.png',\n" +
+    "      headline: '" + escJs(d.headline) + "',\n" +
+    "      subheadline: '" + escJs(d.subheadline) + "'\n" +
+    '    };\n  <\/script>\n<\/head>\n<body>\n' +
+    '  <!-- Copy body from website-src/partner-template.html -->\n' +
+    '<\/body>\n<\/html>';
+}
+
+function downloadPage() {
+  var d = getFormData();
+  var blob = new Blob([getPageTemplate()], { type: 'text/html' });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = d.slug + '.html';
+  a.click();
+}
+
+function copyConfig() {
+  var d = getFormData();
+  var config = "window.ASCEND_PARTNER = {\n  id: '" + d.slug + "',\n  name: '" + d.name + "',\n  utm_source: 'partner_" + d.slug.replace(/-/g,'_') + "',\n  utm_campaign: '" + d.slug.replace(/-/g,'_') + "_q2_2026',\n  headline: '" + d.headline + "',\n  subheadline: '" + d.subheadline + "'\n};";
+  navigator.clipboard.writeText(config);
+  var btn = document.getElementById('copy-btn');
+  btn.textContent = 'Copied!';
+  setTimeout(function() { btn.textContent = 'Copy Config'; }, 2000);
+}
+
+// HubSpot search
+var searchTimeout;
+document.getElementById('f-name').addEventListener('input', function() {
+  var val = this.value.trim();
+  var box = document.getElementById('hs-results');
+  clearTimeout(searchTimeout);
+  if (val.length < 2) { box.style.display = 'none'; return; }
+  searchTimeout = setTimeout(function() {
+    fetch('/api/partner?search=' + encodeURIComponent(val))
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (!data.results || data.results.length === 0) { box.style.display = 'none'; return; }
+        box.style.display = 'block';
+        box.textContent = '';
+        data.results.forEach(function(co) {
+          var row = document.createElement('div');
+          row.style.cssText = 'padding:8px 12px;cursor:pointer;font-size:13px;border-bottom:1px solid #f0f0f0;';
+          row.addEventListener('mouseenter', function() { row.style.background = '#f8f7ff'; });
+          row.addEventListener('mouseleave', function() { row.style.background = '#fff'; });
+          var nameEl = document.createElement('strong');
+          nameEl.textContent = co.properties.name || '';
+          row.appendChild(nameEl);
+          if (co.properties.domain) {
+            var domEl = document.createElement('span');
+            domEl.style.cssText = 'color:#98a2b3;font-size:12px;margin-left:8px;';
+            domEl.textContent = co.properties.domain;
+            row.appendChild(domEl);
+          }
+          row.addEventListener('click', function() {
+            var p = co.properties;
+            document.getElementById('f-name').value = p.name || '';
+            document.getElementById('f-website').value = p.domain ? 'https://' + p.domain : '';
+            if (p.partner_owner) { var s = document.getElementById('f-owner'); for (var i=0;i<s.options.length;i++) { if (s.options[i].value===p.partner_owner) s.selectedIndex=i; } }
+            if (p.partner_pricing) document.getElementById('f-pricing').value = p.partner_pricing;
+            if (p.partner_trial) document.getElementById('f-trial').value = p.partner_trial;
+            if (p.partner_benefits) document.getElementById('f-benefits').value = p.partner_benefits;
+            box.style.display = 'none';
+          });
+          box.appendChild(row);
+        });
+      })
+      .catch(function() { box.style.display = 'none'; });
+  }, 300);
+});
+
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('#hs-results') && !e.target.closest('#f-name'))
+    document.getElementById('hs-results').style.display = 'none';
+});
+
+function createInHubspot() {
+  var btn = document.getElementById('hs-btn');
+  var status = document.getElementById('hs-status');
+  var d = getFormData();
+  btn.disabled = true;
+  btn.textContent = 'Creating...';
+  status.style.display = 'none';
+  fetch('/api/partner', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(d) })
+    .then(function(r) { return r.json().then(function(data) { return { ok: r.ok, data: data }; }); })
+    .then(function(result) {
+      status.style.display = 'block';
+      if (result.ok) {
+        var msg = result.data.company.created ? 'Created' : 'Found existing';
+        status.style.background = '#d4edda'; status.style.color = '#155724';
+        status.textContent = msg + ' company "' + result.data.company.name + '" (ID: ' + result.data.company.id + '). Deal: ' + result.data.deal.name;
+        btn.textContent = 'Created'; btn.style.background = '#00b894';
+      } else {
+        status.style.background = '#f8d7da'; status.style.color = '#721c24';
+        status.textContent = 'Error: ' + (result.data.error || 'Unknown');
+        btn.disabled = false; btn.textContent = 'Retry';
+      }
+    })
+    .catch(function(err) {
+      status.style.display = 'block'; status.style.background = '#f8d7da'; status.style.color = '#721c24';
+      status.textContent = 'Network error: ' + err.message;
+      btn.disabled = false; btn.textContent = 'Retry';
+    });
+}
+</script>
+</body>
+</html>

@@ -4,25 +4,23 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ascend | Trip Planner</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* ===== TOKENS ===== */
 :root {
-  --bg: #FAFAFA; --bg-card: #FFFFFF; --bg-alt: #F4F2FF; --bg-input: #FFFFFF;
-  --text: #111118; --text-secondary: #555; --text-muted: #999; --text-hint: #BBB;
-  --accent: #6F57FF; --accent-hover: #5A44E0; --accent-glow: rgba(111,87,255,0.12);
-  --accent-light: #F1EEFF; --accent-soft: #E8E3FF;
+  --bg: #FAFAFA; --bg-card: #FFFFFF; --bg-alt: #f8f7ff; --bg-input: #FFFFFF;
+  --text: #1a1a2e; --text-secondary: #667085; --text-muted: #98a2b3; --text-hint: #BBB;
+  --accent: #6F57FF; --accent-hover: #5a44e6; --accent-glow: rgba(111,87,255,0.12);
+  --accent-light: #f8f7ff; --accent-soft: #E8E3FF;
   --border: #E8E8E8; --border-focus: #6F57FF; --border-light: #F0F0F0;
   --chip-bg: #F7F7F7; --chip-border: #E8E8E8; --chip-text: #555;
   --chip-hover-border: #C5BBFF; --chip-active-bg: #6F57FF;
   --chip-active-text: #fff; --chip-active-border: #6F57FF;
-  --header-bg: #111118; --toast-bg: #111118; --toast-text: #fff;
+  --header-bg: #1a1a2e; --toast-bg: #1a1a2e; --toast-text: #fff;
   --success-bg: #E8F9E4; --success-text: #1a6b1a; --success-border: #6CBF5B;
   --danger: #E53E3E; --shadow-sm: 0 1px 3px rgba(0,0,0,0.04);
   --shadow-md: 0 4px 20px rgba(0,0,0,0.06); --shadow-lg: 0 12px 40px rgba(0,0,0,0.08);
-  --radius-sm: 10px; --radius-md: 14px; --radius-lg: 20px; --radius-pill: 100px;
-  --mono: 'DM Mono', monospace; --sans: 'Inter', -apple-system, sans-serif;
+  --radius-sm: 6px; --radius-md: 12px; --radius-lg: 16px; --radius-pill: 100px;
+  --mono: 'DM Mono', monospace; --sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --ease: cubic-bezier(0.4, 0, 0.2, 1); --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 [data-theme="dark"] {
@@ -45,43 +43,32 @@
 html { scroll-behavior: smooth; height: 100%; }
 body {
   font-family: var(--sans); background: var(--bg); color: var(--text);
-  line-height: 1.55; -webkit-font-smoothing: antialiased; min-height: 100%;
+  line-height: 1.6; -webkit-font-smoothing: antialiased; min-height: 100%;
   display: flex; flex-direction: column;
 }
 
 /* ===== UNIFIED NAV BAR ===== */
-.header {
-  background: var(--header-bg); padding: 0 28px; height: 56px;
+.asc-nav {
+  background: #fff; padding: 0 28px; height: 56px; border-bottom: 1px solid #e8e8e8;
   display: flex; justify-content: space-between; align-items: center;
-  position: sticky; top: 0; z-index: 100; flex-shrink: 0;
+  position: sticky; top: 0; z-index: 200;
 }
-.logo { display: flex; align-items: center; gap: 8px; text-decoration: none; }
-.logo img { height: 24px; width: 24px; border-radius: 4px; }
-.logo-text { font-size: 1.15rem; font-weight: 700; color: #fff; letter-spacing: -0.02em; }
+.asc-nav-left { display: flex; align-items: center; gap: 8px; text-decoration: none; }
 .asc-nav-links {
-  display: flex; align-items: center; gap: 6px; min-width: 0;
-  overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none;
+  display: flex; align-items: center; gap: 6px;
 }
-.asc-nav-links::-webkit-scrollbar { display: none; }
 .asc-nav-links a {
-  color: #888; font-size: 13px; font-weight: 500; text-decoration: none;
-  padding: 6px 14px; border-radius: 100px; transition: all 0.2s;
+  color: #667085; font-size: 13px; font-weight: 500; text-decoration: none;
+  padding: 6px 14px; border-radius: 6px; transition: all 0.2s;
   border: 1px solid transparent;
 }
-.asc-nav-links a, .theme-toggle { flex: 0 0 auto; }
-.asc-nav-links a:hover { color: #fff; background: rgba(255,255,255,0.06); }
-.asc-nav-links a.active { color: #fff; background: rgba(111,87,255,0.15); border-color: rgba(111,87,255,0.3); }
-.header-right { display: flex; align-items: center; gap: 14px; }
-.header-badge {
-  font-family: var(--mono); font-size: 0.65rem; color: rgba(255,255,255,0.7);
-  border: 1px solid rgba(255,255,255,0.15); border-radius: var(--radius-pill);
-  padding: 4px 12px; letter-spacing: 0.08em; text-transform: uppercase;
-}
+.asc-nav-links a:hover { color: #1a1a2e; background: rgba(111,87,255,0.06); }
+.asc-nav-links a.active { color: #6f57ff; background: rgba(111,87,255,0.1); border-color: rgba(111,87,255,0.3); }
 .theme-toggle {
   background: none; border: 1px solid rgba(255,255,255,0.15); color: #fff;
   border-radius: 50%; width: 32px; height: 32px; cursor: pointer;
   display: flex; align-items: center; justify-content: center; font-size: 0.85rem;
-  transition: border-color 0.2s var(--ease);
+  transition: border-color 0.2s var(--ease); margin-left: 6px;
 }
 .theme-toggle:hover { border-color: rgba(255,255,255,0.4); }
 
@@ -288,9 +275,9 @@ select {
 }
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-  padding: 13px 28px; border-radius: var(--radius-sm); font-size: 0.9rem;
+  padding: 13px 28px; border-radius: 6px; font-size: 13px;
   font-weight: 600; cursor: pointer; transition: all 0.2s var(--ease);
-  font-family: var(--sans); letter-spacing: -0.01em; border: none;
+  font-family: var(--sans); letter-spacing: .04em; border: none;
 }
 .btn-next {
   background: var(--accent); color: #fff;
@@ -370,8 +357,8 @@ select {
 
 /* ===== FOOTER ===== */
 .footer {
-  background: var(--header-bg); padding: 24px; text-align: center;
-  font-size: 0.72rem; color: rgba(255,255,255,0.4); flex-shrink: 0;
+  background: #f8f7ff; padding: 24px; text-align: center;
+  font-size: 0.72rem; color: #667085; flex-shrink: 0; border-top: 1px solid #e8e8e8;
 }
 
 /* ===== RESPONSIVE ===== */
@@ -390,20 +377,19 @@ select {
 <body>
 
 <!-- HEADER -->
-<div class="header">
-  <a href="index.html" class="logo">
-    <span class="logo-text">ascend</span>
-  </a>
-  <div class="asc-nav-links">
+<nav class="asc-nav">
+  <a href="hub.html" class="asc-nav-left"><img src="logo-purple.svg" alt="Ascend" style="height:24px;"></a>
+  <div class="asc-nav-links" style="display:none;">
+    <a href="hub.html">Hub</a>
     <a href="index.html">ROI Calculator</a>
     <a href="trip-planner.html" class="active">Trip Planner</a>
-    <a href="pricing.html">Pricing</a>
     <a href="visa-tools.html">Visa Tools</a>
+    <a href="templates.html">Partners</a>
     <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
       <span id="themeIcon">&#9790;</span>
     </button>
   </div>
-</div>
+</nav>
 
 <!-- STEPPER -->
 <div class="stepper-bar">

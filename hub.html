@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ascend Tools</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; color: #1a1a2e; background: #fff; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+    a { color: inherit; text-decoration: none; }
+    :root {
+      --pri: #6f57ff; --pri-light: #f8f7ff;
+      --text: #1a1a2e; --text-secondary: #667085; --text-muted: #98a2b3;
+      --border: #e8e8e8;
+      --radius-md: 12px;
+    }
+    nav { display: flex; align-items: center; padding: 16px 24px; background: #fff; border-bottom: 1px solid var(--border); }
+    nav img { height: 24px; }
+    nav .title { margin-left: 12px; font-size: 15px; font-weight: 600; color: var(--text-muted); }
+    .container { max-width: 720px; margin: 0 auto; padding: 32px 24px 64px; }
+    .section { margin-bottom: 32px; }
+    .section-label { font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; padding-left: 4px; }
+    .tool-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 32px; }
+    .tool-list { border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; }
+    .tool-row { display: flex; align-items: center; gap: 14px; padding: 12px 16px; border-bottom: 1px solid var(--border); transition: background .15s; }
+    .tool-row:last-child { border-bottom: none; }
+    .tool-row:hover { background: var(--pri-light); }
+    .tool-row .icon { font-size: 18px; width: 28px; text-align: center; flex-shrink: 0; }
+    .tool-row .info { flex: 1; min-width: 0; }
+    .tool-row .name { font-size: 14px; font-weight: 600; }
+    .tool-row .desc { font-size: 12px; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .tool-row .arrow { color: var(--text-muted); font-size: 14px; flex-shrink: 0; }
+    .tool-row:hover .arrow { color: var(--pri); }
+    .tool-row:hover .name { color: var(--pri); }
+  </style>
+</head>
+<body>
+  <nav>
+    <img src="logo-purple.svg" alt="Ascend">
+    <span class="title">Tools</span>
+  </nav>
+
+  <div class="container">
+    <div class="tool-grid">
+      <div>
+        <div class="section-label">Client Tools</div>
+        <div class="tool-list">
+          <a href="index.html" class="tool-row">
+            <span class="icon">&#128200;</span>
+            <div class="info"><div class="name">ROI Calculator</div><div class="desc">Savings by travel profile, cabin class, team size</div></div>
+            <span class="arrow">&rsaquo;</span>
+          </a>
+          <a href="trip-planner.html" class="tool-row">
+            <span class="icon">&#9992;&#65039;</span>
+            <div class="info"><div class="name">Trip Planner</div><div class="desc">Route optimization and cabin comparisons</div></div>
+            <span class="arrow">&rsaquo;</span>
+          </a>
+          <a href="visa-tools.html" class="tool-row">
+            <span class="icon">&#127758;</span>
+            <div class="info"><div class="name">Visa Tools</div><div class="desc">Visa check, passport compare, advisories</div></div>
+            <span class="arrow">&rsaquo;</span>
+          </a>
+        </div>
+
+        <div class="section-label" style="margin-top:24px;">Onboarding</div>
+        <div class="tool-list">
+          <a href="https://ascend-onboarding.vercel.app/" class="tool-row">
+            <span class="icon">&#128203;</span>
+            <div class="info"><div class="name">Onboarding Wizard</div><div class="desc">5-step: Company, Pricing, Contract, Travelers, Review</div></div>
+            <span class="arrow">&rsaquo;</span>
+          </a>
+          <a href="https://ascend-onboarding.vercel.app/policy.html" class="tool-row">
+            <span class="icon">&#128196;</span>
+            <div class="info"><div class="name">Travel Policy Form</div><div class="desc">Post-signature preferences</div></div>
+            <span class="arrow">&rsaquo;</span>
+          </a>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">Partners</div>
+        <div class="tool-list">
+          <a href="templates.html" class="tool-row">
+            <span class="icon">&#129309;</span>
+            <div class="info"><div class="name">Partner Communities</div><div class="desc">Directory, create new, architecture docs</div></div>
+            <span class="arrow">&rsaquo;</span>
+          </a>
+        </div>
+
+        <div class="section-label" style="margin-top:24px;">Booking</div>
+        <div class="tool-list">
+          <a href="booking.html" class="tool-row">
+            <span class="icon">&#127968;</span>
+            <div class="info"><div class="name">Book Travel</div><div class="desc">Hotels, flights, cars, activities — Xeni, Onewurld, Little Emperors</div></div>
+            <span class="arrow">&rsaquo;</span>
+          </a>
+        </div>
+
+        <div class="section-label" style="margin-top:24px;">In Progress</div>
+        <div class="tool-list">
+          <a href="sports.html" class="tool-row">
+            <span class="icon">&#127941;</span>
+            <div class="info"><div class="name">Sports & Entertainment</div><div class="desc">Landing page mockup, 5 verticals</div></div>
+            <span class="arrow">&rsaquo;</span>
+          </a>
+          <a href="form-review.html" class="tool-row">
+            <span class="icon">&#128221;</span>
+            <div class="info"><div class="name">Form Review</div><div class="desc">Proposed referral form enhancements</div></div>
+            <span class="arrow">&rsaquo;</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

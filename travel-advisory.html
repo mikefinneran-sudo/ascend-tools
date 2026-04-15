@@ -4,19 +4,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ascend | Travel Advisory</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #ffffff; --text: #1a1a1a; --text-muted: #666; --text-secondary: #444;
+  --bg: #ffffff; --text: #1a1a2e; --text-muted: #98a2b3; --text-secondary: #667085;
   --text-detail: #333; --metric-bg: #F1EEFF; --metric-border: #E8E8E8;
-  --hero-bg: #D9FDD2; --hero-border: #6F57FF; --footer-bg: #161616;
-  --footer-text: #999; --footer-link: #B4A7FF;
-  --accent: #6F57FF; --accent-hover: #5A44E0; --accent-light: #F1EEFF;
+  --hero-bg: #D9FDD2; --hero-border: #6F57FF; --footer-bg: #f8f7ff;
+  --footer-text: #667085; --footer-link: #6f57ff;
+  --accent: #6F57FF; --accent-hover: #5a44e6; --accent-light: #f8f7ff;
   --success: #D9FDD2; --success-text: #1a5c1a;
   --input-bg: #fff; --input-border: #E8E8E8; --input-focus: #6F57FF;
   --table-stripe: #F9F8FF; --chart-text: #1a1a1a;
-  --card-dark: #161616; --card-dark-text: #fff; --card-dark-muted: #aaa;
+  --card-dark: #1a1a2e; --card-dark-text: #fff; --card-dark-muted: #aaa;
   --amber-bg: #FEF3C7; --amber-border: #D97706; --amber-text: #92400E;
   --bonus-bg: #F1EEFF; --bonus-border: #6F57FF;
   --red-bg: #FEE2E2; --red-border: #DC2626; --red-text: #991B1B;
@@ -28,7 +26,7 @@
   --bg: #0e0e12; --text: #e8e8e8; --text-muted: #888; --text-secondary: #bbb;
   --text-detail: #ccc; --metric-bg: #1c1a28; --metric-border: #2d2b3a;
   --hero-bg: #1a2e1f; --hero-border: #6F57FF; --footer-bg: #0a0a0e;
-  --footer-text: #666; --footer-link: #B4A7FF;
+  --footer-text: #666; --footer-link: #6f57ff;
   --accent: #8B7AFF; --accent-hover: #A090FF; --accent-light: #1c1a28;
   --success: #1a2e1f; --success-text: #a3d98f;
   --input-bg: #18181f; --input-border: #2d2b3a; --input-focus: #8B7AFF;
@@ -42,36 +40,32 @@
 }
 *, *::before, *::after { box-sizing: border-box; }
 html, body {
-  margin: 0; padding: 0; font-family: 'Inter', -apple-system, sans-serif;
-  background: var(--bg); color: var(--text); line-height: 1.5;
+  margin: 0; padding: 0; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg); color: var(--text); line-height: 1.6;
 }
 a { color: var(--accent); }
 .container { max-width: 1180px; margin: 0 auto; padding: 28px 16px 48px; }
 
 .asc-nav {
-  background: #111118; padding: 0 28px; height: 56px;
+  background: #fff; padding: 0 28px; height: 56px; border-bottom: 1px solid #e8e8e8;
   display: flex; justify-content: space-between; align-items: center;
   position: sticky; top: 0; z-index: 200;
 }
 .asc-nav-left { display: flex; align-items: center; gap: 8px; text-decoration: none; }
-.asc-nav-left span { font-size: 1.15rem; font-weight: 700; color: #fff; letter-spacing: -0.02em; }
 .asc-nav-links {
-  display: flex; align-items: center; gap: 6px; min-width: 0;
-  overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none;
+  display: flex; align-items: center; gap: 6px;
 }
-.asc-nav-links::-webkit-scrollbar { display: none; }
 .asc-nav-links a {
-  color: #888; font-size: 13px; font-weight: 500; text-decoration: none;
-  padding: 6px 14px; border-radius: 100px; transition: all 0.2s;
+  color: #667085; font-size: 13px; font-weight: 500; text-decoration: none;
+  padding: 6px 14px; border-radius: 6px; transition: all 0.2s;
   border: 1px solid transparent;
 }
-.asc-nav-links a, .asc-nav-toggle { flex: 0 0 auto; }
-.asc-nav-links a:hover { color: #fff; background: rgba(255,255,255,0.06); }
-.asc-nav-links a.active { color: #fff; background: rgba(111,87,255,0.15); border-color: rgba(111,87,255,0.3); }
+.asc-nav-links a:hover { color: #1a1a2e; background: rgba(111,87,255,0.06); }
+.asc-nav-links a.active { color: #6f57ff; background: rgba(111,87,255,0.1); border-color: rgba(111,87,255,0.3); }
 .asc-nav-toggle {
-  color: #888; border: 1px solid #333; padding: 5px 14px; border-radius: 32px;
-  font-size: 12px; cursor: pointer; background: transparent; font-family: 'Inter', sans-serif;
-  transition: all 0.2s; margin-left: 12px;
+  color: #888; border: 1px solid #333; padding: 5px 14px; border-radius: 6px;
+  font-size: 13px; cursor: pointer; background: transparent; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  transition: all 0.2s; margin-left: 12px; letter-spacing: .04em;
 }
 .asc-nav-toggle:hover { color: #fff; border-color: #666; background: rgba(255,255,255,0.06); }
 
@@ -123,7 +117,7 @@ label {
   display: block; font-size: 13px; font-weight: 500; color: var(--text-secondary); margin-bottom: 6px;
 }
 input, select, button {
-  font-family: 'Inter', sans-serif;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 }
 input, select {
   width: 100%; padding: 10px 12px; font-size: 14px;
@@ -135,8 +129,8 @@ input:focus, select:focus {
 }
 .btn-primary,
 .btn-secondary {
-  border-radius: 999px; font-size: 14px; font-weight: 600; cursor: pointer;
-  transition: all 0.2s; white-space: nowrap;
+  border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer;
+  transition: all 0.2s; white-space: nowrap; letter-spacing: .04em;
 }
 .btn-primary {
   background: var(--accent); color: #fff; border: none; padding: 12px 22px;
@@ -321,16 +315,13 @@ input:focus, select:focus {
 <body>
 
 <nav class="asc-nav">
-  <a href="index.html" class="asc-nav-left"><span>ascend</span></a>
-  <div class="asc-nav-links">
+  <a href="hub.html" class="asc-nav-left"><img src="logo-purple.svg" alt="Ascend" style="height:24px;"></a>
+  <div class="asc-nav-links" style="display:none;">
+    <a href="hub.html">Hub</a>
     <a href="index.html">ROI Calculator</a>
     <a href="trip-planner.html">Trip Planner</a>
-    <a href="pricing.html">Pricing</a>
-    <a href="visa-check.html">Visa Check</a>
-    <a href="trip-check.html">Trip Check</a>
-    <a href="passport-compare.html">Passport Compare</a>
-    <a href="passport-map.html">Passport Map</a>
-    <a href="travel-advisory.html" class="active">Travel Advisory</a>
+    <a href="visa-tools.html" class="active">Visa Tools</a>
+    <a href="templates.html">Partners</a>
     <button class="asc-nav-toggle" onclick="toggleTheme()" id="theme-toggle">Dark mode</button>
   </div>
 </nav>

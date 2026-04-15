@@ -4,30 +4,28 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ascend | Travel ROI Calculator</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
 <style>
 :root {
-  --bg: #ffffff; --text: #1a1a1a; --text-muted: #666; --text-secondary: #444;
+  --bg: #ffffff; --text: #1a1a2e; --text-muted: #98a2b3; --text-secondary: #667085;
   --text-detail: #333; --metric-bg: #F1EEFF; --metric-border: #E8E8E8;
-  --hero-bg: #D9FDD2; --hero-border: #6F57FF; --footer-bg: #161616;
-  --footer-text: #999; --footer-link: #B4A7FF;
-  --accent: #6F57FF; --accent-hover: #5A44E0; --accent-light: #F1EEFF;
+  --hero-bg: #D9FDD2; --hero-border: #6F57FF; --footer-bg: #f8f7ff;
+  --footer-text: #667085; --footer-link: #6f57ff;
+  --accent: #6F57FF; --accent-hover: #5a44e6; --accent-light: #f8f7ff;
   --success: #D9FDD2; --success-text: #1a5c1a;
   --input-bg: #fff; --input-border: #E8E8E8; --input-focus: #6F57FF;
   --table-stripe: #F9F8FF; --chart-text: #1a1a1a;
   --card-dark: #161616; --card-dark-text: #fff; --card-dark-muted: #aaa;
   --amber-bg: #FEF3C7; --amber-border: #D97706; --amber-text: #92400E;
   --bonus-bg: #F1EEFF; --bonus-border: #6F57FF;
-  --mono: 'DM Mono', monospace;
+  --mono: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 }
 [data-theme="dark"] {
   --bg: #0e0e12; --text: #e8e8e8; --text-muted: #888; --text-secondary: #bbb;
   --text-detail: #ccc; --metric-bg: #1c1a28; --metric-border: #2d2b3a;
   --hero-bg: #1a2e1f; --hero-border: #6F57FF; --footer-bg: #0a0a0e;
-  --footer-text: #666; --footer-link: #B4A7FF;
+  --footer-text: #666; --footer-link: #6f57ff;
   --accent: #8B7AFF; --accent-hover: #A090FF; --accent-light: #1c1a28;
   --success: #1a2e1f; --success-text: #a3d98f;
   --input-bg: #1c1a28; --input-border: #2d2b3a; --input-focus: #8B7AFF;
@@ -38,50 +36,46 @@
 }
 *, *::before, *::after { box-sizing: border-box; }
 html, body {
-  margin: 0; padding: 0; font-family: 'Inter', -apple-system, sans-serif;
-  background: var(--bg); color: var(--text); line-height: 1.5;
+  margin: 0; padding: 0; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg); color: var(--text); line-height: 1.6;
 }
 .container { max-width: 960px; margin: 0 auto; padding: 0 16px 40px; }
 
 /* HEADER */
 .asc-header {
-  background: #161616; padding: 20px 28px 16px; display: flex;
+  background: #f8f7ff; padding: 20px 28px 16px; display: flex;
   justify-content: space-between; align-items: center; margin-bottom: 1.5rem;
 }
-.asc-header h1 { color: #fff; font-size: 26px; font-weight: 700; margin: 0 0 2px; letter-spacing: -0.5px; }
+.asc-header h1 { color: #1a1a2e; font-size: 26px; font-weight: 700; margin: 0 0 2px; letter-spacing: -0.5px; }
 .asc-header .accent-dot { color: var(--accent); }
-.asc-header p { color: #999; font-size: 14px; margin: 0; }
+.asc-header p { color: #667085; font-size: 14px; margin: 0; }
 .asc-toggle {
   color: #999; border: 1px solid #444; padding: 5px 14px;
-  border-radius: 32px; font-size: 12px; cursor: pointer;
-  background: transparent; white-space: nowrap; font-family: 'Inter', sans-serif;
+  border-radius: 6px; font-size: 12px; cursor: pointer;
+  background: transparent; white-space: nowrap; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   transition: all 0.2s;
 }
 .asc-toggle:hover { background: rgba(255,255,255,0.1); color: #fff; border-color: #666; }
 /* UNIFIED NAV BAR */
 .asc-nav {
-  background: #111118; padding: 0 28px; height: 56px;
+  background: #fff; padding: 0 28px; height: 56px; border-bottom: 1px solid #e8e8e8;
   display: flex; justify-content: space-between; align-items: center;
   position: sticky; top: 0; z-index: 200;
 }
 .asc-nav-left { display: flex; align-items: center; gap: 8px; text-decoration: none; }
-.asc-nav-left span { font-size: 1.15rem; font-weight: 700; color: #fff; letter-spacing: -0.02em; }
 .asc-nav-links {
-  display: flex; align-items: center; gap: 6px; min-width: 0;
-  overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none;
+  display: flex; align-items: center; gap: 6px;
 }
-.asc-nav-links::-webkit-scrollbar { display: none; }
 .asc-nav-links a {
-  color: #888; font-size: 13px; font-weight: 500; text-decoration: none;
-  padding: 6px 14px; border-radius: 100px; transition: all 0.2s;
+  color: #667085; font-size: 13px; font-weight: 500; text-decoration: none;
+  padding: 6px 14px; border-radius: 6px; transition: all 0.2s;
   border: 1px solid transparent;
 }
-.asc-nav-links a, .asc-nav-toggle { flex: 0 0 auto; }
-.asc-nav-links a:hover { color: #fff; background: rgba(255,255,255,0.06); }
-.asc-nav-links a.active { color: #fff; background: rgba(111,87,255,0.15); border-color: rgba(111,87,255,0.3); }
+.asc-nav-links a:hover { color: #1a1a2e; background: rgba(111,87,255,0.06); }
+.asc-nav-links a.active { color: #6f57ff; background: rgba(111,87,255,0.1); border-color: rgba(111,87,255,0.3); }
 .asc-nav-toggle {
-  color: #888; border: 1px solid #333; padding: 5px 14px; border-radius: 32px;
-  font-size: 12px; cursor: pointer; background: transparent; font-family: 'Inter', sans-serif;
+  color: #888; border: 1px solid #333; padding: 5px 14px; border-radius: 6px;
+  font-size: 12px; cursor: pointer; background: transparent; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   transition: all 0.2s; margin-left: 12px;
 }
 .asc-nav-toggle:hover { color: #fff; border-color: #666; background: rgba(255,255,255,0.06); }
@@ -111,7 +105,7 @@ h3 { font-size: 17px; font-weight: 700; margin: 1rem 0 0.5rem; }
 /* FORMS */
 label { display: block; font-size: 13px; font-weight: 500; color: var(--text-secondary); margin-bottom: 4px; }
 input, select {
-  width: 100%; padding: 8px 10px; font-size: 14px; font-family: 'Inter', sans-serif;
+  width: 100%; padding: 8px 10px; font-size: 14px; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   background: var(--input-bg); color: var(--text); border: 1px solid var(--input-border);
   border-radius: 6px; transition: border-color 0.2s;
 }
@@ -176,15 +170,17 @@ tr:nth-child(even) { background: var(--table-stripe); }
 /* BUTTONS */
 .btn-primary {
   background: var(--accent); color: #fff; border: none; padding: 12px 28px;
-  border-radius: 32px; font-size: 15px; font-weight: 600; cursor: pointer;
-  font-family: 'Inter', sans-serif; transition: background 0.2s;
+  border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; transition: background 0.2s;
+  letter-spacing: .04em;
 }
 .btn-primary:hover { background: var(--accent-hover); }
 .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
 .btn-outline {
   background: transparent; color: var(--accent); border: 1px solid var(--accent);
-  padding: 10px 20px; border-radius: 32px; font-size: 14px; cursor: pointer;
-  font-family: 'Inter', sans-serif; transition: all 0.2s;
+  padding: 10px 20px; border-radius: 6px; font-size: 13px; cursor: pointer;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; transition: all 0.2s;
+  letter-spacing: .04em;
 }
 .btn-outline:hover { background: var(--accent-light); }
 
@@ -248,12 +244,13 @@ tr:nth-child(even) { background: var(--table-stripe); }
 
 <!-- HEADER -->
 <nav class="asc-nav">
-  <a href="index.html" class="asc-nav-left"><span>ascend</span></a>
-  <div class="asc-nav-links">
+  <a href="hub.html" class="asc-nav-left"><img src="logo-purple.svg" alt="Ascend" style="height:24px;"></a>
+  <div class="asc-nav-links" style="display:none;">
+    <a href="hub.html">Hub</a>
     <a href="index.html" class="active">ROI Calculator</a>
     <a href="trip-planner.html">Trip Planner</a>
-    <a href="pricing.html">Pricing</a>
     <a href="visa-tools.html">Visa Tools</a>
+    <a href="templates.html">Partners</a>
     <button class="asc-nav-toggle" onclick="toggleTheme()" id="theme-toggle">Dark mode</button>
   </div>
 </nav>
@@ -524,10 +521,6 @@ tr:nth-child(even) { background: var(--table-stripe); }
   <p>Join hundreds of executives saving 35%+ on premium travel</p>
 </div>
 
-<div style="text-align:center;margin:1rem 0;">
-  <a href="#" id="pricingLink" onclick="goToPricing()" style="color:var(--accent);font-size:14px;font-weight:600;text-decoration:none;">Build a pricing proposal with these numbers &rarr;</a>
-</div>
-
 <!-- METHODOLOGY -->
 <details>
   <summary>How we calculate this</summary>
@@ -544,7 +537,7 @@ tr:nth-child(even) { background: var(--table-stripe); }
 <!-- FOOTER -->
 <div class="asc-footer">
   <p>Built for <a href="https://joinascend.com">Ascend</a> &mdash; Premium travel concierge for executives and teams.</p>
-  <p><a href="index.html">ROI Calculator</a> &middot; <a href="pricing.html">Pricing Proposal</a></p>
+  <p><a href="index.html">ROI Calculator</a></p>
   <p>Calculator estimates based on industry averages and published Ascend savings rates. Individual results may vary.</p>
 </div>
 
@@ -1357,45 +1350,6 @@ function init() {
 
   wireEvents();
   recalculate();
-}
-
-// =============================================================================
-// ROI → PRICING HANDOFF
-// =============================================================================
-
-function goToPricing() {
-  var params = new URLSearchParams();
-
-  // Trips and travelers
-  var trips = parseInt($('trips').value) || 8;
-  params.set('trips', trips);
-
-  // Cabin → travel mix mapping
-  var cabin = $('cabin').value;
-  if (cabin === 'first') params.set('mix', 'all_premium');
-  else if (cabin === 'business') params.set('mix', 'heavy_premium');
-  else params.set('mix', 'balanced');
-
-  // Route value: weighted avg of domestic ($500) and international ($4K)
-  var travelMix = $('travel-mix').value;
-  var pctIntl = travelMix === 'international' ? 0.8 : travelMix === 'mixed' ? 0.5 : 0.2;
-  var routeVal = Math.round(500 * (1 - pctIntl) + 4000 * pctIntl);
-  params.set('routeValue', routeVal);
-
-  // Segment and travelers from tier selection
-  var tier = document.querySelector('input[name="tier"]:checked');
-  if (tier && tier.value === 'enterprise') {
-    params.set('segment', 'enterprise');
-    params.set('travelers', parseInt($('ent-seats').value) || 5);
-  } else {
-    params.set('segment', 'smb');
-    params.set('travelers', 1);
-  }
-
-  // Theme passthrough
-  if (document.documentElement.getAttribute('data-theme') === 'dark') params.set('theme', 'dark');
-
-  window.location.href = 'pricing.html?' + params.toString();
 }
 
 document.addEventListener('DOMContentLoaded', init);

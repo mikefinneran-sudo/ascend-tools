@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>New Partner Page Wizard — Ascend</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; color: #1a1a2e; background: #fff; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+    :root {
+      --pri: #6f57ff; --pri-hover: #5a44e6; --pri-light: #f8f7ff;
+      --text: #1a1a2e; --text-secondary: #667085; --text-muted: #98a2b3;
+      --bg-alt: #f9f8f7; --border: #e8e8e8;
+      --radius-sm: 6px; --radius-md: 12px; --radius-lg: 16px;
+    }
+    h1, h2, h3, h4 { letter-spacing: -.02em; line-height: 1.2; font-weight: 600; }
+    .asc-nav {
+      background: #fff; padding: 0 28px; height: 56px; border-bottom: 1px solid #e8e8e8;
+      display: flex; justify-content: space-between; align-items: center;
+      position: sticky; top: 0; z-index: 200;
+    }
+    .asc-nav-left { display: flex; align-items: center; gap: 8px; text-decoration: none; }
+    .asc-nav-links {
+      display: flex; align-items: center; gap: 6px;
+    }
+    .asc-nav-links a {
+      color: #667085; font-size: 13px; font-weight: 500; text-decoration: none;
+      padding: 6px 14px; border-radius: 6px; transition: all 0.2s;
+      border: 1px solid transparent;
+    }
+    .asc-nav-links a:hover { color: #1a1a2e; background: rgba(111,87,255,0.06); }
+    .asc-nav-links a.active { color: #6f57ff; background: rgba(111,87,255,0.1); border-color: rgba(111,87,255,0.3); }
+
+    .wizard-layout { display: grid; grid-template-columns: 400px 1fr; min-height: calc(100vh - 100px); }
+
+    .wizard-form { padding: 32px; border-right: 1px solid var(--border); overflow-y: auto; }
+    .wizard-form h2 { font-size: 22px; margin-bottom: 4px; }
+    .wizard-form .sub { font-size: 14px; color: var(--text-muted); margin-bottom: 24px; }
+
+    .step { display: none; }
+    .step.active { display: block; }
+    .step-indicator { display: flex; gap: 8px; margin-bottom: 24px; }
+    .step-dot { width: 100%; height: 4px; border-radius: 2px; background: var(--border); }
+    .step-dot.done { background: var(--pri); }
+    .step-dot.current { background: var(--pri); opacity: 0.5; }
+
+    .field { margin-bottom: 16px; }
+    .field label { display: block; font-weight: 500; font-size: 13px; color: #33475b; margin-bottom: 6px; }
+    .field label .hint { font-size: 11px; color: rgba(0,0,0,.4); font-weight: 400; }
+    .field input, .field select, .field textarea {
+      width: 100%; padding: 10px 12px; border: 1px solid #cbd6e2;
+      border-radius: var(--radius-sm); font-size: 14px; background: #fff; font-family: inherit;
+    }
+    .field textarea { resize: vertical; min-height: 80px; }
+    .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--pri); outline: none; box-shadow: 0 0 0 3px rgba(111,87,255,.1); }
+    .field .help { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+
+    .btn-row { display: flex; gap: 12px; margin-top: 24px; }
+    .btn { padding: 10px 24px; border-radius: var(--radius-sm); font-weight: 600; font-size: 13px; border: none; cursor: pointer; letter-spacing: .02em; }
+    .btn--pri { background: var(--pri); color: #fff; }
+    .btn--pri:hover { background: var(--pri-hover); }
+    .btn--ghost { background: transparent; color: var(--text-secondary); border: 1px solid var(--border); }
+    .btn--green { background: #00b894; color: #fff; }
+    .btn--green:hover { background: #00a381; }
+
+    .wizard-preview { background: var(--bg-alt); display: flex; flex-direction: column; }
+    .preview-header { padding: 16px 24px; background: #fff; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .preview-header h3 { font-size: 15px; }
+    .preview-tabs { display: flex; gap: 4px; background: var(--bg-alt); border-radius: 6px; padding: 3px; }
+    .preview-tab { padding: 6px 14px; border-radius: 4px; font-size: 12px; font-weight: 600; border: none; background: transparent; cursor: pointer; color: var(--text-muted); }
+    .preview-tab.active { background: #fff; color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+    .preview-frame { flex: 1; }
+    .preview-frame iframe { width: 100%; height: 100%; border: none; background: #fff; }
+    .preview-code { flex: 1; overflow: auto; padding: 20px; display: none; }
+    .preview-code pre { font-size: 12px; line-height: 1.5; white-space: pre-wrap; word-break: break-all; color: var(--text-secondary); background: #fff; padding: 20px; border-radius: var(--radius-md); border: 1px solid var(--border); }
+
+    #review-summary { background: var(--bg-alt); border-radius: var(--radius-md); padding: 16px; font-size: 13px; line-height: 1.8; margin-bottom: 16px; }
+    .deploy-instructions { margin-top: 16px; padding: 16px; background: var(--pri-light); border-radius: var(--radius-md); font-size: 12px; color: var(--text-secondary); line-height: 1.6; }
+
+    @media (max-width: 900px) {
+      .wizard-layout { grid-template-columns: 1fr; }
+      .wizard-preview { min-height: 500px; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="asc-nav">
+    <a href="hub.html" class="asc-nav-left"><img src="logo-purple.svg" alt="Ascend" style="height:24px;"></a>
+    <div class="asc-nav-links" style="display:none;">
+      <a href="hub.html">Hub</a>
+      <a href="index.html">ROI Calculator</a>
+      <a href="trip-planner.html">Trip Planner</a>
+      <a href="visa-tools.html">Visa Tools</a>
+      <a href="templates.html" class="active">Partners</a>
+    </div>
+  </nav>
+
+  <div class="wizard-layout">
+    <div class="wizard-form">
+      <div class="step-indicator">
+        <div class="step-dot current" id="dot-1"></div>
+        <div class="step-dot" id="dot-2"></div>
+        <div class="step-dot" id="dot-3"></div>
+        <div class="step-dot" id="dot-4"></div>
+      </div>
+
+      <div class="step active" id="step-1">
+        <h2>Partner Identity</h2>
+        <p class="sub">Start typing to search HubSpot, or enter a new partner.</p>
+        <div class="field">
+          <label>Partner Name *</label>
+          <input id="f-name" placeholder="e.g. Tiger 21" autocomplete="off">
+          <div id="hs-results" style="display:none; border: 1px solid #e8e8e8; border-radius: 6px; margin-top: 4px; max-height: 160px; overflow-y: auto;"></div>
+        </div>
+        <div class="field">
+          <label>Page Slug <span class="hint">(auto-generated)</span></label>
+          <input id="f-slug" placeholder="e.g. tiger-21-with-ascend" readonly style="background: var(--bg-alt);">
+          <div class="help">URL: joinascend.com/<strong id="slug-preview">...</strong></div>
+        </div>
+        <div class="field">
+          <label>Partner Website URL <span class="hint">(optional)</span></label>
+          <input id="f-website" placeholder="e.g. https://tiger21.com/">
+        </div>
+        <div class="field">
+          <label>Partner Logo URL <span class="hint">(optional)</span></label>
+          <input id="f-logo" placeholder="e.g. /assets/partners/tiger21-logo.png">
+          <div class="help">Leave blank to show placeholder.</div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn--pri" onclick="goStep(2)">Next: Benefits</button>
+        </div>
+      </div>
+
+      <div class="step" id="step-2">
+        <h2>Benefits & Pricing</h2>
+        <p class="sub">What does this partner's community get?</p>
+        <div class="field">
+          <label>Owner *</label>
+          <select id="f-owner">
+            <option value="">Select...</option>
+            <option value="Zach">Zach</option>
+            <option value="Chloe">Chloe</option>
+            <option value="Omar">Omar</option>
+            <option value="Cam">Cam</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Pricing</label>
+          <input id="f-pricing" placeholder="e.g. $1,875/year (25% off annual)">
+          <div class="help">Leave blank for standard pricing.</div>
+        </div>
+        <div class="field">
+          <label>Trial Terms</label>
+          <input id="f-trial" placeholder="e.g. Three month free trial">
+        </div>
+        <div class="field">
+          <label>Special Benefits <span class="hint">(one per line)</span></label>
+          <textarea id="f-benefits" placeholder="Automatic approval + fast-tracked onboarding&#10;Valid for EA, assistant, family&#10;Complimentary miles &amp; points consulting call"></textarea>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn--ghost" onclick="goStep(1)">Back</button>
+          <button class="btn btn--pri" onclick="goStep(3)">Next: Page Copy</button>
+        </div>
+      </div>
+
+      <div class="step" id="step-3">
+        <h2>Page Copy</h2>
+        <p class="sub">The headline and description on the landing page.</p>
+        <div class="field">
+          <label>Headline</label>
+          <input id="f-headline" placeholder="e.g. Exclusive Travel Benefits for Tiger 21 Members">
+          <div class="help">Default: "Exclusive Travel Benefits for [Partner] Community"</div>
+        </div>
+        <div class="field">
+          <label>Subheadline / Benefits Copy</label>
+          <textarea id="f-subheadline" placeholder="e.g. As a Tiger 21 member, you receive automatic approval..." style="min-height: 100px;"></textarea>
+          <div class="help">This is the copy shown to the partner's members.</div>
+        </div>
+        <div class="field">
+          <label>Onboarding Calendly URL</label>
+          <input id="f-calendly" placeholder="e.g. https://calendly.com/zach-ascend/ascend-new-link">
+        </div>
+        <div class="btn-row">
+          <button class="btn btn--ghost" onclick="goStep(2)">Back</button>
+          <button class="btn btn--pri" onclick="goStep(4)">Next: Review</button>
+        </div>
+      </div>
+
+      <div class="step" id="step-4">
+        <h2>Review & Generate</h2>
+        <p class="sub">Check the preview, then download.</p>
+        <div id="review-summary"></div>
+        <div class="btn-row" style="flex-direction: column; gap: 12px;">
+          <button class="btn btn--pri" id="hs-btn" onclick="createInHubspot()" style="width: 100%;">Create in HubSpot</button>
+          <button class="btn btn--green" onclick="downloadPage()" style="width: 100%;">Download Partner Page HTML</button>
+          <button class="btn btn--ghost" id="copy-btn" onclick="copyConfig()" style="width: 100%;">Copy Config Block</button>
+          <button class="btn btn--ghost" onclick="goStep(3)" style="width: 100%;">Back to Edit</button>
+        </div>
+        <div id="hs-status" style="display:none; margin-top: 12px; padding: 12px; border-radius: 6px; font-size: 13px;"></div>
+        <div class="deploy-instructions">
+          <strong>Steps:</strong><br>
+          1. Click "Create in HubSpot" to add the partner as a Company + Deal<br>
+          2. Download the HTML file<br>
+          3. Save to website-src/partners/[slug].html<br>
+          4. Add partner logo to website-src/assets/partners/<br>
+          5. Run: node build.js<br>
+          6. Deploy: npx wrangler pages deploy website-dist --project-name ascend-site --branch main<br>
+          <br>
+          <strong>Existing partner?</strong> Type the name in Step 1 — if it's already in HubSpot, select it to pre-fill the form.
+        </div>
+      </div>
+    </div>
+
+    <div class="wizard-preview">
+      <div class="preview-header">
+        <h3>Live Preview</h3>
+        <div class="preview-tabs">
+          <button class="preview-tab active" id="tab-page" onclick="showPreviewMode('page')">Page</button>
+          <button class="preview-tab" id="tab-code" onclick="showPreviewMode('code')">Code</button>
+        </div>
+      </div>
+      <div class="preview-frame" id="preview-page">
+        <iframe id="preview-iframe" srcdoc=""></iframe>
+      </div>
+      <div class="preview-code" id="preview-code">
+        <pre id="preview-code-content"></pre>
+      </div>
+    </div>
+  </div>
+
+<script>
+function nameToSlug(name) {
+  return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') + '-with-ascend';
+}
+
+function esc(s) {
+  var d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+function escJs(s) { return s.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\n/g,'\\n'); }
+
+function getFormData() {
+  var name = document.getElementById('f-name').value.trim() || 'Partner Name';
+  var slug = document.getElementById('f-slug').value.trim();
+  return {
+    name: name,
+    slug: slug || nameToSlug(name),
+    website: document.getElementById('f-website').value.trim(),
+    logo: document.getElementById('f-logo').value.trim(),
+    owner: document.getElementById('f-owner').value,
+    pricing: document.getElementById('f-pricing').value.trim() || 'Standard pricing',
+    trial: document.getElementById('f-trial').value.trim() || 'Basic free trial',
+    benefits: document.getElementById('f-benefits').value.trim(),
+    headline: document.getElementById('f-headline').value.trim() || 'Exclusive Travel Benefits for ' + name + ' Members',
+    subheadline: document.getElementById('f-subheadline').value.trim() || 'As a ' + name + ' member, you receive a free trial of our membership services before needing to commit, as well as a fast-tracked onboarding.',
+    calendly: document.getElementById('f-calendly').value.trim()
+  };
+}
+
+function getPreviewHtml() {
+  var d = getFormData();
+  var logoHtml = d.logo
+    ? '<img src="' + esc(d.logo) + '" alt="' + esc(d.name) + ' logo" style="display:block;max-width:180px;max-height:48px;width:auto;height:auto;margin:0 auto 20px;">'
+    : '<div style="display:inline-flex;align-items:center;justify-content:center;padding:10px 20px;border:2px dashed #cbd6e2;border-radius:8px;color:#98a2b3;font-size:13px;font-weight:600;letter-spacing:0.04em;margin:0 auto 20px;">YOUR PARTNER LOGO</div>';
+
+  return '<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">' +
+    '<style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:system-ui,-apple-system,sans-serif;color:#1a1a2e;background:#fff;-webkit-font-smoothing:antialiased}' +
+    'nav{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid #e8e8e8}' +
+    '.logo{font-size:20px;font-weight:700;color:#6f57ff}.nav-r{display:flex;gap:16px;align-items:center}' +
+    '.nav-r a{font-size:12px;font-weight:600;color:#667085;text-decoration:none}.nav-r .cta{background:#6f57ff;color:#fff;padding:8px 16px;border-radius:6px}' +
+    '.hero{max-width:600px;margin:60px auto 0;text-align:center;padding:0 20px}' +
+    'h1{font-size:36px;font-weight:600;letter-spacing:-0.02em;line-height:1.1;margin:0 0 10px;color:#071120}' +
+    '.sub{color:#5b6572;font-size:15px;line-height:1.6;max-width:520px;margin:0 auto 28px}' +
+    'form{max-width:520px;margin:0 auto;padding:0 20px}' +
+    'label{display:block;font-weight:500;font-size:12px;color:#33475b;margin-bottom:5px}' +
+    'label .hint{font-size:10px;color:rgba(0,0,0,.4);font-weight:400}' +
+    'input,select{width:100%;padding:9px 11px;border:1px solid #cbd6e2;border-radius:6px;font-size:14px;margin-bottom:14px;font-family:inherit}' +
+    '.row{display:flex;gap:12px}.row>div{flex:1}' +
+    'button{width:100%;padding:12px;background:#6f57ff;color:#fff;border:none;border-radius:6px;font-weight:600;font-size:13px;cursor:pointer;margin-top:4px}' +
+    '.proof{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:14px;padding:12px;background:#f8f7ff;border:1px solid rgba(111,87,255,.12);border-radius:8px;font-size:13px;font-weight:600;color:#6f57ff}' +
+    '.check{display:flex;gap:8px;align-items:flex-start;font-size:11px;color:#555;margin-bottom:14px;line-height:1.4}' +
+    '.check input{width:16px;height:16px;margin-top:1px;accent-color:#6f57ff}' +
+    'footer{background:#1a1a2e;color:rgba(255,255,255,.6);padding:32px 20px;margin-top:48px;text-align:center;font-size:12px}' +
+    '</style></head><body>' +
+    '<nav><span class="logo">ascend</span><div class="nav-r"><a href="#">How it works</a><a href="#">Pricing</a><a href="#" class="cta">APPLY NOW</a></div></nav>' +
+    '<div class="hero">' + logoHtml +
+    '<h1>' + esc(d.headline) + '</h1>' +
+    '<p class="sub">' + esc(d.subheadline) + '</p></div>' +
+    '<form>' +
+    '<div class="row"><div><label>First Name*</label><input placeholder="e.g. Alex"></div><div><label>Last Name*</label><input placeholder="e.g. Morgan"></div></div>' +
+    '<label>Company</label><input placeholder="e.g. ' + esc(d.name) + '">' +
+    '<label>Email*</label><input placeholder="e.g. alex@company.com">' +
+    '<label>Phone Number* <span class="hint">(Your WhatsApp number)</span></label><input placeholder="+1 555 123 4567">' +
+    '<div class="row"><div><label>Trips per month?*</label><input placeholder="e.g. 2"></div><div><label>Avg trip cost (USD)?*</label><input placeholder="e.g. 5000"></div></div>' +
+    '<label>Referral?</label><select><option>No referral</option><option>Zach Resnick</option><option value="other">Someone else</option></select>' +
+    '<label>How did you hear about us?</label><input placeholder="Optional">' +
+    '<div class="check"><input type="checkbox"><span>I agree to receive communications from Ascend.</span></div>' +
+    '<button type="button">Get Started</button>' +
+    '<div class="proof">78% of customers onboarded in under 15 minutes</div>' +
+    '</form><footer>2026 Ascend. All rights reserved.</footer></body></html>';
+}
+
+function getPageTemplate() {
+  var d = getFormData();
+  return '<!DOCTYPE html>\n<html lang="en">\n<head>\n  <meta charset="utf-8">\n  <meta name="viewport" content="width=device-width, initial-scale=1">\n' +
+    '  <title>' + esc(d.name) + ' Travel Benefits | Ascend</title>\n' +
+    '  <meta name="robots" content="noindex, nofollow">\n' +
+    '  <link rel="icon" href="/assets/images/favicon.png">\n' +
+    '  <link rel="stylesheet" href="{{MAIN_CSS}}">\n  <link rel="stylesheet" href="{{ONBOARD_CSS}}">\n' +
+    '  <script>\n    window.ASCEND_PARTNER = {\n' +
+    "      id: '" + escJs(d.slug) + "',\n" +
+    "      name: '" + escJs(d.name) + "',\n" +
+    "      utm_source: 'partner_" + escJs(d.slug.replace(/-/g,'_')) + "',\n" +
+    "      utm_campaign: '" + escJs(d.slug.replace(/-/g,'_')) + "_q2_2026',\n" +
+    "      logo: '" + escJs(d.logo || '/assets/partners/' + d.slug + '-logo.png') + "',\n" +
+    "      headline: '" + escJs(d.headline) + "',\n" +
+    "      subheadline: '" + escJs(d.subheadline) + "'\n" +
+    '    };\n  <\/script>\n</head>\n<body>\n' +
+    '  <!-- Same body as partner-template.html -->\n' +
+    '  <!-- Copy from website-src/partner-template.html lines 31-174 -->\n' +
+    '</body>\n</html>';
+}
+
+function updatePreview() {
+  document.getElementById('preview-iframe').srcdoc = getPreviewHtml();
+  document.getElementById('preview-code-content').textContent = getPageTemplate();
+}
+
+document.getElementById('f-name').addEventListener('input', function() {
+  var slug = nameToSlug(this.value);
+  document.getElementById('f-slug').value = slug;
+  document.getElementById('slug-preview').textContent = slug;
+  updatePreview();
+});
+
+document.querySelectorAll('.wizard-form input, .wizard-form select, .wizard-form textarea').forEach(function(el) {
+  el.addEventListener('input', updatePreview);
+  el.addEventListener('change', updatePreview);
+});
+
+function goStep(n) {
+  if (n > 1 && !document.getElementById('f-name').value.trim()) {
+    document.getElementById('f-name').focus();
+    return;
+  }
+  document.querySelectorAll('.step').forEach(function(s) { s.classList.remove('active'); });
+  document.getElementById('step-' + n).classList.add('active');
+  document.querySelectorAll('.step-dot').forEach(function(d, i) {
+    d.className = 'step-dot' + (i < n - 1 ? ' done' : i === n - 1 ? ' current' : '');
+  });
+  if (n === 4) {
+    var d = getFormData();
+    var summary = document.getElementById('review-summary');
+    summary.textContent = '';
+    var lines = [
+      ['Partner', d.name],
+      ['Slug', d.slug],
+      ['Owner', d.owner || 'Not set'],
+      ['Pricing', d.pricing],
+      ['Trial', d.trial],
+      ['URL', 'joinascend.com/' + d.slug]
+    ];
+    lines.forEach(function(pair) {
+      var b = document.createElement('strong');
+      b.textContent = pair[0] + ': ';
+      summary.appendChild(b);
+      summary.appendChild(document.createTextNode(pair[1]));
+      summary.appendChild(document.createElement('br'));
+    });
+  }
+  updatePreview();
+}
+
+function showPreviewMode(mode) {
+  document.getElementById('tab-page').classList.toggle('active', mode === 'page');
+  document.getElementById('tab-code').classList.toggle('active', mode === 'code');
+  document.getElementById('preview-page').style.display = mode === 'page' ? 'flex' : 'none';
+  document.getElementById('preview-code').style.display = mode === 'code' ? 'block' : 'none';
+}
+
+function downloadPage() {
+  var d = getFormData();
+  var html = getPageTemplate();
+  var blob = new Blob([html], { type: 'text/html' });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = d.slug + '.html';
+  a.click();
+}
+
+function copyConfig() {
+  var d = getFormData();
+  var config = "window.ASCEND_PARTNER = {\n" +
+    "  id: '" + d.slug + "',\n" +
+    "  name: '" + d.name + "',\n" +
+    "  utm_source: 'partner_" + d.slug.replace(/-/g, '_') + "',\n" +
+    "  utm_campaign: '" + d.slug.replace(/-/g, '_') + "_q2_2026',\n" +
+    "  logo: '" + (d.logo || '/assets/partners/' + d.slug + '-logo.png') + "',\n" +
+    "  headline: '" + d.headline + "',\n" +
+    "  subheadline: '" + d.subheadline + "'\n" +
+    "};";
+  navigator.clipboard.writeText(config);
+  var btn = document.getElementById('copy-btn');
+  btn.textContent = 'Copied!';
+  setTimeout(function() { btn.textContent = 'Copy Config Block'; }, 2000);
+}
+
+// HubSpot search on name input
+var searchTimeout;
+document.getElementById('f-name').addEventListener('input', function() {
+  var val = this.value.trim();
+  var box = document.getElementById('hs-results');
+  clearTimeout(searchTimeout);
+  if (val.length < 2) { box.style.display = 'none'; return; }
+  searchTimeout = setTimeout(function() {
+    fetch('/api/partner?search=' + encodeURIComponent(val))
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (!data.results || data.results.length === 0) {
+          box.style.display = 'none';
+          return;
+        }
+        box.style.display = 'block';
+        box.textContent = '';
+        data.results.forEach(function(co) {
+          var row = document.createElement('div');
+          row.style.cssText = 'padding:10px 14px;cursor:pointer;font-size:13px;border-bottom:1px solid #f0f0f0;display:flex;justify-content:space-between;align-items:center;';
+          row.addEventListener('mouseenter', function() { row.style.background = '#f8f7ff'; });
+          row.addEventListener('mouseleave', function() { row.style.background = ''; });
+
+          var left = document.createElement('div');
+          var nameEl = document.createElement('strong');
+          nameEl.textContent = co.properties.name || '';
+          left.appendChild(nameEl);
+          if (co.properties.domain) {
+            var domEl = document.createElement('span');
+            domEl.style.cssText = 'color:#98a2b3;font-size:12px;margin-left:8px;';
+            domEl.textContent = co.properties.domain;
+            left.appendChild(domEl);
+          }
+
+          var badge = document.createElement('span');
+          badge.style.cssText = 'font-size:10px;font-weight:600;padding:2px 8px;border-radius:4px;background:#f8f7ff;color:#6f57ff;';
+          badge.textContent = 'HubSpot';
+
+          row.appendChild(left);
+          row.appendChild(badge);
+          row.addEventListener('click', function() { loadFromHubspot(co); });
+          box.appendChild(row);
+        });
+      })
+      .catch(function() { box.style.display = 'none'; });
+  }, 300);
+});
+
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('#hs-results') && !e.target.closest('#f-name')) {
+    document.getElementById('hs-results').style.display = 'none';
+  }
+});
+
+function loadFromHubspot(company) {
+  var p = company.properties;
+  document.getElementById('f-name').value = p.name || '';
+  document.getElementById('f-slug').value = nameToSlug(p.name || '');
+  document.getElementById('slug-preview').textContent = nameToSlug(p.name || '');
+  document.getElementById('f-website').value = p.domain ? 'https://' + p.domain : '';
+  if (p.partner_owner) {
+    var sel = document.getElementById('f-owner');
+    for (var i = 0; i < sel.options.length; i++) {
+      if (sel.options[i].value === p.partner_owner) { sel.selectedIndex = i; break; }
+    }
+  }
+  if (p.partner_pricing) document.getElementById('f-pricing').value = p.partner_pricing;
+  if (p.partner_trial) document.getElementById('f-trial').value = p.partner_trial;
+  if (p.partner_benefits) document.getElementById('f-benefits').value = p.partner_benefits;
+  document.getElementById('hs-results').style.display = 'none';
+  updatePreview();
+}
+
+function createInHubspot() {
+  var btn = document.getElementById('hs-btn');
+  var status = document.getElementById('hs-status');
+  var d = getFormData();
+
+  btn.disabled = true;
+  btn.textContent = 'Creating...';
+  status.style.display = 'none';
+
+  fetch('/api/partner', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(d)
+  })
+    .then(function(r) { return r.json().then(function(data) { return { ok: r.ok, data: data }; }); })
+    .then(function(result) {
+      status.style.display = 'block';
+      if (result.ok) {
+        var msg = result.data.company.created ? 'Created' : 'Found existing';
+        status.style.background = '#d4edda';
+        status.style.color = '#155724';
+        status.textContent = msg + ' company "' + result.data.company.name + '" (ID: ' + result.data.company.id + '). Deal created: ' + result.data.deal.name + ' (ID: ' + result.data.deal.id + ')';
+        btn.textContent = 'Created in HubSpot';
+        btn.style.background = '#00b894';
+      } else {
+        status.style.background = '#f8d7da';
+        status.style.color = '#721c24';
+        status.textContent = 'Error: ' + (result.data.error || 'Unknown error');
+        btn.disabled = false;
+        btn.textContent = 'Retry — Create in HubSpot';
+      }
+    })
+    .catch(function(err) {
+      status.style.display = 'block';
+      status.style.background = '#f8d7da';
+      status.style.color = '#721c24';
+      status.textContent = 'Network error: ' + err.message;
+      btn.disabled = false;
+      btn.textContent = 'Retry — Create in HubSpot';
+    });
+}
+
+updatePreview();
+</script>
+</body>
+</html>

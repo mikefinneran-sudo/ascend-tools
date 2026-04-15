@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Partner Page Form Migration — Outline</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; color: #1a1a2e; background: #fff; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+    :root {
+      --pri: #6f57ff; --pri-hover: #5a44e6; --pri-light: #f8f7ff;
+      --text: #1a1a2e; --text-secondary: #667085; --text-muted: #98a2b3;
+      --bg-alt: #f9f8f7; --border: #e8e8e8;
+      --radius-sm: 6px; --radius-md: 12px; --radius-lg: 16px;
+    }
+    h1, h2, h3, h4 { letter-spacing: -.02em; line-height: 1.2; font-weight: 600; }
+    .asc-nav {
+      background: #fff; padding: 0 28px; height: 56px; border-bottom: 1px solid #e8e8e8;
+      display: flex; justify-content: space-between; align-items: center;
+      position: sticky; top: 0; z-index: 200;
+    }
+    .asc-nav-left { display: flex; align-items: center; gap: 8px; text-decoration: none; }
+    .asc-nav-links {
+      display: flex; align-items: center; gap: 6px;
+    }
+    .asc-nav-links a {
+      color: #667085; font-size: 13px; font-weight: 500; text-decoration: none;
+      padding: 6px 14px; border-radius: 6px; transition: all 0.2s;
+      border: 1px solid transparent;
+    }
+    .asc-nav-links a:hover { color: #1a1a2e; background: rgba(111,87,255,0.06); }
+    .asc-nav-links a.active { color: #6f57ff; background: rgba(111,87,255,0.1); border-color: rgba(111,87,255,0.3); }
+    .container { max-width: 900px; margin: 0 auto; padding: 0 24px; }
+    section { padding: 60px 0; }
+
+    .hero-section { background: var(--bg-alt); padding: 60px 0; text-align: center; }
+    .hero-section h1 { font-size: 36px; margin-bottom: 12px; }
+    .hero-section p { font-size: 18px; color: var(--text-secondary); max-width: 600px; margin: 0 auto; }
+
+    .status-badge { display: inline-block; background: #00b894; color: white; font-size: 12px; font-weight: 700; padding: 4px 12px; border-radius: 20px; margin-bottom: 20px; letter-spacing: .04em; }
+
+    /* Architecture */
+    .arch-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-top: 32px; }
+    .arch-card { background: #fff; border: 1px solid var(--border); border-radius: var(--radius-md); padding: 24px; }
+    .arch-card h4 { font-size: 16px; margin-bottom: 8px; }
+    .arch-card p { font-size: 14px; color: var(--text-secondary); }
+    .arch-card code { background: var(--pri-light); color: var(--pri); padding: 2px 6px; border-radius: 4px; font-size: 13px; }
+
+    /* Flow */
+    .flow { background: var(--bg-alt); }
+    .flow-steps { display: flex; gap: 16px; margin-top: 32px; align-items: flex-start; }
+    .flow-step { flex: 1; background: #fff; border-radius: var(--radius-md); padding: 20px; text-align: center; border: 1px solid var(--border); }
+    .flow-step .num { width: 32px; height: 32px; border-radius: 50%; background: var(--pri); color: #fff; display: inline-grid; place-items: center; font-weight: 700; font-size: 14px; margin-bottom: 12px; }
+    .flow-step h4 { font-size: 14px; margin-bottom: 6px; }
+    .flow-step p { font-size: 13px; color: var(--text-secondary); }
+    .flow-arrow { display: flex; align-items: center; color: var(--text-muted); font-size: 24px; padding-top: 30px; }
+
+    /* Data Flow */
+    .data-flow { margin-top: 32px; }
+    .data-row { display: flex; align-items: center; gap: 12px; padding: 14px 20px; background: #fff; border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 8px; }
+    .data-row .label { font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--text-muted); width: 80px; flex-shrink: 0; }
+    .data-row .desc { font-size: 14px; color: var(--text-secondary); }
+    .data-row code { background: var(--pri-light); color: var(--pri); padding: 2px 6px; border-radius: 4px; font-size: 12px; }
+
+    /* Dependencies */
+    .dep-table { width: 100%; border-collapse: collapse; margin-top: 24px; }
+    .dep-table th { text-align: left; padding: 12px 16px; font-size: 13px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .04em; border-bottom: 2px solid var(--border); }
+    .dep-table td { padding: 12px 16px; border-bottom: 1px solid #f0f0f0; font-size: 14px; }
+    .dep-table .status { font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 4px; }
+    .status--done { background: #d4edda; color: #155724; }
+    .status--gap { background: #fff3cd; color: #856404; }
+
+    /* Risks */
+    .risk-card { background: #fff; border: 1px solid var(--border); border-radius: var(--radius-md); padding: 20px; margin-bottom: 12px; }
+    .risk-card h4 { font-size: 15px; margin-bottom: 6px; }
+    .risk-card p { font-size: 14px; color: var(--text-secondary); }
+  </style>
+</head>
+<body>
+  <nav class="asc-nav">
+    <a href="hub.html" class="asc-nav-left"><img src="logo-purple.svg" alt="Ascend" style="height:24px;"></a>
+    <div class="asc-nav-links" style="display:none;">
+      <a href="hub.html">Hub</a>
+      <a href="index.html">ROI Calculator</a>
+      <a href="trip-planner.html">Trip Planner</a>
+      <a href="visa-tools.html">Visa Tools</a>
+      <a href="templates.html" class="active">Partners</a>
+    </div>
+  </nav>
+
+  <section class="hero-section">
+    <div class="container">
+      <span class="status-badge">MIGRATION COMPLETE</span>
+      <h1>Partner Page Form Migration</h1>
+      <p>All form pages share a single codebase. No legacy form to migrate from — the unified architecture is already built and deployed.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="container">
+      <h2>Architecture</h2>
+      <div class="arch-grid">
+        <div class="arch-card">
+          <h4>Shared Form Script</h4>
+          <p><code>onboard.js</code></p>
+          <p style="margin-top: 8px;">Loaded by all form pages via build token. Handles validation, submission, qualification, and post-submit channel selection.</p>
+        </div>
+        <div class="arch-card">
+          <h4>Partner Resolution</h4>
+          <p>Priority order:</p>
+          <p style="margin-top: 8px;">1. URL param <code>?partner=</code><br>2. <code>sessionStorage</code><br>3. <code>window.ASCEND_PARTNER.id</code></p>
+        </div>
+        <div class="arch-card">
+          <h4>Form Pages</h4>
+          <p><code>join-ascend.html</code> — Main<br><code>partner-template.html</code> — Generic<br><code>partners/bitkraft.html</code> — Specific</p>
+          <p style="margin-top: 8px;">All share identical form logic.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="flow">
+    <div class="container">
+      <h2>How to Create a New Partner Page</h2>
+      <div class="flow-steps">
+        <div class="flow-step">
+          <div class="num">1</div>
+          <h4>Copy bitkraft.html</h4>
+          <p>Duplicate to <code>partners/new-slug.html</code></p>
+        </div>
+        <span class="flow-arrow">&rarr;</span>
+        <div class="flow-step">
+          <div class="num">2</div>
+          <h4>Update Config</h4>
+          <p>Partner name, logo, headline, UTMs in the <code>ASCEND_PARTNER</code> block</p>
+        </div>
+        <span class="flow-arrow">&rarr;</span>
+        <div class="flow-step">
+          <div class="num">3</div>
+          <h4>Add Logo</h4>
+          <p>Drop file into <code>assets/partners/</code></p>
+        </div>
+        <span class="flow-arrow">&rarr;</span>
+        <div class="flow-step">
+          <div class="num">4</div>
+          <h4>Build & Deploy</h4>
+          <p><code>node build.js</code> then deploy to Cloudflare Pages</p>
+        </div>
+      </div>
+      <p style="text-align: center; margin-top: 20px; font-size: 14px; color: var(--text-muted);">~15 minutes per page. No backend changes needed.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="container">
+      <h2>Data Flow (All Pages, Identical)</h2>
+      <div class="data-flow">
+        <div class="data-row">
+          <span class="label">Step 1</span>
+          <span class="desc">Form submit fires dual POST: Railway webhook <code>/webhook/form-contact</code> + HubSpot Forms API (portal 50755448)</span>
+        </div>
+        <div class="data-row">
+          <span class="label">Step 2</span>
+          <span class="desc">Railway creates/updates HubSpot contact via Contacts API</span>
+        </div>
+        <div class="data-row">
+          <span class="label">Step 3</span>
+          <span class="desc"><code>partner_id</code> flows through to HubSpot contact property and WhatsApp webhook <code>extra</code> object</span>
+        </div>
+        <div class="data-row">
+          <span class="label">Step 4</span>
+          <span class="desc">UTMs persist via <code>sessionStorage</code> across page navigations</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section style="background: var(--bg-alt);">
+    <div class="container">
+      <h2>Dependencies</h2>
+      <table class="dep-table">
+        <thead><tr><th>Component</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td>Shared onboard.js — all pages use it</td><td><span class="status status--done">Done</span></td></tr>
+          <tr><td>Build pipeline (build.js) — auto-discovers partner pages</td><td><span class="status status--done">Done</span></td></tr>
+          <tr><td>HubSpot form integration — partner_id field included</td><td><span class="status status--done">Done</span></td></tr>
+          <tr><td>WhatsApp bot receives partner context</td><td><span class="status status--done">Done</span></td></tr>
+          <tr><td>Cloudflare deploy — manual via npm run deploy</td><td><span class="status status--done">Done</span></td></tr>
+          <tr><td>Partner logo assets — directory exists, no logos committed</td><td><span class="status status--gap">Gap</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <div class="container">
+      <h2>Risks & Open Questions</h2>
+      <div class="risk-card">
+        <h4>Logo assets not in repo</h4>
+        <p>The assets/partners/ directory has a .gitkeep but no actual logos. Partner pages show broken images until logos are added. Fallback: /assets/logos/partner-id.webp.</p>
+      </div>
+      <div class="risk-card">
+        <h4>Website deploy is manual</h4>
+        <p>Changes require node build.js then npm run deploy. Commit to main does NOT auto-deploy to Cloudflare Pages.</p>
+      </div>
+      <div class="risk-card">
+        <h4>No per-partner analytics dashboard</h4>
+        <p>UTM params provide channel-level attribution. HubSpot can filter by partner_id contact property if a dashboard is needed.</p>
+      </div>
+    </div>
+  </section>
+</body>
+</html>

@@ -14,9 +14,21 @@
       --border: #e8e8e8;
       --radius-md: 12px;
     }
-    nav { display: flex; align-items: center; padding: 16px 24px; background: #fff; border-bottom: 1px solid var(--border); }
-    nav img { height: 24px; }
-    nav .title { margin-left: 12px; font-size: 15px; font-weight: 600; color: var(--text-muted); }
+    .asc-nav {
+      background: #fff; padding: 0 28px; height: 56px; border-bottom: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center;
+      position: sticky; top: 0; z-index: 200;
+    }
+    .asc-nav-left { display: flex; align-items: center; gap: 8px; text-decoration: none; }
+    .asc-nav-left img { height: 24px; }
+    .asc-nav-links { display: flex; align-items: center; gap: 6px; }
+    .asc-nav-links a {
+      color: #667085; font-size: 13px; font-weight: 500; text-decoration: none;
+      padding: 6px 14px; border-radius: 6px; transition: all 0.2s;
+      border: 1px solid transparent;
+    }
+    .asc-nav-links a:hover { color: #1a1a2e; background: rgba(111,87,255,0.06); }
+    .asc-nav-links a.active { color: #6f57ff; background: rgba(111,87,255,0.1); border-color: rgba(111,87,255,0.3); }
     .container { max-width: 720px; margin: 0 auto; padding: 32px 24px 64px; }
     .section { margin-bottom: 32px; }
     .section-label { font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; padding-left: 4px; }
@@ -35,9 +47,15 @@
   </style>
 </head>
 <body>
-  <nav>
-    <img src="logo-purple.svg" alt="Ascend">
-    <span class="title">Tools</span>
+  <nav class="asc-nav">
+    <a href="hub.html" class="asc-nav-left"><img src="logo-purple.svg" alt="Ascend"></a>
+    <div class="asc-nav-links">
+      <a href="hub.html" class="active">Hub</a>
+      <a href="index.html">ROI Calculator</a>
+      <a href="trip-planner.html">Trip Planner</a>
+      <a href="visa-tools.html">Visa Tools</a>
+      <a href="templates.html">Partners</a>
+    </div>
   </nav>
 
   <div class="container">
@@ -82,7 +100,12 @@
         <div class="tool-list">
           <a href="templates.html" class="tool-row">
             <span class="icon">&#129309;</span>
-            <div class="info"><div class="name">Partner Communities</div><div class="desc">Directory, create new, architecture docs</div></div>
+            <div class="info"><div class="name">Partner Communities</div><div class="desc">Directory of live partner pages</div></div>
+            <span class="arrow">&rsaquo;</span>
+          </a>
+          <a href="new-partner.html" class="tool-row">
+            <span class="icon">&#128221;</span>
+            <div class="info"><div class="name">Landing Page Generator</div><div class="desc">Step-by-step wizard to create a new partner page</div></div>
             <span class="arrow">&rsaquo;</span>
           </a>
         </div>

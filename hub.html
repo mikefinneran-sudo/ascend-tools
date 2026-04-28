@@ -44,6 +44,47 @@
     .tool-row .arrow { color: var(--text-muted); font-size: 14px; flex-shrink: 0; }
     .tool-row:hover .arrow { color: var(--pri); }
     .tool-row:hover .name { color: var(--pri); }
+    /* Test-call widget */
+    .test-call {
+      border: 1px solid var(--border); border-radius: var(--radius-md);
+      padding: 14px 16px; background: #fff;
+    }
+    .test-call summary {
+      list-style: none; cursor: pointer; display: flex; align-items: center;
+      gap: 14px; user-select: none;
+    }
+    .test-call summary::-webkit-details-marker { display: none; }
+    .test-call summary .icon { font-size: 18px; width: 28px; text-align: center; }
+    .test-call summary .info { flex: 1; }
+    .test-call summary .name { font-size: 14px; font-weight: 600; }
+    .test-call summary .desc { font-size: 12px; color: var(--text-secondary); }
+    .test-call summary .arrow { color: var(--text-muted); font-size: 14px; }
+    .test-call[open] summary .arrow { transform: rotate(90deg); }
+    .test-call summary:hover .name { color: var(--pri); }
+    .test-call summary:hover .arrow { color: var(--pri); }
+    .test-call-form { margin-top: 14px; display: grid; gap: 10px; }
+    .test-call-form label { font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--text-muted); }
+    .test-call-form input {
+      width: 100%; padding: 10px 12px; border: 1px solid var(--border);
+      border-radius: 8px; font: inherit; color: var(--text);
+      background: #fff; transition: border-color .15s;
+    }
+    .test-call-form input:focus { outline: none; border-color: var(--pri); }
+    .test-call-form .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .test-call-btn {
+      padding: 10px 16px; border: none; border-radius: 8px;
+      background: var(--pri); color: #fff; font-weight: 600; font-size: 13px;
+      cursor: pointer; transition: opacity .15s;
+    }
+    .test-call-btn:hover { opacity: .9; }
+    .test-call-btn:disabled { opacity: .5; cursor: not-allowed; }
+    .test-call-status {
+      font-size: 12px; margin-top: 4px; min-height: 16px;
+      color: var(--text-secondary);
+    }
+    .test-call-status.ok { color: #047857; }
+    .test-call-status.err { color: #b42318; }
+    .test-call-hint { font-size: 11px; color: var(--text-muted); margin-top: -4px; }
   </style>
 </head>
 <body>
@@ -132,8 +173,137 @@
             <span class="arrow">&rsaquo;</span>
           </a>
         </div>
+
+        <div class="section-label" style="margin-top:24px;">Internal</div>
+        <details class="test-call" id="testCall">
+          <summary>
+            <span class="icon">&#128222;</span>
+            <div class="info">
+              <div class="name">Test Discovery Call</div>
+              <div class="desc">Trigger an outbound Vapi call to your phone</div>
+            </div>
+            <span class="arrow">&rsaquo;</span>
+          </summary>
+          <form class="test-call-form" id="testCallForm" novalidate>
+            <div>
+              <label for="tc-name">Name</label>
+              <input id="tc-name" name="name" type="text" autocomplete="name" required>
+            </div>
+            <div>
+              <label for="tc-phone">Phone (E.164)</label>
+              <input id="tc-phone" name="phone" type="tel" placeholder="+15551234567" autocomplete="tel" required>
+              <div class="test-call-hint">Include country code with leading +. US: +1xxxxxxxxxx</div>
+            </div>
+            <div>
+              <label for="tc-email">Email (optional)</label>
+              <input id="tc-email" name="email" type="email" autocomplete="email">
+            </div>
+            <div>
+              <label for="tc-key">Internal key (skips rate limit)</label>
+              <input id="tc-key" name="internalKey" type="password" autocomplete="off">
+              <div class="test-call-hint">Stored in this browser only. Required for rapid back-to-back testing.</div>
+            </div>
+            <button class="test-call-btn" type="submit" id="tc-submit">Place test call</button>
+            <div class="test-call-status" id="tc-status"></div>
+          </form>
+        </details>
       </div>
     </div>
   </div>
+  <script>
+    (function () {
+      const API_BASE = 'https://ascend-discovery-agent-icy-thunder-6561.fly.dev';
+      const E164 = /^\+[1-9]\d{6,14}$/;
+      const form = document.getElementById('testCallForm');
+      if (!form) return;
+      const statusEl = document.getElementById('tc-status');
+      const btn = document.getElementById('tc-submit');
+      const keyInput = document.getElementById('tc-key');
+      const KEY_STORE = 'ascend-test-call-internal-key';
+
+      // Restore the key from localStorage so Mike types it once per browser
+      try {
+        const saved = localStorage.getItem(KEY_STORE);
+        if (saved) keyInput.value = saved;
+      } catch (_) { /* private mode — silently ignore */ }
+
+      function setStatus(msg, kind) {
+        statusEl.textContent = msg || '';
+        statusEl.className = 'test-call-status' + (kind ? ' ' + kind : '');
+      }
+
+      async function pollStatus(callId, deadlineMs) {
+        const start = Date.now();
+        while (Date.now() - start < deadlineMs) {
+          try {
+            const r = await fetch(API_BASE + '/api/call-status/' + encodeURIComponent(callId));
+            if (r.ok) {
+              const data = await r.json();
+              if (data.status && data.status !== 'initiated' && data.status !== 'queued') {
+                return data.status;
+              }
+            }
+          } catch (_) { /* ignore transient */ }
+          await new Promise(res => setTimeout(res, 2500));
+        }
+        return null;
+      }
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const name = document.getElementById('tc-name').value.trim();
+        const phone = document.getElementById('tc-phone').value.trim();
+        const email = document.getElementById('tc-email').value.trim() || null;
+
+        if (!name) { setStatus('Name is required.', 'err'); return; }
+        if (!E164.test(phone)) {
+          setStatus('Phone must be E.164 (e.g. +15551234567).', 'err');
+          return;
+        }
+
+        btn.disabled = true;
+        setStatus('Placing call…');
+
+        const internalKey = keyInput.value.trim();
+        // Persist for next test — empty string clears the entry
+        try {
+          if (internalKey) localStorage.setItem(KEY_STORE, internalKey);
+          else localStorage.removeItem(KEY_STORE);
+        } catch (_) { /* private mode */ }
+
+        const headers = { 'Content-Type': 'application/json' };
+        if (internalKey) headers['X-Internal-Key'] = internalKey;
+
+        try {
+          const resp = await fetch(API_BASE + '/api/initiate-call', {
+            method: 'POST',
+            headers,
+            body: JSON.stringify({
+              name, phone, email,
+              form_data: { source: 'ascend-hub-test' },
+            }),
+          });
+          const data = await resp.json().catch(() => ({}));
+          if (!resp.ok) {
+            const detail = data.detail || resp.statusText || ('HTTP ' + resp.status);
+            setStatus('Failed: ' + detail, 'err');
+            return;
+          }
+          const callId = data.call_id;
+          setStatus('Call initiated (' + (callId || 'unknown') + ') — watching status…', 'ok');
+          const final = await pollStatus(callId, 90000);
+          if (final) {
+            setStatus('Call ' + callId + ' → ' + final, 'ok');
+          } else {
+            setStatus('Initiated, but no terminal status within 90s. Check Fly logs.', 'err');
+          }
+        } catch (err) {
+          setStatus('Network error: ' + (err && err.message ? err.message : err), 'err');
+        } finally {
+          btn.disabled = false;
+        }
+      });
+    })();
+  </script>
 </body>
 </html>

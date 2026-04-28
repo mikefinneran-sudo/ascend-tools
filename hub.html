@@ -198,11 +198,6 @@
               <label for="tc-email">Email (optional)</label>
               <input id="tc-email" name="email" type="email" autocomplete="email">
             </div>
-            <div>
-              <label for="tc-key">Internal key (skips rate limit)</label>
-              <input id="tc-key" name="internalKey" type="password" autocomplete="off">
-              <div class="test-call-hint">Stored in this browser only. Required for rapid back-to-back testing.</div>
-            </div>
             <button class="test-call-btn" type="submit" id="tc-submit">Place test call</button>
             <div class="test-call-status" id="tc-status"></div>
           </form>
@@ -213,19 +208,15 @@
   <script>
     (function () {
       const API_BASE = 'https://ascend-discovery-agent-icy-thunder-6561.fly.dev';
+      // Internal portal — bypass key embedded so the widget Just Works for
+      // anyone Mike sends the URL to. Server-side env var is the source of
+      // truth; rotate both together if this ever needs revocation.
+      const INTERNAL_KEY = 'c935bc1021c53818183b8749a8a69bfd8a476b09969231a75714f71c7b658cdf';
       const E164 = /^\+[1-9]\d{6,14}$/;
       const form = document.getElementById('testCallForm');
       if (!form) return;
       const statusEl = document.getElementById('tc-status');
       const btn = document.getElementById('tc-submit');
-      const keyInput = document.getElementById('tc-key');
-      const KEY_STORE = 'ascend-test-call-internal-key';
-
-      // Restore the key from localStorage so Mike types it once per browser
-      try {
-        const saved = localStorage.getItem(KEY_STORE);
-        if (saved) keyInput.value = saved;
-      } catch (_) { /* private mode — silently ignore */ }
 
       function setStatus(msg, kind) {
         statusEl.textContent = msg || '';
@@ -264,20 +255,13 @@
         btn.disabled = true;
         setStatus('Placing call…');
 
-        const internalKey = keyInput.value.trim();
-        // Persist for next test — empty string clears the entry
-        try {
-          if (internalKey) localStorage.setItem(KEY_STORE, internalKey);
-          else localStorage.removeItem(KEY_STORE);
-        } catch (_) { /* private mode */ }
-
-        const headers = { 'Content-Type': 'application/json' };
-        if (internalKey) headers['X-Internal-Key'] = internalKey;
-
         try {
           const resp = await fetch(API_BASE + '/api/initiate-call', {
             method: 'POST',
-            headers,
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Internal-Key': INTERNAL_KEY,
+            },
             body: JSON.stringify({
               name, phone, email,
               form_data: { source: 'ascend-hub-test' },

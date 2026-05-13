@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ascend Proposal Builder</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --pri: #6F57FF; --pri-light: #f8f7ff; --pri-soft: rgba(111,87,255,0.08);
+      --midnight: #1E2F39; --sky: #E0EFFF; --land: #727841; --sun: #DBF4A7;
+      --cream: #EFEAE3; --offwhite: #F6F4F0;
+      --text: #1E2F39; --text-secondary: #4a5a66; --text-muted: #98a2b3;
+      --border: #e8e8e8; --border-strong: #d0d5dd;
+      --radius-sm: 8px; --radius-md: 12px; --radius-lg: 20px;
+      --ok: #047857; --err: #b42318;
+    }
+    body { font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; color: var(--text); background: #fff; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+    a { color: inherit; text-decoration: none; }
+    code, kbd, .mono { font-family: 'SF Mono', Menlo, Consolas, monospace; }
+
+    .asc-nav { background: #fff; padding: 0 28px; height: 56px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 200; }
+    .asc-nav-left { display: flex; align-items: center; gap: 8px; }
+    .asc-nav-left img { height: 24px; }
+    .asc-nav-links { display: flex; align-items: center; gap: 6px; }
+    .asc-nav-links a { color: var(--text-secondary); font-size: 13px; font-weight: 500; padding: 6px 14px; border-radius: 6px; transition: all 0.2s; border: 1px solid transparent; }
+    .asc-nav-links a:hover { color: var(--text); background: var(--pri-soft); }
+    .asc-nav-links a.active { color: var(--pri); background: var(--pri-soft); border-color: rgba(111,87,255,0.3); }
+
+    .hero { background: var(--midnight); color: #fff; padding: 56px 28px 40px; }
+    .hero-inner { max-width: 880px; margin: 0 auto; }
+    .hero .eyebrow { font-family: 'SF Mono', Menlo, Consolas, monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.7; margin-bottom: 14px; }
+    .hero h1 { font-size: 44px; font-weight: 500; letter-spacing: -0.02em; line-height: 1.05; max-width: 720px; }
+    .hero p { margin-top: 16px; font-size: 16px; opacity: 0.85; max-width: 600px; }
+
+    .container { max-width: 880px; margin: 0 auto; padding: 40px 28px 96px; }
+
+    .card { border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 28px; margin-bottom: 20px; background: #fff; }
+    .card-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 20px; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
+    .card-head h2 { font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+    .card-head .step { font-family: 'SF Mono', Menlo, Consolas, monospace; font-size: 11px; color: var(--text-muted); }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+    @media (max-width: 640px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+
+    .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+    .field:last-child { margin-bottom: 0; }
+    label { font-size: 12px; font-weight: 600; color: var(--text-secondary); letter-spacing: 0.01em; }
+    input[type=text], input[type=email], input[type=number], input[type=url], select, textarea {
+      width: 100%; padding: 10px 12px; border: 1px solid var(--border-strong); border-radius: var(--radius-sm);
+      font: inherit; color: var(--text); background: #fff; transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    textarea { resize: vertical; min-height: 88px; font-family: inherit; }
+    input:focus, select:focus, textarea:focus { outline: none; border-color: var(--pri); box-shadow: 0 0 0 3px var(--pri-soft); }
+    .help { font-size: 11px; color: var(--text-muted); }
+
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .chip { display: inline-flex; align-items: center; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--border-strong); font-size: 13px; cursor: pointer; user-select: none; transition: all 0.15s; background: #fff; }
+    .chip:hover { border-color: var(--pri); color: var(--pri); }
+    .chip.selected { background: var(--pri); border-color: var(--pri); color: #fff; }
+    .chip input { display: none; }
+
+    .actions { display: flex; align-items: center; gap: 12px; margin-top: 24px; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 24px; border-radius: 999px; font: inherit; font-weight: 600; font-size: 14px; cursor: pointer; border: 1px solid transparent; transition: all 0.15s; }
+    .btn-pri { background: var(--pri); color: #fff; }
+    .btn-pri:hover:not(:disabled) { background: #5a45e6; }
+    .btn-pri:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-ghost { background: #fff; color: var(--text); border-color: var(--border-strong); }
+    .btn-ghost:hover { background: var(--offwhite); }
+
+    .status { font-size: 13px; color: var(--text-secondary); min-height: 18px; }
+    .status.err { color: var(--err); }
+    .status.ok { color: var(--ok); }
+
+    .result { display: none; }
+    .result.show { display: block; }
+    .result-head { background: var(--pri); color: #fff; padding: 32px 28px; border-radius: var(--radius-lg) var(--radius-lg) 0 0; }
+    .result-head .eyebrow { font-family: 'SF Mono', Menlo, Consolas, monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.8; margin-bottom: 10px; }
+    .result-head h2 { font-size: 28px; font-weight: 500; letter-spacing: -0.015em; }
+    .result-head .meta { margin-top: 10px; font-family: 'SF Mono', Menlo, Consolas, monospace; font-size: 12px; opacity: 0.85; }
+    .result-body { border: 1px solid var(--border); border-top: none; border-radius: 0 0 var(--radius-lg) var(--radius-lg); padding: 24px 28px; }
+    .deck-link { display: inline-flex; align-items: center; gap: 10px; padding: 14px 20px; background: var(--midnight); color: #fff; border-radius: var(--radius-sm); font-weight: 600; margin-bottom: 16px; }
+    .deck-link:hover { background: #2a3b46; }
+    .deck-link.warn { background: var(--cream); color: var(--midnight); border: 1px solid var(--border-strong); }
+    .md-preview { background: var(--offwhite); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 16px; font-family: 'SF Mono', Menlo, Consolas, monospace; font-size: 12px; line-height: 1.55; max-height: 320px; overflow: auto; white-space: pre-wrap; }
+
+    .req::after { content: " *"; color: var(--pri); }
+  </style>
+</head>
+<body>
+  <nav class="asc-nav">
+    <a href="hub.html" class="asc-nav-left"><img src="logo-purple.svg" alt="Ascend"></a>
+    <div class="asc-nav-links">
+      <a href="hub.html">Hub</a>
+      <a href="index.html">ROI Calculator</a>
+      <a href="trip-planner.html">Trip Planner</a>
+      <a href="visa-tools.html">Visa Tools</a>
+      <a href="proposal-builder.html" class="active">Proposals</a>
+      <a href="templates.html">Partners</a>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="hero-inner">
+      <div class="eyebrow">ASCEND × CLIENT</div>
+      <h1>Build a branded sales proposal in under a minute.</h1>
+      <p>Fill the intake brief. The system writes the deck and creates it in Gamma using the Ascend brand. AEs review, refine, send.</p>
+    </div>
+  </section>
+
+  <main class="container">
+    <form id="proposalForm" novalidate>
+      <!-- Client -->
+      <div class="card">
+        <div class="card-head"><h2>Client</h2><span class="step">01</span></div>
+        <div class="grid-2">
+          <div class="field">
+            <label class="req" for="client-company">Company</label>
+            <input id="client-company" name="client.company" type="text" required>
+          </div>
+          <div class="field">
+            <label for="client-industry">Industry</label>
+            <input id="client-industry" name="client.industry" type="text" placeholder="e.g. Private equity, Pro sports, Family office">
+          </div>
+          <div class="field">
+            <label for="client-hq">Headquarters</label>
+            <input id="client-hq" name="client.headquarters" type="text" placeholder="London, UK">
+          </div>
+        </div>
+      </div>
+
+      <!-- Contact -->
+      <div class="card">
+        <div class="card-head"><h2>Primary contact</h2><span class="step">02</span></div>
+        <div class="grid-2">
+          <div class="field">
+            <label for="contact-name">Name</label>
+            <input id="contact-name" name="contact.name" type="text">
+          </div>
+          <div class="field">
+            <label for="contact-role">Role</label>
+            <input id="contact-role" name="contact.role" type="text" placeholder="EA to Founder, Head of Travel">
+          </div>
+          <div class="field">
+            <label for="contact-email">Email</label>
+            <input id="contact-email" name="contact.email" type="email">
+          </div>
+          <div class="field">
+            <label for="contact-phone">Phone</label>
+            <input id="contact-phone" name="contact.phone" type="text">
+          </div>
+        </div>
+      </div>
+
+      <!-- Travel profile -->
+      <div class="card">
+        <div class="card-head"><h2>Travel profile</h2><span class="step">03</span></div>
+        <div class="grid-3">
+          <div class="field">
+            <label for="prof-team">Team size</label>
+            <input id="prof-team" name="profile.team_size" type="number" min="1" placeholder="4">
+          </div>
+          <div class="field">
+            <label for="prof-trips">Trips per year</label>
+            <input id="prof-trips" name="profile.trips_per_year" type="number" min="1" placeholder="80">
+          </div>
+          <div class="field">
+            <label for="prof-ticket">Avg ticket (USD)</label>
+            <input id="prof-ticket" name="profile.avg_ticket_usd" type="number" min="0" placeholder="4200">
+          </div>
+        </div>
+        <div class="field">
+          <label for="prof-cabin">Cabin mix</label>
+          <input id="prof-cabin" name="profile.cabin_mix" type="text" placeholder="Business 70 / First 20 / Economy 10">
+        </div>
+        <div class="field">
+          <label>Regions</label>
+          <div class="chips" data-chip-group="profile.regions" data-multi="true">
+            <label class="chip"><input type="checkbox" value="NA">North America</label>
+            <label class="chip"><input type="checkbox" value="LATAM">LATAM</label>
+            <label class="chip"><input type="checkbox" value="EMEA">EMEA</label>
+            <label class="chip"><input type="checkbox" value="APAC">APAC</label>
+            <label class="chip"><input type="checkbox" value="MENA">MENA</label>
+            <label class="chip"><input type="checkbox" value="AFRICA">Africa</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pain points -->
+      <div class="card">
+        <div class="card-head"><h2>What is breaking today</h2><span class="step">04</span></div>
+        <div class="field">
+          <label>Top pain points</label>
+          <div class="chips" data-chip-group="pain_points" data-multi="true">
+            <label class="chip"><input type="checkbox" value="Last-minute disruption response">Last-minute disruption</label>
+            <label class="chip"><input type="checkbox" value="Visa friction across APAC and MENA">Visa friction</label>
+            <label class="chip"><input type="checkbox" value="No single point of accountability">No single point of accountability</label>
+            <label class="chip"><input type="checkbox" value="Hours lost per trip on planning">Hours lost per trip</label>
+            <label class="chip"><input type="checkbox" value="Missing wholesale premium-cabin rates">Missing wholesale rates</label>
+            <label class="chip"><input type="checkbox" value="Inconsistent reporting and spend visibility">Reporting / spend visibility</label>
+            <label class="chip"><input type="checkbox" value="Fragmented vendor relationships">Fragmented vendors</label>
+            <label class="chip"><input type="checkbox" value="Group and event logistics complexity">Group / event logistics</label>
+          </div>
+        </div>
+        <div class="field">
+          <label for="pain-notes">Additional context (verbatim quote if you have one)</label>
+          <textarea id="pain-notes" name="pain_notes" placeholder="&quot;We lose half a day every time a flight gets cancelled in Asia&quot; — Anna, COO"></textarea>
+        </div>
+      </div>
+
+      <!-- Scope -->
+      <div class="card">
+        <div class="card-head"><h2>Service scope</h2><span class="step">05</span></div>
+        <div class="field">
+          <label>Pillars in scope</label>
+          <div class="chips" data-chip-group="scope" data-multi="true">
+            <label class="chip"><input type="checkbox" value="Flights" checked>Flights</label>
+            <label class="chip"><input type="checkbox" value="Hotels" checked>Hotels</label>
+            <label class="chip"><input type="checkbox" value="Ground">Ground</label>
+            <label class="chip"><input type="checkbox" value="Visas & Documents">Visas & Documents</label>
+            <label class="chip"><input type="checkbox" value="Activities & Reservations">Activities & Reservations</label>
+            <label class="chip"><input type="checkbox" value="Disruption Response">Disruption Response</label>
+            <label class="chip"><input type="checkbox" value="Reporting & Spend">Reporting & Spend</label>
+            <label class="chip"><input type="checkbox" value="Group/Event Logistics">Group / Event Logistics</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pricing -->
+      <div class="card">
+        <div class="card-head"><h2>Pricing</h2><span class="step">06</span></div>
+        <div class="grid-2">
+          <div class="field">
+            <label for="price-tier">Tier name</label>
+            <input id="price-tier" name="pricing.tier" type="text" placeholder="Founders, Executive, Family Office">
+          </div>
+          <div class="field">
+            <label for="price-fee">Annual fee (USD)</label>
+            <input id="price-fee" name="pricing.annual_fee_usd" type="number" min="0" placeholder="Leave blank for &quot;Indicative&quot;">
+          </div>
+        </div>
+        <div class="field">
+          <label for="price-trial">Trial terms</label>
+          <input id="price-trial" name="pricing.trial_terms" type="text" placeholder="30-day pilot, full refund if cancelled">
+        </div>
+      </div>
+
+      <!-- Differentiators -->
+      <div class="card">
+        <div class="card-head"><h2>What to surface</h2><span class="step">07</span></div>
+        <div class="field">
+          <label for="diff">Differentiators / talking points</label>
+          <textarea id="diff" name="differentiators" placeholder="Anything specific the AE wants on a slide: client references, named partnerships, unique routing this prospect cares about."></textarea>
+        </div>
+      </div>
+
+      <!-- AE -->
+      <div class="card">
+        <div class="card-head"><h2>Account Executive</h2><span class="step">08</span></div>
+        <div class="grid-2">
+          <div class="field">
+            <label class="req" for="ae-name">Your name</label>
+            <input id="ae-name" name="ae.name" type="text" required>
+          </div>
+          <div class="field">
+            <label for="ae-email">Your email</label>
+            <input id="ae-email" name="ae.email" type="email">
+          </div>
+        </div>
+        <div class="field">
+          <label for="ae-calendar">Calendar link</label>
+          <input id="ae-calendar" name="ae.calendar_url" type="url" placeholder="https://calendly.com/...">
+        </div>
+      </div>
+
+      <div class="actions">
+        <button type="submit" class="btn btn-pri" id="submitBtn">Generate deck</button>
+        <div class="status" id="status"></div>
+      </div>
+    </form>
+
+    <div class="card result" id="result" style="padding:0;">
+      <div class="result-head">
+        <div class="eyebrow">DECK READY</div>
+        <h2 id="resultTitle">Proposal generated</h2>
+        <div class="meta" id="resultMeta"></div>
+      </div>
+      <div class="result-body">
+        <div id="deckLinkWrap"></div>
+        <div class="actions" style="margin: 0 0 16px;">
+          <button type="button" class="btn btn-ghost" id="copyMdBtn">Copy markdown</button>
+          <button type="button" class="btn btn-ghost" id="copyLinkBtn">Copy deck link</button>
+          <button type="button" class="btn btn-ghost" id="resetBtn">Start another</button>
+          <div class="status" id="copyStatus"></div>
+        </div>
+        <details>
+          <summary style="cursor:pointer; font-size:13px; color: var(--text-secondary); margin-bottom: 10px;">Show generated markdown</summary>
+          <div class="md-preview" id="mdPreview"></div>
+        </details>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    (function () {
+      const ASCEND_KEY = 'd77aac0f45529a85c72dced8d4f1ce2d';
+      const form = document.getElementById('proposalForm');
+      const submitBtn = document.getElementById('submitBtn');
+      const statusEl = document.getElementById('status');
+      const resultEl = document.getElementById('result');
+
+      // Chip toggling
+      document.querySelectorAll('.chip').forEach((chip) => {
+        const input = chip.querySelector('input');
+        if (input && input.checked) chip.classList.add('selected');
+        chip.addEventListener('click', (e) => {
+          if (e.target !== input) {
+            input.checked = !input.checked;
+          }
+          chip.classList.toggle('selected', input.checked);
+        });
+      });
+
+      function getChipValues(groupName) {
+        const group = document.querySelector(`[data-chip-group="${groupName}"]`);
+        if (!group) return [];
+        return Array.from(group.querySelectorAll('input:checked')).map((i) => i.value);
+      }
+
+      function val(id) {
+        const el = document.getElementById(id);
+        if (!el) return '';
+        return (el.value || '').trim();
+      }
+
+      function num(id) {
+        const v = val(id);
+        if (!v) return null;
+        const n = Number(v);
+        return Number.isFinite(n) ? n : null;
+      }
+
+      function buildBrief() {
+        const painPoints = getChipValues('pain_points');
+        const painNotes = val('pain-notes');
+        if (painNotes) painPoints.push(painNotes);
+        return {
+          client: {
+            company: val('client-company'),
+            industry: val('client-industry'),
+            headquarters: val('client-hq')
+          },
+          contact: {
+            name: val('contact-name'),
+            role: val('contact-role'),
+            email: val('contact-email'),
+            phone: val('contact-phone')
+          },
+          profile: {
+            team_size: num('prof-team'),
+            trips_per_year: num('prof-trips'),
+            avg_ticket_usd: num('prof-ticket'),
+            cabin_mix: val('prof-cabin'),
+            regions: getChipValues('profile.regions')
+          },
+          pain_points: painPoints,
+          scope: getChipValues('scope'),
+          pricing: {
+            tier: val('price-tier'),
+            annual_fee_usd: num('price-fee') || 0,
+            trial_terms: val('price-trial')
+          },
+          differentiators: val('diff'),
+          ae: {
+            name: val('ae-name'),
+            email: val('ae-email'),
+            calendar_url: val('ae-calendar')
+          },
+          date_iso: new Date().toISOString().slice(0, 10)
+        };
+      }
+
+      function setStatus(msg, kind) {
+        statusEl.textContent = msg || '';
+        statusEl.className = 'status' + (kind ? ' ' + kind : '');
+      }
+
+      function showResult(data) {
+        document.getElementById('resultTitle').textContent = `Ascend × ${data.meta.client}`;
+        document.getElementById('resultMeta').textContent =
+          `${data.meta.model} · ${new Date(data.meta.generated_at).toLocaleString()}`;
+        document.getElementById('mdPreview').textContent = data.markdown;
+
+        const wrap = document.getElementById('deckLinkWrap');
+        wrap.innerHTML = '';
+        const gamma = data.gamma || {};
+        const url = gamma.generation && (gamma.generation.gammaUrl || gamma.generation.url || gamma.generation.shareUrl);
+        if (url) {
+          const a = document.createElement('a');
+          a.href = url; a.target = '_blank'; a.rel = 'noopener';
+          a.className = 'deck-link';
+          a.textContent = 'Open deck in Gamma →';
+          wrap.appendChild(a);
+          document.getElementById('copyLinkBtn').dataset.url = url;
+        } else if (gamma.skipped) {
+          const note = document.createElement('div');
+          note.className = 'deck-link warn';
+          note.textContent = 'Markdown ready. Gamma API not configured — paste into Gamma manually.';
+          wrap.appendChild(note);
+          document.getElementById('copyLinkBtn').style.display = 'none';
+        } else if (gamma.error) {
+          const note = document.createElement('div');
+          note.className = 'deck-link warn';
+          note.textContent = `Markdown ready. Gamma create failed: ${gamma.error}. Paste markdown manually.`;
+          wrap.appendChild(note);
+          document.getElementById('copyLinkBtn').style.display = 'none';
+        } else if (gamma.generation && gamma.generation.generationId) {
+          const note = document.createElement('div');
+          note.className = 'deck-link warn';
+          note.textContent = `Gamma queued (id ${gamma.generation.generationId}) — deck URL will appear once it finishes rendering.`;
+          wrap.appendChild(note);
+          document.getElementById('copyLinkBtn').style.display = 'none';
+        }
+
+        resultEl.classList.add('show');
+        resultEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const brief = buildBrief();
+        if (!brief.client.company) { setStatus('Client company is required.', 'err'); return; }
+        if (!brief.ae.name) { setStatus('Your name (AE) is required.', 'err'); return; }
+
+        submitBtn.disabled = true;
+        setStatus('Writing deck (this takes 30–60 seconds)…');
+
+        try {
+          const resp = await fetch('/api/proposal', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-Ascend-Key': ASCEND_KEY },
+            body: JSON.stringify(brief)
+          });
+          const data = await resp.json().catch(() => ({}));
+          if (!resp.ok) {
+            setStatus(`Failed: ${data.error || resp.statusText}${data.details ? ' — ' + data.details.join('; ') : ''}`, 'err');
+            return;
+          }
+          setStatus('Deck generated.', 'ok');
+          showResult(data);
+        } catch (err) {
+          setStatus(`Network error: ${err && err.message ? err.message : err}`, 'err');
+        } finally {
+          submitBtn.disabled = false;
+        }
+      });
+
+      document.getElementById('copyMdBtn').addEventListener('click', async () => {
+        const md = document.getElementById('mdPreview').textContent;
+        try {
+          await navigator.clipboard.writeText(md);
+          document.getElementById('copyStatus').textContent = 'Markdown copied.';
+          document.getElementById('copyStatus').className = 'status ok';
+        } catch (_) {
+          document.getElementById('copyStatus').textContent = 'Copy failed — select manually.';
+          document.getElementById('copyStatus').className = 'status err';
+        }
+      });
+
+      document.getElementById('copyLinkBtn').addEventListener('click', async () => {
+        const url = document.getElementById('copyLinkBtn').dataset.url;
+        if (!url) return;
+        try {
+          await navigator.clipboard.writeText(url);
+          document.getElementById('copyStatus').textContent = 'Link copied.';
+          document.getElementById('copyStatus').className = 'status ok';
+        } catch (_) {
+          document.getElementById('copyStatus').textContent = 'Copy failed.';
+          document.getElementById('copyStatus').className = 'status err';
+        }
+      });
+
+      document.getElementById('resetBtn').addEventListener('click', () => {
+        resultEl.classList.remove('show');
+        setStatus('');
+        form.reset();
+        document.querySelectorAll('.chip').forEach((c) => {
+          const i = c.querySelector('input');
+          c.classList.toggle('selected', !!(i && i.checked));
+        });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    })();
+  </script>
+</body>
+</html>
